@@ -113,7 +113,7 @@ export default function Index() {
         <View className="flex flex-row w-4/5 h-16 text-lg bg-secondary-accentGreen rounded-xl px-4 gap-3">
           <Feather name="search" size={20} color="gray" className="py-5" />
           <TextInput
-            className="flex h-full text-lg bg-transparent rounded-xl pr-8"
+            className="flex h-full w-full text-lg bg-transparent rounded-xl pr-8"
             placeholder="Search here..."
             placeholderTextColor="gray"
           />
