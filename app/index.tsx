@@ -1,10 +1,17 @@
 import { View, Text, Image, TextInput, TouchableOpacity } from "react-native";
 import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
+import CircleButton from "@/components/CircleButton";
 import { useState } from "react";
+import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
+
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
-    <View>
+    <SafeAreaView className="flex h-full">
       <View className="flex-row items-center justify-between px-4 py-3 h-16">
         <View className="flex-1">
           <TouchableOpacity
@@ -21,7 +28,6 @@ export default function Index() {
             className="w-32 h-32"
           />
         </View>
-
         <View className="flex-1" />
       </View>
       <View className="flex flex-row items-center justify-between px-4 py-3 h-16">
@@ -47,6 +53,11 @@ export default function Index() {
         </TouchableOpacity>
       </View>
       <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
+      <CircleButton content={content} onPress={() => setIsModalVisible(true)} />
+      <CreateNewNoteModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+      />
+    </SafeAreaView>
   );
 }
