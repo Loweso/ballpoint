@@ -5,9 +5,11 @@ import { useState } from "react";
 import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { OrganizePreferencesModal } from "@/components/OrganizePreferencesModal";
 
 export default function Index() {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isCreateNewNoteModalVisible, setIsCreateNewNoteModalVisible] =
+    useState(false);
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
@@ -53,10 +55,13 @@ export default function Index() {
         </TouchableOpacity>
       </View>
       <Text>Edit app/index.tsx to edit this screen.</Text>
-      <CircleButton content={content} onPress={() => setIsModalVisible(true)} />
+      <CircleButton
+        content={content}
+        onPress={() => setIsCreateNewNoteModalVisible(true)}
+      />
       <CreateNewNoteModal
-        isVisible={isModalVisible}
-        setIsVisible={setIsModalVisible}
+        isVisible={isCreateNewNoteModalVisible}
+        setIsVisible={setIsCreateNewNoteModalVisible}
       />
     </SafeAreaView>
   );
