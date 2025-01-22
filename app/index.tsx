@@ -15,8 +15,10 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import CircleButton from "@/components/CircleButton";
 import DropDownPicker from "react-native-dropdown-picker";
-import { DatePickerModal } from "react-native-paper-dates";
+import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 DropDownPicker.setMode("BADGE");
 
@@ -88,10 +90,14 @@ export default function Index() {
     [setOpen, setRange]
   );
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
-    <View>
-      <View className="flex-row items-center justify-between px-4 py-3 h-16 bg-primary-white z-20">
-        <View className="flex-1">
+    <SafeAreaView className="flex w-screen h-full">
+      <CircleButton content={content} onPress={() => setIsModalVisible(true)} />
+      <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-20">
+        <View className="flex w-1/3">
           <TouchableOpacity
             className="items-start justify-center bg-transparent w-8"
             onPress={() => console.log("Menu Button Pressed")}
@@ -155,16 +161,6 @@ export default function Index() {
         />
 
         <Text className="text-black mt-3">Date</Text>
-        <Pressable onPress={() => setOpen(true)}>Pick date range</Pressable>
-        <DatePickerModal
-          locale="en"
-          mode="range"
-          visible={open}
-          onDismiss={onDismiss}
-          startDate={range.startDate}
-          endDate={range.endDate}
-          onConfirm={onConfirm}
-        />
 
         <View className="flex flex-col items-center w-full">
           <Pressable
@@ -228,6 +224,10 @@ export default function Index() {
       </Animated.View>
 
       <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
+      <CreateNewNoteModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+      />
+    </SafeAreaView>
   );
 }
