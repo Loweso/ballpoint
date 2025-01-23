@@ -90,12 +90,16 @@ export default function Index() {
     [setOpen, setRange]
   );
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isCreateNewNoteModalVisible, setIsCreateNewNoteModalVisible] =
+    useState(false);
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
     <SafeAreaView className="flex w-screen h-full">
-      <CircleButton content={content} onPress={() => setIsModalVisible(true)} />
+      <CircleButton
+        content={content}
+        onPress={() => setIsCreateNewNoteModalVisible(true)}
+      />
       <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-20">
         <View className="flex w-1/3">
           <TouchableOpacity
@@ -224,9 +228,10 @@ export default function Index() {
       </Animated.View>
 
       <Text>Edit app/index.tsx to edit this screen.</Text>
+
       <CreateNewNoteModal
-        isVisible={isModalVisible}
-        setIsVisible={setIsModalVisible}
+        isVisible={isCreateNewNoteModalVisible}
+        setIsVisible={setIsCreateNewNoteModalVisible}
       />
     </SafeAreaView>
   );

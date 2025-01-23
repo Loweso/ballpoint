@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Modal, View, Text, TouchableOpacity, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +26,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
       visible={isVisible}
       onRequestClose={closeModal}
     >
-      <SafeAreaView className="bg-black/30 h-full flex justify-center items-center">
+      <View className="bg-black/30 h-full flex justify-center items-center">
         <View className="h-[200px] w-[80%] bg-white px-6 py-8 rounded-xl shadow-md">
           <View className="relative">
             <Text className="text-3xl">Title</Text>
@@ -54,7 +54,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
             <Text className="text-white">Create New Note</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 };
