@@ -31,7 +31,7 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
               className="absolute top-[-10px] right-0"
               onPress={closeModal}
             >
-              <Ionicons name="close-outline" color="#5A5353" size={32} />
+              <Ionicons name="exit-outline" color="#5A5353" size={32} />
             </TouchableOpacity>
           </View>
 

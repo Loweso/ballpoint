@@ -28,13 +28,15 @@ const Note = () => {
         <TouchableOpacity onPress={handlePickDocument}>
           <Text>Extract</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setIsExtractionWindowVisible(true);
-          }}
-        >
-          <Text>ExtractionWindow</Text>
-        </TouchableOpacity>
+        {selectedFile && (
+          <TouchableOpacity
+            onPress={() => {
+              setIsExtractionWindowVisible(true);
+            }}
+          >
+            <Text>ExtractionWindow</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <ExtractionWindow
         isVisible={isExtractionWindowVisible}
