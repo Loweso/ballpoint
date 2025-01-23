@@ -9,6 +9,7 @@ interface ConfirmationModalProps {
   classnameCancel?: string;
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
+  classnameModal?: string;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -19,6 +20,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   cancelText,
   classnameConfirm,
   classnameCancel,
+  classnameModal,
 }) => {
   const closeModal = () => {
     setIsVisible(false);
@@ -32,7 +34,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       visible={isVisible}
       onRequestClose={closeModal}
     >
-      <View className=" w-[50%] bg-white px-2 py-6 rounded-xl shadow-md">
+      <View
+        className={` w-[50%] bg-white px-2 py-6 rounded-xl ${classnameModal}`}
+      >
         <Text className=" text-center">{label}</Text>
         <View className="flex flex-row w-full justify-around">
           <TouchableOpacity
