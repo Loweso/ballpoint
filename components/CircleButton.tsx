@@ -1,6 +1,5 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React, { ReactElement } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
+import React from "react";
 
 interface CircleButtonProps {
   onPress?: () => void;
