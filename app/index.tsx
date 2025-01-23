@@ -18,6 +18,7 @@ import {
 import CircleButton from "@/components/CircleButton";
 import DropDownPicker from "react-native-dropdown-picker";
 import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
+import { DashboardSettings } from "@/components/DashboardSettings";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 DropDownPicker.setMode("BADGE");
@@ -33,6 +34,8 @@ export default function Index() {
 
   const [isFilterMenuVisible, setFilterMenuVisible] = useState(false);
   const [isSortMenuVisible, setSortMenuVisible] = useState(false);
+  const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
+    useState(false);
   const filterSlideAnim = useRef(new Animated.Value(-200)).current;
   const sortSlideAnim = useRef(new Animated.Value(-200)).current;
 
@@ -104,7 +107,11 @@ export default function Index() {
         <View className="flex w-1/3">
           <TouchableOpacity
             className="items-start justify-center bg-transparent w-8"
-            onPress={() => console.log("Menu Button Pressed")}
+            onPress={() => {
+              setIsManageCategoriesVisible(true);
+              console.log(setIsManageCategoriesVisible);
+              console.log("Menu Button Pressed");
+            }}
           >
             <Entypo name="dots-three-vertical" size={20} color="black" />
           </TouchableOpacity>
@@ -232,6 +239,11 @@ export default function Index() {
       <CreateNewNoteModal
         isVisible={isCreateNewNoteModalVisible}
         setIsVisible={setIsCreateNewNoteModalVisible}
+      />
+
+      <DashboardSettings
+        isVisible={isManageCategoriesVisible}
+        setIsVisible={setIsManageCategoriesVisible}
       />
     </SafeAreaView>
   );
