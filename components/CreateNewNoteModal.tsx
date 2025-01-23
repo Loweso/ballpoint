@@ -49,7 +49,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
               router.push("/note");
               setIsVisible(false);
             }}
-            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 ov"
+            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 "
           >
             <Text className="text-white">Create New Note</Text>
           </TouchableOpacity>

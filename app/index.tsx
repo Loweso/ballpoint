@@ -20,6 +20,11 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+//bet
+import NamingModal from "@/components/NamingModal";  // Import NamingModal
+import PolishMenuModal from "@/components/PolishMenuModal";  // Import PolishMenuModal
+import QueryMenuModal from "@/components/QueryMenuModal";  // Import QueryMenuModal
+
 DropDownPicker.setMode("BADGE");
 
 export default function Index() {
@@ -92,6 +97,11 @@ export default function Index() {
 
   const [isCreateNewNoteModalVisible, setIsCreateNewNoteModalVisible] =
     useState(false);
+
+  // States for the modal visibility
+  const [isNamingModalVisible, setIsNamingModalVisible] = useState(false);
+  const [isPolishMenuModalVisible, setIsPolishMenuModalVisible] = useState(false);
+  const [isQueryMenuModalVisible, setIsQueryMenuModalVisible] = useState(false);
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
@@ -227,12 +237,63 @@ export default function Index() {
         </View>
       </Animated.View>
 
+            {/* Buttons to Trigger Modals */}
+      <View className="flex-row justify-around py-4">
+        <TouchableOpacity
+          onPress={() => setIsNamingModalVisible(true)}
+          className="bg-yellow p-3 rounded-full shadow-md"
+        >
+          <Text>Open Naming Modal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setIsPolishMenuModalVisible(true)}
+          className="bg-yellow p-3 rounded-full shadow-md"
+        >
+          <Text>Open Polish Menu Modal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setIsQueryMenuModalVisible(true)}
+          className="bg-yellow p-3 rounded-full shadow-md"
+        >
+          <Text>Open Query Menu Modal</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Modals */}
+      <NamingModal
+        visible={isNamingModalVisible}
+        onClose={() => setIsNamingModalVisible(false)}
+        onCancel={() => setIsNamingModalVisible(false)}
+        onProceed={() => {
+          console.log("Naming Modal Proceeded");
+          setIsNamingModalVisible(false);
+        }}
+      />
+      <PolishMenuModal
+        visible={isPolishMenuModalVisible}
+        onClose={() => setIsPolishMenuModalVisible(false)}
+      />
+
+      <QueryMenuModal
+        visible={isQueryMenuModalVisible}
+        onClose={() => setIsQueryMenuModalVisible(false)}
+        onProcessQuery={() => {
+          console.log("Query Process");
+          setIsPolishMenuModalVisible(false);
+        }}
+        onCompleteHighlightedText={() => {
+          console.log("Complete Highlighted Text");
+          setIsPolishMenuModalVisible(false);
+        }}
+      />
+
       <Text>Edit app/index.tsx to edit this screen.</Text>
 
       <CreateNewNoteModal
         isVisible={isCreateNewNoteModalVisible}
         setIsVisible={setIsCreateNewNoteModalVisible}
       />
+      
     </SafeAreaView>
   );
 }
