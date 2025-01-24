@@ -37,6 +37,7 @@ const Note = () => {
             <Text>ExtractionWindow</Text>
           </TouchableOpacity>
         )}
+        <Text>{selectedFile?.name}</Text>
       </View>
       <ExtractionWindow
         isVisible={isExtractionWindowVisible}
