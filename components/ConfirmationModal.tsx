@@ -35,7 +35,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       onRequestClose={closeModal}
     >
       <View
-        className={` w-[50%] bg-white px-2 py-6 rounded-xl ${classnameModal}`}
+        className={`w-[50%] bg-white px-2 py-6 rounded-xl ${classnameModal}`}
       >
         <Text className=" text-center">{label}</Text>
         <View className="flex flex-row w-full justify-around">
