@@ -34,7 +34,7 @@ export default function Index() {
 
   const [isFilterMenuVisible, setFilterMenuVisible] = useState(false);
   const [isSortMenuVisible, setSortMenuVisible] = useState(false);
-  const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
+  const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
     useState(false);
   const filterSlideAnim = useRef(new Animated.Value(-200)).current;
   const sortSlideAnim = useRef(new Animated.Value(-200)).current;
@@ -108,8 +108,8 @@ export default function Index() {
           <TouchableOpacity
             className="items-start justify-center bg-transparent w-8"
             onPress={() => {
-              setIsManageCategoriesVisible(true);
-              console.log(setIsManageCategoriesVisible);
+              setIsDashBoardSettingsVisible(true);
+              console.log(setIsDashBoardSettingsVisible);
               console.log("Menu Button Pressed");
             }}
           >
@@ -242,8 +242,8 @@ export default function Index() {
       />
 
       <DashboardSettings
-        isVisible={isManageCategoriesVisible}
-        setIsVisible={setIsManageCategoriesVisible}
+        isVisible={isDashboardSettingsVisible}
+        setIsVisible={setIsDashBoardSettingsVisible}
       />
     </SafeAreaView>
   );
