@@ -5,6 +5,7 @@ import {
   Text,
   Image,
   Pressable,
+  ScrollView,
   TextInput,
   TouchableOpacity,
 } from "react-native";
@@ -27,8 +28,32 @@ import QueryMenuModal from "@/components/QueryMenuModal"; // Import QueryMenuMod
 
 import { DatePickerModal } from "react-native-paper-dates";
 import { format } from "date-fns";
+import NoteComponent from "@/components/NoteComponent";
 
 DropDownPicker.setMode("BADGE");
+
+const noteData = [
+  {
+    title: "Note 1",
+    categories: [
+      { label: "CMSC 128", color: "bg-secondary-yellow" },
+      { label: "Prototyping", color: "bg-tertiary-buttonGreen/[0.5]" },
+    ],
+    notesContent:
+      "(This is a test for very long content.) Component-Level Design defines the data structures, algorithms, interface characteristics, and communication mechanisms allocated to each software component. It can be used to review for correctness and consistency with other components. A component is a modular",
+    date: new Date("2024-12-15"),
+  },
+  {
+    title: "Long Note Title Test",
+    categories: [
+      { label: "Design", color: "bg-tertiary-buttonRed/[0.5]" },
+      { label: "CMSC 101", color: "bg-tertiary-buttonBlue" },
+    ],
+    notesContent:
+      "This is the content of note 2. It contains details about another topic.",
+    date: new Date("2025-01-24"),
+  },
+];
 
 export default function Index() {
   const [open, setOpen] = useState(false);
@@ -136,51 +161,53 @@ export default function Index() {
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
-    <SafeAreaView className="flex w-screen h-full">
+    <SafeAreaView className="flex w-screen h-full bg-primary-white">
       <CircleButton
         content={content}
         onPress={() => setIsCreateNewNoteModalVisible(true)}
       />
-      <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-20">
-        <View className="flex w-1/3">
+      <View className="absolute top-0">
+        <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-20">
+          <View className="flex w-1/3">
+            <TouchableOpacity
+              className="items-start justify-center bg-transparent w-8"
+              onPress={() => console.log("Menu Button Pressed")}
+            >
+              <Entypo name="dots-three-vertical" size={20} color="black" />
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-1 items-center">
+            <Image
+              source={require("../assets/images/ballpointLogo.png")}
+              className="w-32 h-32"
+            />
+          </View>
+
+          <View className="flex-1" />
+        </View>
+        <View className="flex flex-row items-center justify-between bg-primary-white px-4 py-3 h-20 z-20">
+          <View className="flex flex-row w-4/5 h-16 text-lg bg-secondary-accentGreen rounded-xl px-4 gap-3">
+            <Feather name="search" size={20} color="gray" className="py-5" />
+            <TextInput
+              className="flex h-full w-full text-lg bg-transparent rounded-xl pr-8"
+              placeholder="Search here..."
+              placeholderTextColor="gray"
+            />
+          </View>
           <TouchableOpacity
             className="items-start justify-center bg-transparent w-8"
-            onPress={() => console.log("Menu Button Pressed")}
+            onPress={toggleFilterMenu}
           >
-            <Entypo name="dots-three-vertical" size={20} color="black" />
+            <Feather name="filter" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="items-start justify-center bg-transparent w-8"
+            onPress={toggleSortMenu}
+          >
+            <Ionicons name="filter" size={24} color="black" />
           </TouchableOpacity>
         </View>
-
-        <View className="flex-1 items-center">
-          <Image
-            source={require("../assets/images/ballpointLogo.png")}
-            className="w-32 h-32"
-          />
-        </View>
-
-        <View className="flex-1" />
-      </View>
-      <View className="flex flex-row items-center justify-between bg-primary-white px-4 py-3 h-20 z-20">
-        <View className="flex flex-row w-4/5 h-16 text-lg bg-secondary-accentGreen rounded-xl px-4 gap-3">
-          <Feather name="search" size={20} color="gray" className="py-5" />
-          <TextInput
-            className="flex h-full w-full text-lg bg-transparent rounded-xl pr-8"
-            placeholder="Search here..."
-            placeholderTextColor="gray"
-          />
-        </View>
-        <TouchableOpacity
-          className="items-start justify-center bg-transparent w-8"
-          onPress={toggleFilterMenu}
-        >
-          <Feather name="filter" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="items-start justify-center bg-transparent w-8"
-          onPress={toggleSortMenu}
-        >
-          <Ionicons name="filter" size={24} color="black" />
-        </TouchableOpacity>
       </View>
 
       <Animated.View
@@ -379,27 +406,43 @@ export default function Index() {
           </TouchableOpacity>
         </View>
       </Animated.View>
+      <View className="flex flex-col w-full pt-32 px-4">
+        {/* Buttons to Trigger Modals */}
+        <View className="flex-row justify-around py-4">
+          <TouchableOpacity
+            onPress={() => setIsNamingModalVisible(true)}
+            className="bg-yellow p-3 rounded-full shadow-md"
+          >
+            <Text>Open Naming Modal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setIsPolishMenuModalVisible(true)}
+            className="bg-yellow p-3 rounded-full shadow-md"
+          >
+            <Text>Open Polish Menu Modal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setIsQueryMenuModalVisible(true)}
+            className="bg-yellow p-3 rounded-full shadow-md"
+          >
+            <Text>Open Query Menu Modal</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Buttons to Trigger Modals */}
-      <View className="flex-row justify-around py-4">
-        <TouchableOpacity
-          onPress={() => setIsNamingModalVisible(true)}
-          className="bg-yellow p-3 rounded-full shadow-md"
-        >
-          <Text>Open Naming Modal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setIsPolishMenuModalVisible(true)}
-          className="bg-yellow p-3 rounded-full shadow-md"
-        >
-          <Text>Open Polish Menu Modal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setIsQueryMenuModalVisible(true)}
-          className="bg-yellow p-3 rounded-full shadow-md"
-        >
-          <Text>Open Query Menu Modal</Text>
-        </TouchableOpacity>
+        <Text className="text-gray-500">Ready to Create?</Text>
+        <Text className="my-3 text-5xl font-bold">Your Notes</Text>
+        <ScrollView>
+          {noteData.map((note, index) => (
+            <View key={index} style={{ marginBottom: 20 }}>
+              <NoteComponent
+                title={note.title}
+                categories={note.categories}
+                notesContent={note.notesContent}
+                date={note.date}
+              />
+            </View>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Modals */}
@@ -429,8 +472,6 @@ export default function Index() {
           setIsPolishMenuModalVisible(false);
         }}
       />
-
-      <Text>Edit app/index.tsx to edit this screen.</Text>
 
       <CreateNewNoteModal
         isVisible={isCreateNewNoteModalVisible}
