@@ -31,7 +31,6 @@ export const pickDocument = async (): Promise<File | null> => {
       }
 
       console.log("Selected file:", file);
-      alert(`Name: ${file.name}\nSize: ${file.size} bytes\nURI: ${file.uri}`);
       return file;
     } else {
       return null;

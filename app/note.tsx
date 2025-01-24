@@ -19,6 +19,12 @@ const Note = () => {
   const handlePickDocument = async () => {
     const file: File | null = await pickDocument();
     setSelectedFile(file);
+
+    if (file) {
+      setTimeout(() => {
+        setIsExtractionWindowVisible(true);
+      }, 600);
+    }
   };
 
   return (
@@ -28,20 +34,11 @@ const Note = () => {
         <TouchableOpacity onPress={handlePickDocument}>
           <Text>Extract</Text>
         </TouchableOpacity>
-        {selectedFile && (
-          <TouchableOpacity
-            onPress={() => {
-              setIsExtractionWindowVisible(true);
-            }}
-          >
-            <Text>ExtractionWindow</Text>
-          </TouchableOpacity>
-        )}
-        <Text>{selectedFile?.name}</Text>
       </View>
       <ExtractionWindow
         isVisible={isExtractionWindowVisible}
         setIsVisible={setIsExtractionWindowVisible}
+        selectedFile={selectedFile}
       />
     </SafeAreaView>
   );
