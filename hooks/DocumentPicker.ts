@@ -1,0 +1,44 @@
+import * as DocumentPicker from "expo-document-picker";
+import { File } from "@/app/note";
+
+export const pickDocument = async (): Promise<File | null> => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ["image/*", "audio/*"], // Only allow image and audio files
+    });
+
+    if (result.canceled) {
+      console.log("User canceled the document picker");
+      alert("No file was selected.");
+      return null;
+    } else if (result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      const file: File = {
+        name: asset.name ?? "Unnamed file",
+        size: asset.size ?? 0,
+        uri: asset.uri,
+      };
+
+      if (
+        asset.mimeType &&
+        !asset.mimeType.startsWith("image/") &&
+        !asset.mimeType.startsWith("audio/")
+      ) {
+        alert(
+          "Invalid file type selected. Please select an image or audio file."
+        );
+        return null;
+      }
+
+      console.log("Selected file:", file);
+      alert(`Name: ${file.name}\nSize: ${file.size} bytes\nURI: ${file.uri}`);
+      return file;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error picking document:", error);
+    alert("Something went wrong while picking the document.");
+    return null;
+  }
+};

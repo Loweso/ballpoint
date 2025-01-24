@@ -79,7 +79,7 @@ export const OrganizePreferencesModal: React.FC<
             onPress={() => {
               setIsVisible(false);
             }}
-            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 ov"
+            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 "
           >
             <Text className="text-white">Organize Notes</Text>
           </TouchableOpacity>
