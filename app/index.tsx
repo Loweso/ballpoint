@@ -168,6 +168,7 @@ export default function Index() {
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
       <EventProvider>
         <CircleButton
+          className="absolute bottom-10 right-8"
           content={content}
           onPress={() => setIsCreateNewNoteModalVisible(true)}
         />
