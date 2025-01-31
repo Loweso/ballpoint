@@ -1,9 +1,10 @@
-import { TouchableOpacity, View, Text } from "react-native";
+import { Dimensions, TouchableOpacity, View, Text } from "react-native";
 import { Link } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
+import { RichEditor } from "react-native-pell-rich-editor";
 
 export type File = {
   name: string;
@@ -27,8 +28,11 @@ const Note = () => {
     }
   };
 
+  const RichText = useRef();
+  const screenHeight = Dimensions.get("window").height;
+
   return (
-    <SafeAreaView>
+    <SafeAreaView className="bg-white">
       <View>
         <Link href="/">back</Link>
         <TouchableOpacity onPress={handlePickDocument}>
@@ -39,6 +43,16 @@ const Note = () => {
         isVisible={isExtractionWindowVisible}
         setIsVisible={setIsExtractionWindowVisible}
         selectedFile={selectedFile}
+      />
+
+      <RichEditor
+        disabled={false}
+        ref={RichText}
+        style={{
+          minHeight: screenHeight,
+          marginBottom: 2,
+        }}
+        placeholder={"Start Writing Here"}
       />
     </SafeAreaView>
   );
