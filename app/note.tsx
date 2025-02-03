@@ -4,6 +4,8 @@ import React, { useState, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
+import CircleButton from "@/components/CircleButton";
+import { Ionicons } from "@expo/vector-icons";
 import {
   actions,
   RichEditor,
@@ -38,6 +40,7 @@ const Note = () => {
       }, 600);
     }
   };
+  const content = <Ionicons name="pencil-outline" size={40} color="black" />;
 
   const RichText = useRef();
   const AiModalOpenIcon = () => (
@@ -48,13 +51,21 @@ const Note = () => {
   );
 
   return (
-    <SafeAreaView className="flex bg-white h-full">
+    <SafeAreaView className="flex w-screen h-full bg-primary-white">
+      <CircleButton
+        className="absolute bottom-10 right-8"
+        content={content}
+        onPress={() => {
+          console.log("edit button pressed");
+        }}
+      />
       <View>
         <Link href="/">back</Link>
         <TouchableOpacity onPress={handlePickDocument}>
           <Text>Extract</Text>
         </TouchableOpacity>
       </View>
+
       <ExtractionWindow
         isVisible={isExtractionWindowVisible}
         setIsVisible={setIsExtractionWindowVisible}
