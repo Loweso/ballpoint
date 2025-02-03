@@ -4,12 +4,17 @@ import React from "react";
 interface CircleButtonProps {
   onPress?: () => void;
   content: React.ReactElement;
+  className: string;
 }
 
-const CircleButton: React.FC<CircleButtonProps> = ({ onPress, content }) => {
+const CircleButton: React.FC<CircleButtonProps> = ({
+  onPress,
+  content,
+  className,
+}) => {
   return (
     <TouchableOpacity
-      className="absolute bottom-10 right-12 z-50 w-20 h-20 bg-secondary-yellow rounded-full flex items-center justify-center font-light"
+      className={`z-50 w-20 h-20 bg-secondary-yellow rounded-full flex items-center justify-center font-light ${className}`}
       onPress={onPress}
     >
       {content}

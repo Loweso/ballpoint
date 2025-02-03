@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
+import CircleButton from "@/components/CircleButton";
+import { Ionicons } from "@expo/vector-icons";
 
 export type File = {
   name: string;
@@ -26,9 +28,17 @@ const Note = () => {
       }, 600);
     }
   };
+  const content = <Ionicons name="pencil-outline" size={40} color="black" />;
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex w-screen h-full bg-primary-white">
+      <CircleButton
+        className="absolute bottom-10 right-8"
+        content={content}
+        onPress={() => {
+          console.log("edit button pressed");
+        }}
+      />
       <View>
         <Link href="/">back</Link>
         <TouchableOpacity onPress={handlePickDocument}>
