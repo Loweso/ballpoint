@@ -1,10 +1,15 @@
-import { Dimensions, TouchableOpacity, View, Text } from "react-native";
+import { Image, TouchableOpacity, View, Text, TextInput } from "react-native";
 import { Link } from "expo-router";
 import React, { useState, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
-import { RichEditor } from "react-native-pell-rich-editor";
+import {
+  actions,
+  RichEditor,
+  RichToolbar,
+} from "react-native-pell-rich-editor";
+import PolishMenuModal from "@/components/PolishMenuModal";
 
 export type File = {
   name: string;
@@ -16,6 +21,12 @@ const Note = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
     useState(false);
+  const [title, onChangeTitle] = useState("");
+  const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
+
+  const toggleAIPolishModal = () => {
+    setIsAIPolishModalOpen(!isAIPolishModalOpen);
+  };
 
   const handlePickDocument = async () => {
     const file: File | null = await pickDocument();
@@ -29,10 +40,15 @@ const Note = () => {
   };
 
   const RichText = useRef();
-  const screenHeight = Dimensions.get("window").height;
+  const AiModalOpenIcon = () => (
+    <Image
+      source={require("../assets/images/aiPolish.png")}
+      className="w-7 h-7"
+    />
+  );
 
   return (
-    <SafeAreaView className="bg-white">
+    <SafeAreaView className="flex bg-white h-full">
       <View>
         <Link href="/">back</Link>
         <TouchableOpacity onPress={handlePickDocument}>
@@ -45,14 +61,46 @@ const Note = () => {
         selectedFile={selectedFile}
       />
 
+      <TextInput
+        className="text-2xl mx-2"
+        placeholder="Title"
+        onChangeText={onChangeTitle}
+        value={title}
+      />
+
       <RichEditor
         disabled={false}
         ref={RichText}
         style={{
-          minHeight: screenHeight,
+          flex: 1,
           marginBottom: 2,
         }}
-        placeholder={"Start Writing Here"}
+        placeholder={"Start writing!"}
+        onChange={(descriptionText) => {
+          console.log("descriptionText:", descriptionText); //descriptionText is for text from editor
+        }}
+      />
+
+      <RichToolbar
+        editor={RichText}
+        actions={[
+          "openAIPolishModal",
+          actions.undo,
+          actions.redo,
+          actions.setBold,
+          actions.setItalic,
+          actions.insertBulletsList,
+          actions.insertOrderedList,
+        ]}
+        iconMap={{
+          openAIPolishModal: AiModalOpenIcon,
+        }}
+        openAIPolishModal={toggleAIPolishModal}
+      />
+
+      <PolishMenuModal
+        visible={isAIPolishModalOpen}
+        onClose={() => toggleAIPolishModal()}
       />
     </SafeAreaView>
   );
