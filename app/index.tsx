@@ -20,6 +20,7 @@ import CircleButton from "@/components/CircleButton";
 import DropDownPicker from "react-native-dropdown-picker";
 import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
 import { DashboardSettings } from "@/components/DashboardSettings";
+import { NoteSettings } from "@/components/NoteSettings";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //bet
@@ -73,6 +74,7 @@ export default function Index() {
   const [isSortMenuVisible, setSortMenuVisible] = useState(false);
   const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
     useState(false);
+  const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const filterSlideAnim = useRef(new Animated.Value(-200)).current;
   const sortSlideAnim = useRef(new Animated.Value(-200)).current;
 
@@ -488,6 +490,11 @@ export default function Index() {
         isVisible={isDashboardSettingsVisible}
         setIsVisible={setIsDashBoardSettingsVisible}
       />
+
+      <NoteSettings
+        isVisible={isNoteSettingsVisible}
+        setIsVisible={setIsNoteSettingsVisible}
+      ></NoteSettings>
     </SafeAreaView>
   );
 }
