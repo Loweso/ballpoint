@@ -60,18 +60,13 @@ const Note = () => {
           console.log("edit button pressed");
         }}
       />
-      <View className="justify-between flex-row gap-4 p-2">
-        
-        <View className="items-center">
-          <Link href="/">
-            <View>
-              <AntDesign name="leftcircleo" size={20} color="black" />
-            </View>
-            <View> 
-              <Text style={{fontSize: 15}}> Notes </Text>
-            </View>
-          </Link>
-        </View>
+      <View className="justify-between flex-row gap-4 p-4">
+        <Link href="/">
+          <View className="flex flex-row items-center gap-1">
+            <AntDesign name="leftcircleo" size={20} color="black" />
+            <Text className="text-lg"> Notes </Text>
+          </View>
+        </Link>
 
         <View>
           <TouchableOpacity onPress={handlePickDocument}>
@@ -84,7 +79,6 @@ const Note = () => {
             <Ionicons name="ellipsis-horizontal" size={20} color="black" />
           </TouchableOpacity>
         </View>
-
       </View>
 
       <ExtractionWindow
