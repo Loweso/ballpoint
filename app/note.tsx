@@ -6,6 +6,7 @@ import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
 import CircleButton from "@/components/CircleButton";
 import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import {
   actions,
   RichEditor,
@@ -59,11 +60,31 @@ const Note = () => {
           console.log("edit button pressed");
         }}
       />
-      <View>
-        <Link href="/">back</Link>
-        <TouchableOpacity onPress={handlePickDocument}>
-          <Text>Extract</Text>
-        </TouchableOpacity>
+      <View className="justify-between flex-row gap-4 p-2">
+        
+        <View className="items-center">
+          <Link href="/">
+            <View>
+              <AntDesign name="leftcircleo" size={20} color="black" />
+            </View>
+            <View> 
+              <Text style={{fontSize: 15}}> Notes </Text>
+            </View>
+          </Link>
+        </View>
+
+        <View>
+          <TouchableOpacity onPress={handlePickDocument}>
+            <Text>Extract</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View>
+          <TouchableOpacity>
+            <Ionicons name="ellipsis-horizontal" size={20} color="black" />
+          </TouchableOpacity>
+        </View>
+
       </View>
 
       <ExtractionWindow
