@@ -1,12 +1,21 @@
-import { Image, TouchableOpacity, View, Text, TextInput } from "react-native";
+import {
+  Image,
+  TouchableOpacity,
+  View,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  useWindowDimensions,
+} from "react-native";
 import { Link } from "expo-router";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
 import CircleButton from "@/components/CircleButton";
-import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
+import RenderHTML from "react-native-render-html";
+
 import {
   actions,
   RichEditor,
@@ -20,12 +29,18 @@ export type File = {
   uri: string;
 };
 
-const Note = () => {
+const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
     useState(false);
   const [title, onChangeTitle] = useState("");
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [noteContent, setNoteContent] = useState(text);
+
+  const { width } = useWindowDimensions();
+  const RichText = useRef<RichEditor | null>(null);
+  const titleInputRef = useRef<TextInput | null>(null);
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -43,7 +58,6 @@ const Note = () => {
   };
   const content = <Ionicons name="pencil-outline" size={40} color="black" />;
 
-  const RichText = useRef();
   const AiModalOpenIcon = () => (
     <Image
       source={require("../assets/images/aiPolish.png")}
@@ -51,15 +65,25 @@ const Note = () => {
     />
   );
 
+  const enableEditing = () => {
+    setIsEditing(true);
+  };
+  const disableEditing = () => {
+    setIsEditing(false);
+    titleInputRef.current?.blur();
+  };
+
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
-      <CircleButton
-        className="absolute bottom-10 right-8"
-        content={content}
-        onPress={() => {
-          console.log("edit button pressed");
-        }}
-      />
+      {!isEditing && (
+        <CircleButton
+          className="absolute bottom-10 right-8"
+          content={content}
+          onPress={() => {
+            enableEditing();
+          }}
+        />
+      )}
       <View className="justify-between flex-row gap-4 p-4">
         <Link href="/">
           <View className="flex flex-row items-center gap-1">
@@ -68,16 +92,22 @@ const Note = () => {
           </View>
         </Link>
 
-        <View>
-          <TouchableOpacity onPress={handlePickDocument}>
-            <Text>Extract</Text>
-          </TouchableOpacity>
-        </View>
+        <View className="flex-row flex gap-x-3 justify-between items-center">
+          {isEditing && (
+            <TouchableOpacity onPress={handlePickDocument}>
+              <Text>Extract</Text>
+            </TouchableOpacity>
+          )}
 
-        <View>
           <TouchableOpacity>
             <Ionicons name="ellipsis-horizontal" size={20} color="black" />
           </TouchableOpacity>
+
+          {isEditing && (
+            <TouchableOpacity onPress={disableEditing}>
+              <Text>Done</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -88,42 +118,67 @@ const Note = () => {
       />
 
       <TextInput
-        className="text-2xl mx-2"
+        ref={titleInputRef}
+        className="text-2xl mx-2 font-semibold"
         placeholder="Title"
         onChangeText={onChangeTitle}
+        onPress={enableEditing}
         value={title}
       />
 
-      <RichEditor
-        disabled={false}
-        ref={RichText}
-        style={{
-          flex: 1,
-          marginBottom: 2,
-        }}
-        placeholder={"Start writing!"}
-        onChange={(descriptionText) => {
-          console.log("descriptionText:", descriptionText); //descriptionText is for text from editor
-        }}
-      />
+      {isEditing ? (
+        <>
+          <RichEditor
+            ref={RichText}
+            style={{
+              flex: 1,
+              marginBottom: 2,
+            }}
+            placeholder={""}
+            initialContentHTML={noteContent}
+            onChange={(descriptionText) => {
+              setNoteContent(descriptionText);
+              console.log("descriptionText:", descriptionText); //descriptionText is for text from editor
+            }}
+          />
 
-      <RichToolbar
-        editor={RichText}
-        actions={[
-          "openAIPolishModal",
-          actions.undo,
-          actions.redo,
-          actions.setBold,
-          actions.setItalic,
-          actions.insertBulletsList,
-          actions.insertOrderedList,
-        ]}
-        iconMap={{
-          openAIPolishModal: AiModalOpenIcon,
-        }}
-        openAIPolishModal={toggleAIPolishModal}
-      />
-
+          <RichToolbar
+            editor={RichText}
+            actions={[
+              "openAIPolishModal",
+              actions.undo,
+              actions.redo,
+              actions.setBold,
+              actions.setItalic,
+              actions.insertBulletsList,
+              actions.insertOrderedList,
+            ]}
+            iconMap={{
+              openAIPolishModal: AiModalOpenIcon,
+            }}
+            openAIPolishModal={toggleAIPolishModal}
+          />
+        </>
+      ) : (
+        <TouchableWithoutFeedback
+          onPress={() => {
+            enableEditing();
+            setTimeout(() => {
+              if (RichText.current) {
+                RichText.current.focusContentEditor(); // This forces the cursor to appear
+              }
+            }, 100);
+          }}
+        >
+          <View className="mx-3">
+            {noteContent ? (
+              <RenderHTML contentWidth={width} source={{ html: noteContent }} />
+            ) : (
+              <Text className="text-gray-600">Start Writing!</Text>
+            )}
+          </View>
+        </TouchableWithoutFeedback>
+      )}
       <PolishMenuModal
         visible={isAIPolishModalOpen}
         onClose={() => toggleAIPolishModal()}
