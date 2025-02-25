@@ -15,6 +15,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
 }) => {
   const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
     useState(false);
+  const [manageMode, setManageMode] = useState<"view" | "edit">("view");
   const router = useRouter();
 
   const containerHeight = useRef(new Animated.Value(180)).current;
@@ -30,16 +31,11 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
     });
   };
 
-  const toggleManageCategories = () => {
+  const toggleManageCategories = (mode: "view" | "edit") => {
     const newVisibility = !isManageCategoriesVisible;
 
     setIsManageCategoriesVisible(newVisibility);
-
-    Animated.timing(containerHeight, {
-      toValue: newVisibility ? 240 : 300,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    setManageMode(mode);
   };
 
   return (
@@ -52,7 +48,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
       <View className="bg-black/30 h-full flex justify-end items-center">
         <Animated.View
           style={{
-            height: 280,
+            height: 240,
             width: "100%",
             backgroundColor: "#e1f1e8",
             paddingHorizontal: 16,
@@ -90,7 +86,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
             <TouchableOpacity
               className="ml-2"
               onPress={() => {
-                toggleManageCategories();
+                toggleManageCategories("view");
                 console.log("Manage Categories Pressed");
               }}
             >
@@ -143,6 +139,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
           <ManageCategories
             isVisible={isManageCategoriesVisible}
             setIsVisible={setIsManageCategoriesVisible}
+            initialMode={manageMode}
           />
         </Animated.View>
       </View>
