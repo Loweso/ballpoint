@@ -1,5 +1,5 @@
 import React from "react";
-import { File } from "@/app/note";
+import { File } from "@/app/(root)/note";
 import {
   Modal,
   View,

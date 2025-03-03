@@ -5,16 +5,16 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  useWindowDimensions,
 } from "react-native";
 import { Link } from "expo-router";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
 import CircleButton from "@/components/CircleButton";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import RenderHTML from "react-native-render-html";
+import HTMLView from "react-native-htmlview";
+import striptags from "striptags";
 
 import {
   actions,
@@ -22,6 +22,7 @@ import {
   RichToolbar,
 } from "react-native-pell-rich-editor";
 import PolishMenuModal from "@/components/PolishMenuModal";
+import { images } from "@/constants";
 
 export type File = {
   name: string;
@@ -33,12 +34,11 @@ const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
     useState(false);
-  const [title, onChangeTitle] = useState("");
+  const [title, setTitle] = useState("");
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [noteContent, setNoteContent] = useState(text);
 
-  const { width } = useWindowDimensions();
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
 
@@ -59,10 +59,7 @@ const Note = ({ text }: any) => {
   const content = <Ionicons name="pencil-outline" size={40} color="black" />;
 
   const AiModalOpenIcon = () => (
-    <Image
-      source={require("../assets/images/aiPolish.png")}
-      className="w-7 h-7"
-    />
+    <Image source={images.aiPolish} className="w-7 h-7" />
   );
 
   const enableEditing = () => {
@@ -121,7 +118,7 @@ const Note = ({ text }: any) => {
         ref={titleInputRef}
         className="text-2xl mx-2 font-semibold"
         placeholder="Title"
-        onChangeText={onChangeTitle}
+        onChangeText={setTitle}
         onPress={enableEditing}
         value={title}
       />
@@ -134,10 +131,14 @@ const Note = ({ text }: any) => {
               flex: 1,
               marginBottom: 2,
             }}
+            editorStyle={{
+              contentCSSText: "font-size: 14px;",
+            }}
             placeholder={""}
             initialContentHTML={noteContent}
             onChange={(descriptionText) => {
               setNoteContent(descriptionText);
+              console.log(striptags(descriptionText));
               console.log("descriptionText:", descriptionText); //descriptionText is for text from editor
             }}
           />
@@ -170,9 +171,9 @@ const Note = ({ text }: any) => {
             }, 100);
           }}
         >
-          <View className="mx-3">
+          <View className="mx-3 mt-2">
             {noteContent ? (
-              <RenderHTML contentWidth={width} source={{ html: noteContent }} />
+              <HTMLView value={noteContent} />
             ) : (
               <Text className="text-gray-600">Start Writing!</Text>
             )}
