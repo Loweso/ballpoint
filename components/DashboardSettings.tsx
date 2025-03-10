@@ -15,6 +15,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
 }) => {
   const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
     useState(false);
+  const [manageMode, setManageMode] = useState<"view" | "edit">("view");
   const router = useRouter();
 
   const containerHeight = useRef(new Animated.Value(180)).current;
@@ -30,10 +31,11 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
     });
   };
 
-  const toggleManageCategories = () => {
+  const toggleManageCategories = (mode: "view" | "edit") => {
     const newVisibility = !isManageCategoriesVisible;
 
     setIsManageCategoriesVisible(newVisibility);
+    setManageMode(mode);
 
     Animated.timing(containerHeight, {
       toValue: newVisibility ? 300 : 180,
@@ -73,7 +75,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
           <View>
             <TouchableOpacity
               onPress={() => {
-                toggleManageCategories();
+                toggleManageCategories("edit");
                 console.log(setIsManageCategoriesVisible);
                 console.log("Manage Categories Pressed");
               }}
@@ -94,6 +96,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
           <ManageCategories
             isVisible={isManageCategoriesVisible}
             setIsVisible={setIsManageCategoriesVisible}
+            initialMode={manageMode}
           />
         </Animated.View>
       </View>
