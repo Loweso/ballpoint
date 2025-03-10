@@ -1,5 +1,5 @@
 import * as DocumentPicker from "expo-document-picker";
-import { File } from "@/app/note";
+import { File } from "@/app/(root)/note";
 
 export const pickDocument = async (): Promise<File | null> => {
   try {
@@ -31,7 +31,6 @@ export const pickDocument = async (): Promise<File | null> => {
       }
 
       console.log("Selected file:", file);
-      alert(`Name: ${file.name}\nSize: ${file.size} bytes\nURI: ${file.uri}`);
       return file;
     } else {
       return null;
