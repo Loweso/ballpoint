@@ -23,6 +23,7 @@ import {
 } from "react-native-pell-rich-editor";
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
+import NoteSettings from "@/components/NoteSettings";
 
 export type File = {
   name: string;
@@ -38,6 +39,7 @@ const Note = ({ text }: any) => {
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [noteContent, setNoteContent] = useState(text);
+  const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
 
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
@@ -97,7 +99,15 @@ const Note = ({ text }: any) => {
           )}
 
           <TouchableOpacity>
-            <Ionicons name="ellipsis-horizontal" size={20} color="black" />
+            <Ionicons
+              name="ellipsis-horizontal"
+              size={20}
+              color="black"
+              onPress={() => {
+                setIsNoteSettingsVisible(true);
+                console.log("Note Settings Pressed");
+              }}
+            />
           </TouchableOpacity>
 
           {isEditing && (
@@ -183,6 +193,10 @@ const Note = ({ text }: any) => {
       <PolishMenuModal
         visible={isAIPolishModalOpen}
         onClose={() => toggleAIPolishModal()}
+      />
+      <NoteSettings
+        isVisible={isNoteSettingsVisible}
+        setIsVisible={setIsNoteSettingsVisible}
       />
     </SafeAreaView>
   );

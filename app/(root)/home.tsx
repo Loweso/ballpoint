@@ -178,7 +178,10 @@ export default function Home() {
             <View className="flex w-1/3">
               <TouchableOpacity
                 className="items-start justify-center bg-transparent w-8"
-                onPress={() => console.log("Menu Button Pressed")}
+                onPress={() => {
+                  setIsDashBoardSettingsVisible(true);
+                  console.log("Menu Button Pressed");
+                }}
               >
                 <Entypo name="dots-three-vertical" size={20} color="black" />
               </TouchableOpacity>

@@ -15,6 +15,7 @@ module.exports = {
           yellow: "#f4ef62",
           lightyellow: "#fffee1",
           categlistyellow: "#fffff5",
+          buttonGrey: "#f9f9f9",
         },
         tertiary: {
           buttonGreen: "#37b16e",
