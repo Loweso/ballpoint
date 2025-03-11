@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Pressable, Text, TouchableOpacity, View } from "react-native";
+import {
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+  Modal,
+  TextInput,
+} from "react-native";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
@@ -18,6 +25,9 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
   date,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
+  const [newTitle, setNewTitle] = useState(title);
+  const [prevTitle, setPrevTitle] = useState(title);
   const [fontsLoaded] = useFonts({
     "Comfortaa-Medium": require("../assets/fonts/Comfortaa-Medium.ttf"),
   });
@@ -26,12 +36,20 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
     return null;
   }
 
-  const openMenu = () => {
-    setMenuOpen(true);
-  };
-
-  const closeMenu = () => {
+  const openMenu = () => setMenuOpen(true);
+  const closeMenu = () => setMenuOpen(false);
+  const openRenameModal = () => {
+    setPrevTitle(newTitle);
+    setIsRenameModalVisible(true);
     setMenuOpen(false);
+  };
+  const closeRenameModal = () => {
+    setNewTitle(prevTitle);
+    setIsRenameModalVisible(false);
+  };
+  const handleRename = () => {
+    console.log("Renamed to:", newTitle);
+    setIsRenameModalVisible(false);
   };
 
   return (
@@ -44,7 +62,10 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
           onOutsidePress={closeMenu}
           className="absolute top-0 right-0 z-10"
         >
-          <View className="p-4 gap-2 w-36 rounded-xl shadow-lg shadow-black bg-primary-white">
+          <View
+            className="p-4 gap-2 w-36 rounded-xl shadow-lg shadow-black bg-primary-white"
+            onStartShouldSetResponder={() => true}
+          >
             <TouchableOpacity
               className="flex flex-row items-center justify-between w-full"
               onPress={() => console.log("Delete Pressed")}
@@ -52,12 +73,10 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
               <Text className="text-tertiary-textRed">Delete</Text>
               <Feather name="trash-2" size={20} color="red" />
             </TouchableOpacity>
-
             <View className="h-px bg-gray-300 w-full" />
-
             <TouchableOpacity
               className="flex flex-row items-center justify-between w-full"
-              onPress={() => console.log("Rename Pressed")}
+              onPress={openRenameModal}
             >
               <Text className="text-tertiary-textBlue">Rename</Text>
               <MaterialIcons
@@ -66,9 +85,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
                 color="blue"
               />
             </TouchableOpacity>
-
             <View className="h-px bg-gray-300 w-full" />
-
             <TouchableOpacity
               className="flex flex-row items-center justify-between w-full"
               onPress={closeMenu}
@@ -82,17 +99,14 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
 
       <View className="flex flex-row items-center justify-between">
         <Text
-          className="text-3xl w-3/4 items-center"
+          className="text-3xl w-3/4"
           style={{ fontFamily: "Comfortaa-Medium", overflow: "hidden" }}
           numberOfLines={1}
         >
-          {title}
+          {newTitle}
         </Text>
-        <View className="flex flex-col w-1/4 items-end justify-end">
-          <TouchableOpacity
-            className="items-start justify-center w-8"
-            onPress={openMenu}
-          >
+        <View className="flex flex-col w-1/4 items-end">
+          <TouchableOpacity className="w-8" onPress={openMenu}>
             <Entypo name="dots-three-horizontal" size={20} color="black" />
           </TouchableOpacity>
           <Text className="text-sm">{date.toLocaleDateString("en-US")}</Text>
@@ -115,6 +129,34 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
       <Text className="text-sm text-justify" numberOfLines={4}>
         {notesContent}
       </Text>
+
+      <Modal visible={isRenameModalVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50 p-4">
+          <View className="bg-white p-6 rounded-xl w-full">
+            <Text className="text-lg font-bold mb-4">Rename Title</Text>
+            <TextInput
+              className="border border-gray-300 p-2 rounded-md"
+              value={newTitle}
+              onChangeText={setNewTitle}
+              placeholder="Enter new title"
+            />
+            <View className="flex flex-row justify-end mt-4 gap-2">
+              <TouchableOpacity
+                className="px-4 py-2 bg-gray-300 rounded-md"
+                onPress={closeRenameModal}
+              >
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="px-4 py-2 bg-tertiary-buttonGreen rounded-md"
+                onPress={handleRename}
+              >
+                <Text className="text-white">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Pressable>
   );
 };
