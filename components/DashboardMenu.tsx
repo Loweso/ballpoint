@@ -238,22 +238,34 @@ const DashboardMenu = () => {
         />
 
         <View className="flex flex-col items-center w-full mt-4 gap-3">
-          <Pressable
-            className={`flex flex-col items-center justify-center w-1/2 h-16 rounded-full ${
-              value != null ||
-              (range.startDate !== undefined && range.endDate !== undefined)
-                ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
-                : "bg-gray-400"
-            }`}
-            onPress={() => console.log(value, "date range here")}
-            disabled={
-              value == null &&
-              range.startDate === undefined &&
-              range.endDate === undefined
-            }
-          >
-            <Text className="text-primary-white font-bold">APPLY FILTERS</Text>
-          </Pressable>
+          <View className="flex flex-row items-center justify-between w-full gap-3">
+            <Pressable
+              className={`flex flex-col items-center justify-center w-[47.5%] h-16 rounded-full ${
+                value != null ||
+                (range.startDate !== undefined && range.endDate !== undefined)
+                  ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
+                  : "bg-gray-400"
+              }`}
+              onPress={() => console.log(value, "date range here")}
+              disabled={
+                value == null &&
+                range.startDate === undefined &&
+                range.endDate === undefined
+              }
+            >
+              <Text className="text-primary-white font-bold">
+                APPLY FILTERS
+              </Text>
+            </Pressable>
+            <Pressable
+              className="flex flex-col items-center justify-center w-[47.5%] h-16 rounded-full bg-tertiary-buttonRed"
+              onPress={() => console.log(value, "date range here")}
+            >
+              <Text className="text-primary-white font-bold">
+                CLEAR FILTERS
+              </Text>
+            </Pressable>
+          </View>
 
           <TouchableOpacity
             className="items-start justify-center bg-transparent w-8"
@@ -341,17 +353,28 @@ const DashboardMenu = () => {
         </View>
 
         <View className="flex flex-col items-center w-full gap-3">
-          <Pressable
-            className={`flex flex-col items-center justify-center w-1/2 h-16 rounded-full ${
-              pressedSortType && pressedSortOrder
-                ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
-                : "bg-gray-400"
-            }`}
-            onPress={() => console.log(pressedSortType, pressedSortOrder)}
-            disabled={!pressedSortType || !pressedSortOrder}
-          >
-            <Text className="text-primary-white font-bold">APPLY SORT</Text>
-          </Pressable>
+          <View className="flex flex-row items-center justify-between w-full gap-3">
+            <Pressable
+              className={`flex flex-col items-center justify-center w-[42.5%] h-16 rounded-full ${
+                pressedSortType && pressedSortOrder
+                  ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
+                  : "bg-gray-400"
+              }`}
+              onPress={() => console.log(pressedSortType, pressedSortOrder)}
+              disabled={!pressedSortType || !pressedSortOrder}
+            >
+              <Text className="text-primary-white font-bold">APPLY SORT</Text>
+            </Pressable>
+
+            <Pressable
+              className="flex flex-col items-center justify-center w-[52.5%] h-16 rounded-full bg-tertiary-buttonRed"
+              onPress={() => console.log(value, "date range here")}
+            >
+              <Text className="text-primary-white font-bold">
+                CLEAR SORT SETTINGS
+              </Text>
+            </Pressable>
+          </View>
 
           <TouchableOpacity
             className="items-start justify-center bg-transparent w-8"
