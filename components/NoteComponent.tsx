@@ -8,11 +8,13 @@ import {
   TextInput,
 } from "react-native";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
 
 type NoteComponentProps = {
   title: string;
+  noteID: string;
   categories: { label: string; color?: string }[];
   notesContent: string;
   date: Date;
@@ -20,10 +22,13 @@ type NoteComponentProps = {
 
 const NoteComponent: React.FC<NoteComponentProps> = ({
   title,
+  noteID,
   categories,
   notesContent,
   date,
 }) => {
+  const router = useRouter();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
@@ -55,7 +60,10 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
   return (
     <Pressable
       className="w-full bg-primary-white rounded-2xl border-2 border-slate-400 p-4"
-      onPress={() => console.log("Pantropiko")}
+      onPress={() => {
+        console.log("Redirect to?:", noteID);
+        router.push(`/note/${noteID}` as any);
+      }}
     >
       {menuOpen && (
         <OutsidePressHandler
