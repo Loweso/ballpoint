@@ -20,6 +20,7 @@ import CircleButton from "@/components/CircleButton";
 import DropDownPicker from "react-native-dropdown-picker";
 import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
 import { DashboardSettings } from "@/components/DashboardSettings";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //bet
@@ -165,6 +166,7 @@ export default function Home() {
   const [isQueryMenuModalVisible, setIsQueryMenuModalVisible] = useState(false);
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
+  const router = useRouter();
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
       <EventProvider>
@@ -175,7 +177,7 @@ export default function Home() {
         />
         <View className="absolute top-0">
           <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-50">
-            <View className="flex w-1/3">
+            <View className="flex">
               <TouchableOpacity
                 className="items-start justify-center bg-transparent w-8"
                 onPress={() => {
@@ -187,11 +189,25 @@ export default function Home() {
               </TouchableOpacity>
             </View>
 
-            <View className="flex-1 items-center">
+            <View className="flex justify-items-center">
               <Image source={images.ballpointLogo} className="w-32 h-32" />
             </View>
 
-            <View className="flex-1" />
+            <View className="flex">
+              <TouchableOpacity
+                className="justify-items-end bg-transparent w-8"
+                onPress={() => {
+                  router.push("/user");
+                  console.log("User Settings Pressed");
+                }}
+              >
+                <Ionicons
+                  name="person-circle-outline"
+                  size={30}
+                  color="black"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
           <View className="flex flex-row items-center justify-between bg-primary-white px-4 py-3 h-20 z-50">
             <View className="flex flex-row w-4/5 h-16 text-lg bg-secondary-accentGreen rounded-xl px-4 gap-3">
