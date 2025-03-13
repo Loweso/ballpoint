@@ -10,6 +10,7 @@ interface ConfirmationModalProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
   classnameModal?: string;
+  onConfirm: () => void; 
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -21,10 +22,10 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   classnameConfirm,
   classnameCancel,
   classnameModal,
+  onConfirm, 
 }) => {
   const closeModal = () => {
     setIsVisible(false);
-    console.log(isVisible);
   };
 
   return (
@@ -37,8 +38,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       <View
         className={`w-[50%] bg-white px-2 py-6 rounded-xl ${classnameModal}`}
       >
-        <Text className=" text-center">{label}</Text>
+        <Text className="text-center">{label}</Text>
         <View className="flex flex-row w-full justify-around">
+          {/* Cancel Button */}
           <TouchableOpacity
             onPress={closeModal}
             className={`rounded-xl py-2 px-4 w-[45%] flex justify-center items-center mt-3 ${classnameCancel}`}
@@ -53,9 +55,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               {cancelText}
             </Text>
           </TouchableOpacity>
+
+          {/* Confirm Button */}
           <TouchableOpacity
-            onPress={closeModal}
-            className={` rounded-xl py-2 px-4 w-[45%] flex justify-center items-center mt-3 ${classnameConfirm}`}
+            onPress={() => {
+              onConfirm();
+              closeModal();
+            }}
+            className={`rounded-xl py-2 px-4 w-[45%] flex justify-center items-center mt-3 ${classnameConfirm}`}
           >
             <Text
               className={`${

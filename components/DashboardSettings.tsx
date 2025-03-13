@@ -15,8 +15,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
 }) => {
   const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
     useState(false);
-  const [manageMode, setManageMode] = useState<"view" | "edit">("view");
-  const router = useRouter();
+  const [manageMode, setManageMode] = useState<"view" | "edit">("edit");
 
   const containerHeight = useRef(new Animated.Value(180)).current;
 
