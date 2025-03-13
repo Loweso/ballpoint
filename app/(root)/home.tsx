@@ -32,6 +32,7 @@ export default function Home() {
   const [isQueryMenuModalVisible, setIsQueryMenuModalVisible] = useState(false);
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
+
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white pb-20">
       <EventProvider>
