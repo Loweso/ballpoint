@@ -1,5 +1,5 @@
 import React from "react";
-import { File } from "@/app/(root)/note/[id]";
+import { File } from "@/hooks/DocumentPicker";
 import {
   Modal,
   View,

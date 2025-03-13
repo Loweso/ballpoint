@@ -9,7 +9,7 @@ import {
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { pickDocument } from "@/hooks/DocumentPicker";
+import { pickDocument, File } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
 import { noteData } from "@/assets/noteData";
 import CircleButton from "@/components/CircleButton";
@@ -25,7 +25,6 @@ import {
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
-import { File } from "@/hooks/DocumentPicker";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
