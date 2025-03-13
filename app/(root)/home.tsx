@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CircleButton from "@/components/CircleButton";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -13,33 +13,11 @@ import NamingModal from "@/components/NamingModal"; // Import NamingModal
 import PolishMenuModal from "@/components/PolishMenuModal"; // Import PolishMenuModal
 import QueryMenuModal from "@/components/QueryMenuModal"; // Import QueryMenuModal
 
+import { noteData } from "@/assets/noteData";
 import NoteComponent from "@/components/NoteComponent";
 import { EventProvider } from "react-native-outside-press";
 
 DropDownPicker.setMode("BADGE");
-
-const noteData = [
-  {
-    title: "Note 1",
-    categories: [
-      { label: "CMSC 128", color: "bg-secondary-yellow" },
-      { label: "Prototyping", color: "bg-tertiary-buttonGreen/[0.5]" },
-    ],
-    notesContent:
-      "(This is a test for very long content.) Component-Level Design defines the data structures, algorithms, interface characteristics, and communication mechanisms allocated to each software component. It can be used to review for correctness and consistency with other components. A component is a modular",
-    date: new Date("2024-12-15"),
-  },
-  {
-    title: "Long Note Title Test",
-    categories: [
-      { label: "Design", color: "bg-tertiary-buttonRed/[0.5]" },
-      { label: "CMSC 101", color: "bg-tertiary-buttonBlue" },
-    ],
-    notesContent:
-      "This is the content of note 2. It contains details about another topic.",
-    date: new Date("2025-01-24"),
-  },
-];
 
 export default function Home() {
   const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
@@ -55,10 +33,10 @@ export default function Home() {
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
   return (
-    <SafeAreaView className="flex w-screen h-full bg-primary-white">
+    <SafeAreaView className="flex w-screen h-full bg-primary-white pb-20">
       <EventProvider>
         <CircleButton
-          className="absolute bottom-10 right-8"
+          className="absolute -bottom-10 right-8"
           content={content}
           onPress={() => setIsCreateNewNoteModalVisible(true)}
         />
@@ -90,18 +68,22 @@ export default function Home() {
 
           <Text className="text-gray-500">Ready to Create?</Text>
           <Text className="my-3 text-5xl font-bold">Your Notes</Text>
-          <ScrollView>
-            {noteData.map((note, index) => (
-              <View key={index} style={{ marginBottom: 20 }}>
+          <FlatList
+            data={noteData}
+            keyExtractor={(item) => item.noteID}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            renderItem={({ item }) => (
+              <View style={{ marginBottom: 20 }}>
                 <NoteComponent
-                  title={note.title}
-                  categories={note.categories}
-                  notesContent={note.notesContent}
-                  date={note.date}
+                  title={item.title}
+                  noteID={item.noteID}
+                  categories={item.categories}
+                  notesContent={item.notesContent}
+                  date={item.date}
                 />
               </View>
-            ))}
-          </ScrollView>
+            )}
+          />
         </View>
 
         {/* Modals */}

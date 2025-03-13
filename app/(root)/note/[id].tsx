@@ -6,11 +6,13 @@ import {
   TextInput,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Link } from "expo-router";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { Link, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
+import { useLocalSearchParams } from "expo-router";
+import { noteData } from "@/assets/noteData";
 import CircleButton from "@/components/CircleButton";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import HTMLView from "react-native-htmlview";
@@ -24,12 +26,7 @@ import {
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
-
-export type File = {
-  name: string;
-  size: number;
-  uri: string;
-};
+import { File } from "@/hooks/DocumentPicker";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -43,6 +40,8 @@ const Note = ({ text }: any) => {
 
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
+  const { id } = useLocalSearchParams();
+  const pathname = usePathname();
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -71,6 +70,18 @@ const Note = ({ text }: any) => {
     setIsEditing(false);
     titleInputRef.current?.blur();
   };
+
+  useEffect(() => {
+    const foundNote = noteData.find((note) => note.noteID === id);
+
+    if (foundNote) {
+      setTitle(foundNote.title);
+      setNoteContent(foundNote.notesContent);
+    } else {
+      setTitle("Untitled Note");
+      setNoteContent("");
+    }
+  }, [id]);
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">

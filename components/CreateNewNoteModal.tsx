@@ -18,6 +18,8 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
   };
   const router = useRouter();
 
+  const noteID = "NEW_NOTE";
+
   return (
     <Modal
       animationType="fade"
@@ -45,7 +47,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
           </View>
           <TouchableOpacity
             onPress={() => {
-              router.push("/note");
+              router.push(`/note/${noteID}` as any);
               setIsVisible(false);
             }}
             className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 "
