@@ -120,10 +120,12 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       }}
     >
         {/* Header */}
-        <View className="flex flex-row w-[90%] h-[90%] mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center">
+        <View className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
+          style={{ width: mode === "view" ? "90%" : "100%" }}>
+
           <View className="flex flex-row w-full absolute top-[10px]">
             {mode === "edit" && (
-              <TouchableOpacity className="pl-[270px]">
+              <TouchableOpacity className="pl-[250px]">
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
@@ -154,7 +156,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           </View>
 
           {/* Category List */}
-          <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[20px]">
+          <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[20px] rounded-xl">
             {categories.map((category, index) => (
               <View
                 key={index}

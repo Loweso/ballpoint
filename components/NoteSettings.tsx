@@ -58,7 +58,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
       <View className="bg-black/30 h-full flex justify-end items-center">
         <Animated.View
           style={{
-            height: 320,
+            height: containerHeight,
             width: "100%",
             backgroundColor: "#e1f1e8",
             paddingHorizontal: 16,
@@ -79,63 +79,61 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
           </View>
 
           {/* Action Buttons */}
-          <View className="flex flex-row mt-2 items-center justify-center">
-            <TouchableOpacity onPress={() => console.log("Search in Note Pressed")}>
-              <View className="h-[120px] w-[80px] items-center bg-secondary-buttonGrey rounded-xl p-3">
-                <Ionicons name="search-outline" color="#080808" size={56} />
-                <Text className="text-center text-sm">Search in Note</Text>
-              </View>
-            </TouchableOpacity>
+          <View className="-mx-5">
+            <View className="h-full w-full flex flex-row justify-center mt-4">
+              <TouchableOpacity onPress={() => console.log("Search in Note Pressed")}>
+                <View className="h-[110px] w-[75px] items-center bg-secondary-buttonGrey rounded-xl p-3">
+                  <Ionicons name="search-outline" color="#080808" size={48} />
+                  <Text className="text-center text-sm">Search in Note</Text>
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              className="ml-2"
-              onPress={() => toggleManageCategories("view")}
-            >
-              <View className="h-[120px] w-[80px] items-center bg-secondary-categlistyellow rounded-xl p-2">
-                <Ionicons name="list-outline" color="#a09d45" size={56} />
-                <Text className="text-center text-sm text-tertiary-textYellow">
-                  Manage
-                </Text>
-                <Text className="text-center text-sm text-tertiary-textYellow">
-                  Categories
-                </Text>
-              </View>
-            </TouchableOpacity>
+              
+              <TouchableOpacity
+                className="ml-2"
+                onPress={() => toggleManageCategories("view")}
+              >
+                <View className="h-[110px] w-[75px] items-center bg-secondary-categlistyellow rounded-xl pt-3">
+                  <Ionicons name="list-outline" color="#a09d45" size={48} />
+                  <Text className="text-center text-sm text-tertiary-textYellow">
+                    Manage Categories
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              className="ml-2"
-              onPress={() => setRenameModalVisible(true)}
-            >
-              <View className="h-[120px] w-[80px] items-center bg-tertiary-buttonBlue rounded-xl p-3">
-                <Ionicons name="create-outline" color="#146FE1" size={56} />
-                <Text className="text-center text-sm text-tertiary-textBlue">
-                  Rename Note
-                </Text>
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="ml-2"
+                onPress={() => setRenameModalVisible(true)}
+              >
+                <View className="h-[110px] w-[75px] items-center bg-tertiary-buttonBlue rounded-xl p-3">
+                  <Ionicons name="create-outline" color="#146FE1" size={48} />
+                  <Text className="text-center text-sm text-tertiary-textBlue">
+                    Rename Note
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              className="ml-2"
-              onPress={() => setConfirmModalVisible(true)}
-            >
-              <View className="h-[120px] w-[80px] items-center bg-[#FFDEDE] rounded-xl p-3">
-                <Ionicons name="trash-outline" color="#e31e1e" size={56} />
-                <Text className="text-center text-sm text-tertiary-textRed">
-                  Delete Note
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                className="ml-2"
+                onPress={() => setConfirmModalVisible(true)}
+              >
+                <View className="h-[110px] w-[75px] items-center bg-[#FFDEDE] rounded-xl p-3">
+                  <Ionicons name="trash-outline" color="#e31e1e" size={48} />
+                  <Text className="text-center text-sm text-tertiary-textRed">
+                    Delete Note
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-          {/* Manage Categories */}
-          <ManageCategories
-            isVisible={isManageCategoriesVisible}
-            setIsVisible={setIsManageCategoriesVisible}
-            initialMode={manageMode}
-          />
+              {/* Manage Categories */}
+              <ManageCategories
+                isVisible={isManageCategoriesVisible}
+                setIsVisible={setIsManageCategoriesVisible}
+                initialMode={manageMode}
+              />
+            </View>
 
-          {/* Naming Modal */}
-          {renameModalVisible && (
+            {/* Naming Modal */}
             <NamingModal
               visible={renameModalVisible}
               onClose={() => setRenameModalVisible(false)}
@@ -143,10 +141,9 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               onProceed={handleRenameSubmit}
               placeholder="Rename Note Title"
             />
-          )}
+          
 
-          {/* Confirmation Modal */}
-          {confirmModalVisible && (
+            {/* Confirmation Modal */}
             <ConfirmationModal
               isVisible={confirmModalVisible}
               setIsVisible={setConfirmModalVisible}
@@ -157,7 +154,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               classnameCancel="bg-secondary-buttonGrey"
               onConfirm={handleConfirmDelete}
             />
-          )}
+          </View>
         </Animated.View>
       </View>
     </Modal>
