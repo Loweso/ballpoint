@@ -100,30 +100,30 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
   }, [isVisible]);
 
   return (
-    <View className="">
+    <>
       <Animated.View
-        style={{
-          transform: [{ translateY: slideAnim }],
-          position: mode === "view" ? "absolute" : "relative",
-          zIndex: 10,
-          flex: 1,
-          paddingLeft: mode === "view" ? 12 : "auto",
-          paddingRight: mode === "view" ? 12 : "auto",
-          paddingTop: 4,
-          top: mode === "view" ? 54 : "auto",
-          left: mode === "view" ? 0 : "auto",
-          right: mode === "view" ? 0 : "auto",
-          bottom: mode === "view" ? 0 : "auto",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
-        }}
-      >
+      style={{
+        transform: [{ translateY: slideAnim }],
+        position: mode === "view" ? "absolute" : "relative",
+        zIndex: 10,
+        flex: 1,
+        paddingLeft: 2,
+        paddingRight: 2,
+        paddingTop: 4,
+        top: mode === "view" ? 54 : "auto",
+        left: mode === "view" ? 0 : "auto",
+        right: mode === "view" ? 0 : "auto",
+        bottom: mode === "view" ? 0 : "auto",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
+      }}
+    >
         {/* Header */}
-        <View className="h-[90px] bg-secondary-categlistyellow rounded-xl items-center">
-          <View className="flex flex-row absolute top-[10px] border">
+        <View className="flex flex-row w-[90%] h-[90%] mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center">
+          <View className="flex flex-row w-full absolute top-[10px]">
             {mode === "edit" && (
-              <TouchableOpacity className="pl-[300px]">
+              <TouchableOpacity className="pl-[270px]">
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
@@ -212,7 +212,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
             />
         </View>
       </Animated.View>
-    </View>
+    </>
   );
 };
 

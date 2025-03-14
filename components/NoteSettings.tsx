@@ -69,7 +69,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
           }}
         >
           {/* Close Button */}
-          <View className="relative">
+          <View className="h-16 items-center">
             <TouchableOpacity
               className="absolute top-[10px] right-0 z-10"
               onPress={closeModal}
@@ -79,11 +79,11 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
           </View>
 
           {/* Action Buttons */}
-          <View className="flex flex-row mt-16 items-center">
+          <View className="flex flex-row mt-2 items-center justify-center">
             <TouchableOpacity onPress={() => console.log("Search in Note Pressed")}>
-              <View className="h-[120px] w-[90px] items-center bg-secondary-buttonGrey rounded-xl p-3">
+              <View className="h-[120px] w-[80px] items-center bg-secondary-buttonGrey rounded-xl p-3">
                 <Ionicons name="search-outline" color="#080808" size={56} />
-                <Text className="text-center text-base">Search in Note</Text>
+                <Text className="text-center text-sm">Search in Note</Text>
               </View>
             </TouchableOpacity>
 
@@ -91,10 +91,13 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               className="ml-2"
               onPress={() => toggleManageCategories("view")}
             >
-              <View className="h-[120px] w-[90px] items-center bg-secondary-categlistyellow rounded-xl p-3">
+              <View className="h-[120px] w-[80px] items-center bg-secondary-categlistyellow rounded-xl p-2">
                 <Ionicons name="list-outline" color="#a09d45" size={56} />
-                <Text className="text-center text-base text-tertiary-textYellow">
-                  Manage Categories
+                <Text className="text-center text-sm text-tertiary-textYellow">
+                  Manage
+                </Text>
+                <Text className="text-center text-sm text-tertiary-textYellow">
+                  Categories
                 </Text>
               </View>
             </TouchableOpacity>
@@ -103,9 +106,9 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               className="ml-2"
               onPress={() => setRenameModalVisible(true)}
             >
-              <View className="h-[120px] w-[90px] items-center bg-tertiary-buttonBlue rounded-xl p-3">
+              <View className="h-[120px] w-[80px] items-center bg-tertiary-buttonBlue rounded-xl p-3">
                 <Ionicons name="create-outline" color="#146FE1" size={56} />
-                <Text className="text-center text-base text-tertiary-textBlue">
+                <Text className="text-center text-sm text-tertiary-textBlue">
                   Rename Note
                 </Text>
               </View>
@@ -115,9 +118,9 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               className="ml-2"
               onPress={() => setConfirmModalVisible(true)}
             >
-              <View className="h-[120px] w-[90px] items-center bg-[#FFDEDE] rounded-xl p-3">
+              <View className="h-[120px] w-[80px] items-center bg-[#FFDEDE] rounded-xl p-3">
                 <Ionicons name="trash-outline" color="#e31e1e" size={56} />
-                <Text className="text-center text-base text-tertiary-textRed">
+                <Text className="text-center text-sm text-tertiary-textRed">
                   Delete Note
                 </Text>
               </View>
