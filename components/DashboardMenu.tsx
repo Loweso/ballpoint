@@ -22,13 +22,23 @@ import { DatePickerModal } from "react-native-paper-dates";
 import { format } from "date-fns";
 import { images } from "@/constants";
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setSelectedCategories,
+  setDateRange,
+  clearFilters,
+} from "@/slices/filterSlice";
+import { setSortType, setSortOrder, clearSort } from "@/slices/sortSlice";
+import { RootState } from "@/app/store";
+
 const DashboardMenu = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
-    { label: "Category 1", value: "category1" },
-    { label: "Category 2", value: "category2" },
-    { label: "Category 3", value: "category3" },
+    { label: "CMSC 128", value: "CMSC 128" },
+    { label: "Prototyping", value: "Prototyping" },
+    { label: "Design", value: "Design" },
+    { label: "CMSC 101", value: "CMSC 101" },
   ]);
 
   const clearCategories = () => {
@@ -119,6 +129,47 @@ const DashboardMenu = () => {
     [setisDateModalOpen, setRange]
   );
 
+  const dispatch = useDispatch();
+  const selectedCategories = useSelector(
+    (state: RootState) => state.filters.selectedCategories
+  );
+  const dateRange = useSelector((state: RootState) => state.filters.dateRange);
+  const sortType = useSelector((state: RootState) => state.sort.sortType);
+  const sortOrder = useSelector((state: RootState) => state.sort.sortOrder);
+
+  const handleApplyFilters = () => {
+    dispatch(setSelectedCategories(value ?? []));
+    dispatch(
+      setDateRange({
+        startDate: range.startDate ? range.startDate.toISOString() : null,
+        endDate: range.endDate ? range.endDate.toISOString() : null,
+      })
+    );
+    console.log("Filters applied:", selectedCategories, dateRange);
+  };
+
+  const handleApplySorts = () => {
+    dispatch(
+      setSortType(sortType === pressedSortType ? null : pressedSortType)
+    );
+    dispatch(
+      setSortOrder(sortOrder === pressedSortOrder ? null : pressedSortOrder)
+    );
+    console.log("Sort settings applied:", pressedSortType, pressedSortOrder);
+  };
+
+  const handleClearFilters = () => {
+    dispatch(clearFilters());
+    clearCategories();
+    console.log("Filters cleared");
+  };
+
+  const handleClearSort = () => {
+    dispatch(clearSort());
+    setPressedSortType(null);
+    setPressedSortOrder(null);
+  };
+
   return (
     <View className="top-0 flex w-screen bg-primary-white">
       <View className="absolute top-0">
@@ -168,6 +219,11 @@ const DashboardMenu = () => {
       <Animated.View
         style={{
           transform: [{ translateY: filterSlideAnim }],
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 6,
+          elevation: 6,
         }}
         className="bg-primary-white pb-3 px-6 w-full absolute gap-2 z-20"
       >
@@ -246,7 +302,7 @@ const DashboardMenu = () => {
                   ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
                   : "bg-gray-400"
               }`}
-              onPress={() => console.log(value, "date range here")}
+              onPress={handleApplyFilters}
               disabled={
                 value == null &&
                 range.startDate === undefined &&
@@ -259,7 +315,7 @@ const DashboardMenu = () => {
             </Pressable>
             <Pressable
               className="flex flex-col items-center justify-center w-[47.5%] h-16 rounded-full bg-tertiary-buttonRed"
-              onPress={() => console.log(value, "date range here")}
+              onPress={handleClearFilters}
             >
               <Text className="text-primary-white font-bold">
                 CLEAR FILTERS
@@ -279,6 +335,11 @@ const DashboardMenu = () => {
       <Animated.View
         style={{
           transform: [{ translateY: sortSlideAnim }],
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 6,
+          elevation: 6,
         }}
         className="bg-primary-white pb-3 px-6 w-full absolute gap-2 z-20"
       >
@@ -360,7 +421,7 @@ const DashboardMenu = () => {
                   ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
                   : "bg-gray-400"
               }`}
-              onPress={() => console.log(pressedSortType, pressedSortOrder)}
+              onPress={handleApplySorts}
               disabled={!pressedSortType || !pressedSortOrder}
             >
               <Text className="text-primary-white font-bold">APPLY SORT</Text>
@@ -368,7 +429,7 @@ const DashboardMenu = () => {
 
             <Pressable
               className="flex flex-col items-center justify-center w-[52.5%] h-16 rounded-full bg-tertiary-buttonRed"
-              onPress={() => console.log(value, "date range here")}
+              onPress={handleClearSort}
             >
               <Text className="text-primary-white font-bold">
                 CLEAR SORT SETTINGS

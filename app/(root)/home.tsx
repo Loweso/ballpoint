@@ -16,6 +16,9 @@ import QueryMenuModal from "@/components/QueryMenuModal"; // Import QueryMenuMod
 import { noteData } from "@/assets/noteData";
 import NoteComponent from "@/components/NoteComponent";
 import { EventProvider } from "react-native-outside-press";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { useMemo } from "react";
 
 DropDownPicker.setMode("BADGE");
 
@@ -32,6 +35,61 @@ export default function Home() {
   const [isQueryMenuModalVisible, setIsQueryMenuModalVisible] = useState(false);
 
   const content = <Ionicons name="add-outline" size={50} color="black" />;
+  const { selectedCategories, dateRange } = useSelector(
+    (state: RootState) => state.filters
+  );
+  const { sortType, sortOrder } = useSelector((state: RootState) => state.sort);
+
+  const filteredNotes = useMemo(() => {
+    return noteData.filter((item) => {
+      const categoryMatch =
+        selectedCategories.length === 0 ||
+        item.categories.some((cat) => selectedCategories.includes(cat.label));
+
+      const dateMatch =
+        (!dateRange.startDate ||
+          new Date(item.date) >= new Date(dateRange.startDate)) &&
+        (!dateRange.endDate ||
+          new Date(item.date) <= new Date(dateRange.endDate));
+
+      return categoryMatch && dateMatch;
+    });
+  }, [noteData, useSelector((state: RootState) => state.filters)]);
+
+  const sortedNotes = useMemo(() => {
+    const isAscending = sortOrder === "SortAscending";
+
+    return [...filteredNotes].sort((a, b) => {
+      if (sortType === "Date") {
+        return isAscending
+          ? new Date(a.date).getTime() - new Date(b.date).getTime()
+          : new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+
+      if (sortType === "Category") {
+        const categoryA = a.categories
+          .map((cat) => cat.label)
+          .sort()
+          .join(",");
+        const categoryB = b.categories
+          .map((cat) => cat.label)
+          .sort()
+          .join(",");
+
+        return isAscending
+          ? categoryA.localeCompare(categoryB)
+          : categoryB.localeCompare(categoryA);
+      }
+
+      if (sortType === "Title") {
+        return isAscending
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title);
+      }
+
+      return 0;
+    });
+  }, [filteredNotes, useSelector((state: RootState) => state.sort)]);
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white pb-20">
@@ -70,7 +128,7 @@ export default function Home() {
           <Text className="text-gray-500">Ready to Create?</Text>
           <Text className="my-3 text-5xl font-bold">Your Notes</Text>
           <FlatList
-            data={noteData}
+            data={sortedNotes}
             keyExtractor={(item) => item.noteID}
             contentContainerStyle={{ paddingBottom: 100 }}
             renderItem={({ item }) => (
