@@ -14,8 +14,8 @@ export const noteData = [
     title: "Long Note Title Test",
     noteID: "132894775348841",
     categories: [
-      { label: "Design", color: "bg-tertiary-buttonRed" },
       { label: "CMSC 101", color: "bg-tertiary-buttonBlue" },
+      { label: "Design", color: "bg-tertiary-buttonRed" },
     ],
     notesContent:
       "This is the content of note 2. It contains details about another topic.",
@@ -25,8 +25,8 @@ export const noteData = [
     title: "aespa - Drama (Romanized)",
     noteID: "132329472837111",
     categories: [
-      { label: "CMSC 128", color: "bg-secondary-yellow" },
       { label: "CMSC 101", color: "bg-tertiary-buttonBlue" },
+      { label: "CMSC 128", color: "bg-secondary-yellow" },
     ],
     notesContent:
       "Yeah, yeah I'm the drama Ziggy, ziggy, zag, I'm new 'Cause I go biggie, biggie, bad, it's true Nalkaroun nun ane bichin toxic Nae bonneungeul danggyeo, zoom Hold up, what? (Oh, my God) You say, what? (dachyeo neon) You better watch out, urin imi geosen boom Dallyeogago isseo, vroom I li-li like me when I roll Li-li-like me when I'm savage Li-li-like me when I go Li-li-like it when I baddest Hold up, bicheul ttaraseo",

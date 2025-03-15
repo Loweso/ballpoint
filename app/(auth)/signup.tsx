@@ -8,6 +8,7 @@ import {
   Image,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Link } from "expo-router";
 import { images } from "@/constants";
 
@@ -28,6 +29,8 @@ const SignupPage = () => {
     password: "",
     passwordConfirmation: "",
   });
+
+  const router = useRouter();
 
   // Email validation regex
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -192,7 +195,7 @@ const SignupPage = () => {
 
         <TouchableOpacity
           className="p-4 flex-row justify-center items-center"
-          onPress={() => console.log("Sign Up with Google Button Pressed")}
+          onPress={() => router.push("/(root)/home")}
         >
           <Image
             source={images.googleLogo}
