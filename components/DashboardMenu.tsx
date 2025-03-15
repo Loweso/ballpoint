@@ -17,6 +17,7 @@ import {
 } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
 import { DashboardSettings } from "./DashboardSettings";
+import HighlightModal from "./HighlightModal";
 
 import { DatePickerModal } from "react-native-paper-dates";
 import { format } from "date-fns";
@@ -39,6 +40,7 @@ const DashboardMenu = () => {
   const [isSortMenuVisible, setSortMenuVisible] = useState(false);
   const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
     useState(false);
+  const [isHighlightModalVisible, setIsHighlightModalVisible] = useState(false);
   const filterSlideAnim = useRef(new Animated.Value(-200)).current;
   const sortSlideAnim = useRef(new Animated.Value(-200)).current;
 
@@ -127,7 +129,7 @@ const DashboardMenu = () => {
             <TouchableOpacity
               className="items-start justify-center bg-transparent w-8"
               onPress={() => {
-                setIsDashBoardSettingsVisible(true);
+                setIsHighlightModalVisible(true);
                 console.log("Menu Button Pressed");
               }}
             >
@@ -388,6 +390,11 @@ const DashboardMenu = () => {
       <DashboardSettings
         isVisible={isDashboardSettingsVisible}
         setIsVisible={setIsDashBoardSettingsVisible}
+      />
+
+      <HighlightModal
+        isVisible={isHighlightModalVisible}
+        setIsVisible={setIsHighlightModalVisible}
       />
     </View>
   );
