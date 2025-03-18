@@ -129,7 +129,7 @@ const DashboardMenu = () => {
             <TouchableOpacity
               className="items-start justify-center bg-transparent w-8"
               onPress={() => {
-                setIsHighlightModalVisible(true);
+                setIsHighlightModalVisible(true); // this is for testing, change to DashBoardSettingsVisible
                 console.log("Menu Button Pressed");
               }}
             >
@@ -140,6 +140,8 @@ const DashboardMenu = () => {
           <View className="flex-1 items-center">
             <Image source={images.ballpointLogo} className="w-32 h-32" />
           </View>
+
+          <View className="flex-1 "></View>
 
           <View className="flex-1" />
         </View>
