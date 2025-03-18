@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 
 interface ConfirmationModalProps {
   label: string;
@@ -7,9 +7,10 @@ interface ConfirmationModalProps {
   cancelText: string;
   classnameConfirm?: string;
   classnameCancel?: string;
+  classnameModal?: string;
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
-  classnameModal?: string;
+  onConfirm: () => void;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -18,59 +19,59 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   label,
   confirmText,
   cancelText,
-  classnameConfirm,
-  classnameCancel,
-  classnameModal,
+  classnameConfirm = "",
+  classnameCancel = "",
+  classnameModal = "",
+  onConfirm,
 }) => {
-  const closeModal = () => {
-    setIsVisible(false);
-    console.log(isVisible);
-  };
+  if (!isVisible) return null; // Hide the modal if not visible
+
+  const closeModal = () => setIsVisible(false);
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={isVisible}
-      onRequestClose={closeModal}
-    >
-      <View className="bg-black/30 h-full flex justify-center items-center">
-        <View
-          className={`w-[50%] bg-white px-2 py-6 rounded-xl ${classnameModal}`}
-        >
-          <Text className=" text-center">{label}</Text>
-          <View className="flex flex-row w-full justify-around">
-            <TouchableOpacity
-              onPress={closeModal}
-              className={`rounded-xl py-2 px-4 w-[45%] flex justify-center items-center mt-3 ${classnameCancel}`}
+    <View className="absolute inset-0 h-[100%] justify-center items-center bg-black/40">
+      <View
+        className={`w-[80%] bg-white px-4 py-6 rounded-xl ${classnameModal}`}
+      >
+        <Text className="text-center">{label}</Text>
+
+        <View className="flex flex-row justify-around mt-4">
+          {/* Cancel Button */}
+          <TouchableOpacity
+            onPress={closeModal}
+            className={`rounded-xl py-2 px-4 w-[45%] items-center ${classnameCancel}`}
+          >
+            <Text
+              className={
+                classnameCancel.includes("bg-tertiary-buttonRed")
+                  ? "text-white"
+                  : "text-black"
+              }
             >
-              <Text
-                className={`${
-                  classnameCancel?.includes("bg-tertiary-buttonRed")
-                    ? "text-white"
-                    : "text-black"
-                }`}
-              >
-                {cancelText}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={closeModal}
-              className={` rounded-xl py-2 px-4 w-[45%] flex justify-center items-center mt-3 ${classnameConfirm}`}
+              {cancelText}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Confirm Button */}
+          <TouchableOpacity
+            onPress={() => {
+              onConfirm();
+              closeModal();
+            }}
+            className={`rounded-xl py-2 px-4 w-[45%] items-center ${classnameConfirm}`}
+          >
+            <Text
+              className={`${
+                classnameConfirm?.includes("bg-tertiary-buttonRed")
+                  ? "text-white"
+                  : "text-black"
+              }`}
             >
-              <Text
-                className={`${
-                  classnameConfirm?.includes("bg-tertiary-buttonRed")
-                    ? "text-white"
-                    : "text-black"
-                }`}
-              >
-                {confirmText}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              {confirmText}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </Modal>
+    </View>
   );
 };
