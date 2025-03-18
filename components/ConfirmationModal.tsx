@@ -61,11 +61,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             className={`rounded-xl py-2 px-4 w-[45%] items-center ${classnameConfirm}`}
           >
             <Text
-              className={
-                classnameConfirm.includes("bg-tertiary-buttonRed")
+              className={`${
+                classnameConfirm?.includes("bg-tertiary-buttonRed")
                   ? "text-white"
                   : "text-black"
-              }
+              }`}
             >
               {confirmText}
             </Text>
