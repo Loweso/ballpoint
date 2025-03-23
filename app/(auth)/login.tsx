@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -8,8 +8,9 @@ import {
   Image,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { images } from "@/constants";
+import { loginUser } from "@/lib/authactions";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,12 +50,22 @@ const LoginPage = () => {
     return isValid;
   };
 
-  const handleSignin = () => {
-    if (validateForm()) {
-      console.log("Valid");
-      // Handle successful signup (e.g., API request)
-    } else {
-      console.log("Error");
+  const handleSignin = async () => {
+    if (!validateForm()) {
+      console.log("Validation failed");
+      return;
+    }
+    try {
+      const response = await loginUser(email, password);
+      console.log("Login successful", response);
+      router.push("/(root)/home");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: error.email || "",
+        password: error.password || "",
+      }));
     }
   };
 
