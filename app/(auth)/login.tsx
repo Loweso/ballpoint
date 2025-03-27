@@ -116,6 +116,12 @@ const LoginPage = () => {
           <Text className="text-white text-center font-bold">Log In</Text>
         </TouchableOpacity>
 
+        <View className="items-center m-1">
+          <Link href="/forgot-password" asChild>
+            <Text className="text-sm text-black">Forgot Password?</Text>  
+          </Link>
+        </View>
+
         <View className="flex-row items-center m-4">
           <View className="flex-1 h-px bg-gray-300" />
           <Text className="px-2 text-gray-500">OR</Text>
