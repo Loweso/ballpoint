@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import {
   Entypo,
   Feather,
@@ -120,6 +121,7 @@ const DashboardMenu = () => {
     },
     [setisDateModalOpen, setRange]
   );
+  const router = useRouter();
 
   return (
     <View className="top-0 flex w-screen bg-primary-white">
@@ -129,7 +131,7 @@ const DashboardMenu = () => {
             <TouchableOpacity
               className="items-start justify-center bg-transparent w-8"
               onPress={() => {
-                setIsHighlightModalVisible(true); // this is for testing, change to DashBoardSettingsVisible
+                setIsDashBoardSettingsVisible(true); // this is for testing, change to DashBoardSettingsVisible
                 console.log("Menu Button Pressed");
               }}
             >
@@ -137,13 +139,19 @@ const DashboardMenu = () => {
             </TouchableOpacity>
           </View>
 
-          <View className="flex-1 items-center">
+          <View className="flex pl-2">
             <Image source={images.ballpointLogo} className="w-32 h-32" />
           </View>
 
-          <View className="flex-1 "></View>
-
-          <View className="flex-1" />
+          <View className="flex-1"></View>
+          <TouchableOpacity
+            onPress={() => {
+              router.push("/user");
+            }}
+          >
+            {" "}
+            <Ionicons name="person-circle-outline" size={35} />
+          </TouchableOpacity>
         </View>
         <View className="flex flex-row items-center justify-between bg-primary-white px-4 py-3 h-20 z-50">
           <View className="flex flex-row w-4/5 h-16 text-lg bg-secondary-accentGreen rounded-xl px-4 gap-3">
