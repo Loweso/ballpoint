@@ -123,15 +123,15 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         <View className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
           style={{ width: mode === "view" ? "90%" : "100%" }}>
 
-          <View className="flex flex-row w-full absolute top-[10px]">
+          <View className="flex flex-row w-full absolute top-[10px] justify-end">
             {mode === "edit" && (
-              <TouchableOpacity className="pl-[250px]">
+              <TouchableOpacity className="pr-2">
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
             {mode === "edit" && (
               <TouchableOpacity
-                className="pl-[16px] right-[10px]"
+                className="pr-4"
                 onPress={() => {
                   const selectedIndexes = selected
                     .map((isSelected, index) => (isSelected ? index : null))
