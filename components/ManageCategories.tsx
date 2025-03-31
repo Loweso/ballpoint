@@ -38,9 +38,14 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     "Category Name 4",
   ]);
 
-  const [selected, setSelected] = useState(Array(categories.length).fill(false));
+  const [selected, setSelected] = useState(
+    Array(categories.length).fill(false)
+  );
   const [renameModalVisible, setRenameModalVisible] = useState(false);
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number | null>(null);
+  const [isNamingModalVisible, setIsNamingModalVisible] = useState(false);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState<
+    number | null
+  >(null);
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
@@ -63,6 +68,25 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       setCategories(updatedCategories);
       setRenameModalVisible(false);
     }
+  };
+
+  // Open the naming modal
+  const openNamingModal = () => {
+    console.log("Opening naming modal..."); // Debug log
+    setIsNamingModalVisible(true);
+  };
+
+  // Close the naming modal
+  const closeNamingModal = () => {
+    console.log("Closing naming modal..."); // Debug log
+    setIsNamingModalVisible(false);
+  };
+
+  const handleAddCategory = (newName: string) => {
+    if (newName.trim()) {
+      setCategories((prev) => [...prev, newName]);
+    }
+    closeNamingModal();
   };
 
   const handleDeletePress = (index: number) => {
@@ -102,30 +126,31 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
   return (
     <>
       <Animated.View
-      style={{
-        transform: [{ translateY: slideAnim }],
-        position: mode === "view" ? "absolute" : "relative",
-        zIndex: 10,
-        flex: 1,
-        paddingLeft: 2,
-        paddingRight: 2,
-        paddingTop: 4,
-        top: mode === "view" ? 54 : "auto",
-        left: mode === "view" ? 0 : "auto",
-        right: mode === "view" ? 0 : "auto",
-        bottom: mode === "view" ? 0 : "auto",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
-      }}
-    >
+        style={{
+          transform: [{ translateY: slideAnim }],
+          position: mode === "view" ? "absolute" : "relative",
+          zIndex: 10,
+          flex: 1,
+          paddingLeft: 2,
+          paddingRight: 2,
+          paddingTop: 4,
+          top: mode === "view" ? 54 : "auto",
+          left: mode === "view" ? 0 : "auto",
+          right: mode === "view" ? 0 : "auto",
+          bottom: mode === "view" ? 0 : "auto",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
+        }}
+      >
         {/* Header */}
-        <View className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
-          style={{ width: mode === "view" ? "90%" : "100%" }}>
-
+        <View
+          className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
+          style={{ width: mode === "view" ? "90%" : "100%" }}
+        >
           <View className="flex flex-row w-full absolute top-[10px] justify-end">
             {mode === "edit" && (
-              <TouchableOpacity className="pr-2">
+              <TouchableOpacity className="pr-2" onPress={openNamingModal}>
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
@@ -201,17 +226,26 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
             placeholder="Rename category"
           />
 
+          {/* Naming Modal */}
+          <NamingModal
+            visible={isNamingModalVisible}
+            onClose={closeNamingModal}
+            onCancel={closeNamingModal}
+            onProceed={handleAddCategory}
+            placeholder="Enter new category name"
+          />
+
           {/* Confirmation Modal */}
           <ConfirmationModal
-              isVisible={confirmModalVisible}
-              setIsVisible={setConfirmModalVisible}
-              label="Are you sure you want to delete this category?"
-              confirmText="Delete"
-              cancelText="Cancel"
-              classnameConfirm="bg-tertiary-buttonRed"
-              classnameCancel="bg-secondary-buttonGrey"
-              onConfirm={handleConfirmDelete} 
-            />
+            isVisible={confirmModalVisible}
+            setIsVisible={setConfirmModalVisible}
+            label="Are you sure you want to delete this category?"
+            confirmText="Delete"
+            cancelText="Cancel"
+            classnameConfirm="bg-tertiary-buttonRed"
+            classnameCancel="bg-secondary-buttonGrey"
+            onConfirm={handleConfirmDelete}
+          />
         </View>
       </Animated.View>
     </>
