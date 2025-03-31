@@ -25,6 +25,8 @@ module.exports = {
           textRed: "#e31e1e",
           textGray: "#6B6B6B",
           textYellow: "#a09d45",
+          textGreen: "#277B4D",
+          cardBg: "#E3F5EB",
         },
       },
     },
