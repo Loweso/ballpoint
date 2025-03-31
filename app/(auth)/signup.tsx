@@ -80,6 +80,7 @@ const SignupPage = () => {
     }
 
     try {
+      //throw new Error("hello world");
       const response = await registerUser(
         username,
         email,

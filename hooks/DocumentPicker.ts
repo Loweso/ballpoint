@@ -9,7 +9,7 @@ export type File = {
 export const pickDocument = async (): Promise<File | null> => {
   try {
     const result = await DocumentPicker.getDocumentAsync({
-      type: ["image/*", "audio/*"], // Only allow image and audio files
+      type: ["image/png", "image/jpg"],
     });
 
     if (result.canceled) {

@@ -1,7 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
-
-const API_URL = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/api`;
+import api from "@/utils/api";
 
 export const registerUser = async (
   username: string,
@@ -9,30 +8,29 @@ export const registerUser = async (
   password: string,
   passwordConfirmation: string
 ) => {
-  // Replace with your actual backend URL
-
   try {
-    const response = await axios.post(`${API_URL}/register/`, {
+    console.log("Current API URL:", process.env.EXPO_PUBLIC_DEVICE_IPV4);
+    const response = await api.post("/register", {
       username,
       email,
       password,
       password_confirmation: passwordConfirmation,
     });
 
-    return response.data; // Handle success response
+    return response.data;
   } catch (error: any) {
-    throw error.response?.data || { message: "An error occurred" }; // Handle API errors
+    console.log("like JENNIE: " + JSON.stringify(error, null, 2));
   }
 };
 
 export const loginUser = async (email: string, password: string) => {
   try {
-    const response = await axios.post(`${API_URL}/login/`, {
+    const response = await api.post("/login", {
       email,
       password,
     });
 
-    console.log("Login Response:", response.data); // Check if backend returns tokens
+    console.log("Login Response:", response.data);
 
     const { access, refresh } = response.data;
 
@@ -48,7 +46,7 @@ export const loginUser = async (email: string, password: string) => {
 
 export const logoutUser = async () => {
   try {
-    await axios.post("/logout/");
+    await axios.post("/logout");
   } catch (error) {
     console.error("Logout request failed", error);
   }
