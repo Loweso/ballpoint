@@ -14,12 +14,14 @@ interface ExtractionWindowProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
   selectedFile?: File | null;
+  content: string;
 }
 
 export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
   isVisible,
   setIsVisible,
   selectedFile,
+  content,
 }) => {
   const closeModal = () => {
     setIsVisible(false);
@@ -44,42 +46,8 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
             <Ionicons name="exit-outline" color="#5A5353" size={32} />
           </TouchableOpacity>
           <ScrollView className="mt-8 border p-4">
-            <View className="relative">
-              <Text className="text-3xl">Title</Text>
-            </View>
-
             <View className="gap-y-3">
-              <Text className="text-xl mt-3">Header 1</Text>
-              <Text className="text-justify">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </Text>
+              <Text className="text-justify">{content}</Text>
             </View>
           </ScrollView>
 
