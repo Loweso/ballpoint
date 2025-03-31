@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -8,8 +8,9 @@ import {
   Image,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { images } from "@/constants";
+import { registerUser } from "@/lib/authactions";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -72,12 +73,35 @@ const SignupPage = () => {
   };
 
   // Handle signup submission
-  const handleSignup = () => {
-    if (validateForm()) {
-      console.log("Valid");
-      // Handle successful signup (e.g., API request)
-    } else {
-      console.log("Error");
+  const handleSignup = async () => {
+    if (!validateForm()) {
+      console.log("Validation failed");
+      return;
+    }
+
+    try {
+      //throw new Error("hello world");
+      const response = await registerUser(
+        username,
+        email,
+        password,
+        passwordConfirmation
+      );
+      console.log("Registration successful", response);
+
+      alert("Signup successful! Please log in.");
+      router.push("/(auth)/login");
+      // Optionally, navigate to login screen here
+    } catch (error: any) {
+      console.error("Signup error:", error);
+
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        username: error.username || "",
+        email: error.email || "",
+        password: error.password || "",
+        passwordConfirmation: error.passwordConfirmation || "",
+      }));
     }
   };
 
