@@ -74,8 +74,10 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await api.post("/logout");
-    } catch (error) {
-      console.error("Logout request failed:", error);
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data || { message: "Logout failed" }
+      );
     } finally {
       await clearAuthTokens();
     }
@@ -133,7 +135,7 @@ export const checkAuthStatus = createAsyncThunk(
   }
 );
 
-const clearAuthTokens = async () => {
+export const clearAuthTokens = async () => {
   await Promise.all([
     SecureStore.deleteItemAsync("access_token"),
     SecureStore.deleteItemAsync("refresh_token"),
@@ -249,6 +251,7 @@ const authSlice = createSlice({
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        state.loading = false;
       })
       // Refresh Token
       .addCase(refreshToken.fulfilled, (state, action) => {

@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
-import { refreshToken, checkAuthStatus } from "@/lib/redux/slices/authSlice";
+import {
+  refreshToken,
+  checkAuthStatus,
+  clearAuthTokens,
+  logoutUser,
+} from "@/lib/redux/slices/authSlice";
 import { router, useSegments, useRootNavigationState } from "expo-router";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -23,6 +28,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       // Redirect to login if not authenticated and trying to access protected route
       router.replace("/(auth)/login");
     } else if (isAuthenticated && inAuthGroup) {
+      console.log(isAuthenticated, inAuthGroup);
       // Redirect to home if authenticated and trying to access auth routes
       router.replace("/(root)/home");
     }
@@ -37,12 +43,17 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         await dispatch(refreshToken()).unwrap();
       } catch (error) {
         console.error("Token refresh failed:", error);
-        // If refresh fails, user will be redirected to login by the first useEffect
+        clearInterval(refreshInterval);
+
+        await dispatch(logoutUser());
+
+        // Navigate to login
+        router.replace("/(auth)/login");
       }
-    }, 1 * 60 * 1000); // Refresh every 14 minutes (assuming 15-minute token expiry)
+    }, 60 * 1000); // Set to 30 seconds for testing
 
     return () => clearInterval(refreshInterval);
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, segments]);
 
   // Show loading state while checking authentication
   if (loading) {
