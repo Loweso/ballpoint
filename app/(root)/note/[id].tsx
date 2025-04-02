@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   Image,
   TouchableOpacity,
@@ -35,6 +36,7 @@ const Note = ({ text }: any) => {
   const [isEditing, setIsEditing] = useState(false);
   const [noteContent, setNoteContent] = useState(text);
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
+  const [extractedText, setExtractedText] = useState(text);
 
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
@@ -45,15 +47,45 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
-    const file: File | null = await pickDocument();
+    console.log("I'm here!");
+    const file = await pickDocument();
     setSelectedFile(file);
 
-    if (file) {
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+
+      formData.append("image", {
+        name: file.name,
+        uri: file.uri,
+        type: "image/*", // Adjust according to the actual file type
+      });
+
+      const uploadResponse = await axios.post(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/extract/extract-text`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Upload successful:", uploadResponse.data);
+
+      if (uploadResponse.data) {
+        setExtractedText(uploadResponse.data.text);
+      }
+
       setTimeout(() => {
         setIsExtractionWindowVisible(true);
       }, 600);
+    } catch (error) {
+      console.error("Error uploading file:", error);
     }
   };
+
   const content = <Ionicons name="pencil-outline" size={40} color="black" />;
 
   const AiModalOpenIcon = () => (
@@ -130,6 +162,7 @@ const Note = ({ text }: any) => {
         isVisible={isExtractionWindowVisible}
         setIsVisible={setIsExtractionWindowVisible}
         selectedFile={selectedFile}
+        content={extractedText}
       />
 
       <TextInput

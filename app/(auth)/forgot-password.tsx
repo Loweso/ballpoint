@@ -48,6 +48,14 @@ export default function ForgotPasswordFlow({ navigation }: any) {
     }
   };
 
+  const handleBackPress = () => {
+    if (screenState > 0) {
+      setScreenState(screenState - 1); // Go to the previous state in the flow
+    } else {
+      router.push("/login"); // ✅ Use router to navigate to the login screen
+    }
+  };
+
   // Screen 1: Find your account
   const renderFindAccountScreen = () => {
     return (
@@ -233,16 +241,7 @@ export default function ForgotPasswordFlow({ navigation }: any) {
       >
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
           <View className="relative flex-row items-center mb-8 pt-2">
-            <TouchableOpacity
-              className="-ml-2 p-2"
-              onPress={() => {
-                if (screenState > 0) {
-                  setScreenState(screenState - 1);
-                } else if (navigation) {
-                  navigation.goBack();
-                }
-              }}
-            >
+            <TouchableOpacity className="-ml-2 p-2" onPress={handleBackPress}>
               <AntDesign name="leftcircleo" size={24} color="black" />
             </TouchableOpacity>
             <Text className="text-xl font-medium ml-2">Reset Password</Text>
