@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -10,30 +10,28 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { images } from "@/constants";
-import { registerUser } from "@/lib/authactions";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { registerUser, clearError } from "@/lib/redux/slices/authSlice";
 
 const SignupPage = () => {
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  //validation
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-
-  // Error messages
-  const [errors, setErrors] = useState({
+  const [validationErrors, setValidationErrors] = useState({
     username: "",
     email: "",
     password: "",
     passwordConfirmation: "",
   });
 
-  // Email validation regex
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // Validate form fields
   const validateForm = () => {
     let isValid = true;
     let newErrors = {
@@ -45,9 +43,11 @@ const SignupPage = () => {
 
     if (!username.trim()) {
       newErrors.username = "Username is required";
+      isValid = false;
     } else if (!/^[a-zA-Z]\w{4,20}$/.test(username)) {
       newErrors.username =
         "Username must only contain alphanumeric characters that starts with a letter and be 4-20 characters long";
+      isValid = false;
     }
 
     if (!email.trim()) {
@@ -68,41 +68,38 @@ const SignupPage = () => {
       isValid = false;
     }
 
-    setErrors(newErrors);
+    setValidationErrors(newErrors);
     return isValid;
   };
 
-  // Handle signup submission
   const handleSignup = async () => {
     if (!validateForm()) {
-      console.log("Validation failed");
       return;
     }
 
     try {
-      const response = await registerUser(
-        username,
-        email,
-        password,
-        passwordConfirmation
-      );
-      console.log("Registration successful", response);
+      await dispatch(
+        registerUser({
+          username,
+          email,
+          password,
+          passwordConfirmation,
+        })
+      ).unwrap();
 
       alert("Signup successful! Please log in.");
       router.push("/(auth)/login");
-      // Optionally, navigate to login screen here
     } catch (error: any) {
       console.error("Signup error:", error);
-
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        username: error.username || "",
-        email: error.email || "",
-        password: error.password || "",
-        passwordConfirmation: error.passwordConfirmation || "",
-      }));
     }
   };
+
+  // Clear error when component unmounts
+  React.useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-white border border-black">
@@ -118,24 +115,24 @@ const SignupPage = () => {
         <TextInput
           placeholder="Username"
           value={username}
-          className="border border-gray-300 p-3 m-2  rounded-md"
+          className="border border-gray-300 p-3 m-2 rounded-md"
           onChangeText={(username) => setUsername(username)}
         />
-        {errors.username ? (
+        {validationErrors.username ? (
           <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
-            {errors.username}
+            {validationErrors.username}
           </Text>
         ) : null}
 
         <TextInput
           placeholder="Email"
           value={email}
-          className="border border-gray-300 p-3 m-2  rounded-md"
+          className="border border-gray-300 p-3 m-2 rounded-md"
           onChangeText={(email) => setEmail(email)}
         />
-        {errors.email ? (
+        {validationErrors.email ? (
           <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
-            {errors.email}
+            {validationErrors.email}
           </Text>
         ) : null}
 
@@ -144,15 +141,12 @@ const SignupPage = () => {
             placeholder="Password"
             value={password}
             secureTextEntry={!showPassword}
-            className="border border-gray-300 p-3 m-2  rounded-md"
+            className="border border-gray-300 p-3 m-2 rounded-md"
             onChangeText={(password) => setPassword(password)}
           />
           <TouchableOpacity
             className="absolute right-4 top-5"
-            onPress={() => {
-              setShowPassword(!showPassword);
-              console.log("Toggled Password Visibility:", !showPassword);
-            }}
+            onPress={() => setShowPassword(!showPassword)}
           >
             <FontAwesome
               name={showPassword ? "eye-slash" : "eye"}
@@ -161,9 +155,9 @@ const SignupPage = () => {
             />
           </TouchableOpacity>
         </View>
-        {errors.password ? (
+        {validationErrors.password ? (
           <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
-            {errors.password}
+            {validationErrors.password}
           </Text>
         ) : null}
 
@@ -172,20 +166,14 @@ const SignupPage = () => {
             placeholder="Confirm Password"
             value={passwordConfirmation}
             secureTextEntry={!showConfirmPassword}
-            className="border border-gray-300 p-3 m-2  rounded-md pr-10"
+            className="border border-gray-300 p-3 m-2 rounded-md pr-10"
             onChangeText={(password_confirmation) =>
               setPasswordConfirmation(password_confirmation)
             }
           />
           <TouchableOpacity
             className="absolute right-4 top-5"
-            onPress={() => {
-              setShowConfirmPassword(!showConfirmPassword);
-              console.log(
-                "Toggled Confirm Password Visibility:",
-                !showConfirmPassword
-              );
-            }}
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             <FontAwesome
               name={showConfirmPassword ? "eye-slash" : "eye"}
@@ -194,17 +182,26 @@ const SignupPage = () => {
             />
           </TouchableOpacity>
         </View>
-        {errors.passwordConfirmation ? (
+        {validationErrors.passwordConfirmation ? (
           <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
-            {errors.passwordConfirmation}
+            {validationErrors.passwordConfirmation}
           </Text>
         ) : null}
+
+        {error && (
+          <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
+            {error}
+          </Text>
+        )}
 
         <TouchableOpacity
           className="bg-tertiary-buttonGreen p-2 rounded-md m-2"
           onPress={handleSignup}
+          disabled={loading}
         >
-          <Text className="text-white text-center font-bold">Sign Up</Text>
+          <Text className="text-white text-center font-bold">
+            {loading ? "Signing up..." : "Sign Up"}
+          </Text>
         </TouchableOpacity>
 
         <View className="flex-row items-center m-4">
@@ -228,9 +225,7 @@ const SignupPage = () => {
         </TouchableOpacity>
 
         <Link href="/login" asChild>
-          <TouchableOpacity
-            onPress={() => console.log("Navigating to Login Page")}
-          >
+          <TouchableOpacity>
             <Text className="border border-gray-300 text-center text-gray-500 p-3 mt-8">
               Already have an account?{" "}
               <Text className="text-tertiary-buttonGreen font-semibold">
