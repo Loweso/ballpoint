@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, SafeAreaView, TouchableWithoutFeedback, TextInput } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  TouchableWithoutFeedback,
+  TextInput,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface QueryMenuModalProps {
   visible: boolean;
@@ -15,7 +23,7 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
   onProcessQuery,
   onCompleteHighlightedText,
 }) => {
-  const [queryText, setQueryText] = useState('');
+  const [queryText, setQueryText] = useState("");
 
   return (
     <Modal
@@ -34,7 +42,7 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
                   value={queryText}
                   onChangeText={setQueryText}
                   placeholder="Improve with a query..."
-                  style={{width: 230, fontSize: 15}}
+                  style={{ width: 230, fontSize: 15 }}
                   className="flex-1 text-lg text-gray-800"
                   placeholderTextColor="#6B7280"
                 />
@@ -46,9 +54,15 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
                 onPress={onProcessQuery}
               >
                 <View className="flex-none p-1 rounded-md">
-                  <MaterialCommunityIcons name="rotate-3d-variant" size={26} color="black" />
+                  <MaterialCommunityIcons
+                    name="rotate-3d-variant"
+                    size={26}
+                    color="black"
+                  />
                 </View>
-                <Text className="flex-none text-black font-medium pr-2">Process Query</Text>
+                <Text className="flex-none text-black font-medium pr-2">
+                  Process Query
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -56,24 +70,35 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
                 onPress={onCompleteHighlightedText}
               >
                 <View className="flex-none p-1 rounded-md">
-                  <MaterialCommunityIcons name="form-textbox" size={26} color="black" />
+                  <MaterialCommunityIcons
+                    name="form-textbox"
+                    size={26}
+                    color="black"
+                  />
                 </View>
-                <Text className="flex-none text-black font-medium">Complete Highlighted Text</Text>
+                <Text className="flex-none text-black font-medium">
+                  Complete Highlighted Text
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 className="flex-row m-1 gap-2 items-center rounded-lg"
                 onPress={() => {
-                  console.log('Cancel button pressed');
+                  console.log("Cancel button pressed");
                   onClose();
                 }}
               >
                 <View className="flex-none p-1 rounded-md">
-                  <MaterialCommunityIcons name="exit-to-app" size={26} color="black" />
+                  <MaterialCommunityIcons
+                    name="exit-to-app"
+                    size={26}
+                    color="black"
+                  />
                 </View>
-                <Text className="flex-none text-black font-medium">Cancel Query</Text>
+                <Text className="flex-none text-black font-medium">
+                  Cancel Query
+                </Text>
               </TouchableOpacity>
-
             </View>
           </TouchableWithoutFeedback>
         </SafeAreaView>

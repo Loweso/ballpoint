@@ -54,7 +54,12 @@ export default function Home() {
 
       return categoryMatch && dateMatch;
     });
-  }, [noteData, useSelector((state: RootState) => state.filters)]);
+  }, [
+    dateRange.endDate,
+    dateRange.startDate,
+    selectedCategories,
+    useSelector((state: RootState) => state.filters),
+  ]);
 
   const sortedNotes = useMemo(() => {
     const isAscending = sortOrder === "SortAscending";
@@ -89,7 +94,12 @@ export default function Home() {
 
       return 0;
     });
-  }, [filteredNotes, useSelector((state: RootState) => state.sort)]);
+  }, [
+    filteredNotes,
+    sortType,
+    sortOrder,
+    useSelector((state: RootState) => state.sort),
+  ]);
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white pb-20">

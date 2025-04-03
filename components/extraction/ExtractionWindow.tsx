@@ -47,7 +47,7 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
           </TouchableOpacity>
           <ScrollView className="mt-8 border p-4">
             <View className="gap-y-3">
-              <Text className="text-justify">{content}</Text>
+              <Text className="text-justify">{content || ""}</Text>
             </View>
           </ScrollView>
 

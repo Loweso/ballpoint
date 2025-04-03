@@ -129,7 +129,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
               category.color || "bg-secondary-yellow"
             }`}
           >
-            <Text className="font-bold">{category.label}</Text>
+            <Text className="font-bold">{String(category.label)}</Text>
           </View>
         ))}
       </View>

@@ -175,7 +175,7 @@ const DashboardMenu = () => {
   };
 
   return (
-    <View className="top-0 flex w-screen bg-primary-white">
+    <View className="top-0 flex w-screen bg-primary-white mt-[-25]">
       <View className="absolute top-0">
         <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-50">
           <View className="flex w-1/3">
