@@ -125,9 +125,8 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
         {categories.map((category, index) => (
           <View
             key={index}
-            className={`h-8 py-1 px-4 ${
-              category.color || "bg-secondary-yellow"
-            }`}
+            style={{ backgroundColor: category.color || "#fffee1" }} // Use style instead
+            className="h-8 py-1 px-4"
           >
             <Text className="font-bold">{String(category.label)}</Text>
           </View>

@@ -50,7 +50,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         // Navigate to login
         router.replace("/(auth)/login");
       }
-    }, 60 * 1000); // Set to 30 seconds for testing
+    }, 14 * 60 * 1000); // Set to 30 seconds for testing
 
     return () => clearInterval(refreshInterval);
   }, [isAuthenticated, dispatch, segments]);

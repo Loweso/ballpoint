@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import axios from "axios";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Animated,
   View,
@@ -31,20 +32,21 @@ import {
   clearFilters,
 } from "@/slices/filterSlice";
 import { setSortType, setSortOrder, clearSort } from "@/slices/sortSlice";
-import { RootState } from "@/app/store";
+import { RootState } from "@/lib/redux/store";
+
+interface Category {
+  label: string;
+  value: string;
+}
 
 const DashboardMenu = () => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: "CMSC 128", value: "CMSC 128" },
-    { label: "Prototyping", value: "Prototyping" },
-    { label: "Design", value: "Design" },
-    { label: "CMSC 101", value: "CMSC 101" },
-  ]);
+  const [value, setValue] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const clearCategories = () => {
-    setValue(null);
+    setValue([]);
   };
 
   const [isFilterMenuVisible, setFilterMenuVisible] = useState(false);
@@ -54,6 +56,10 @@ const DashboardMenu = () => {
   const [isHighlightModalVisible, setIsHighlightModalVisible] = useState(false);
   const filterSlideAnim = useRef(new Animated.Value(-200)).current;
   const sortSlideAnim = useRef(new Animated.Value(-200)).current;
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const toggleFilterMenu = () => {
     console.log("Filter Button Pressed");
@@ -79,6 +85,25 @@ const DashboardMenu = () => {
       duration: 500,
       useNativeDriver: true,
     }).start();
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get<Category[]>(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/`
+      );
+
+      const formattedCategories = response.data.map((category) => ({
+        label: category.label,
+        value: category.label, // Assign value same as label
+      }));
+
+      setCategories(formattedCategories);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const [pressedSortType, setPressedSortType] = useState<string | null>(null);
@@ -175,7 +200,7 @@ const DashboardMenu = () => {
   };
 
   return (
-    <View className="top-0 flex w-screen bg-primary-white mt-[-25]">
+    <View className="top-0 flex w-screen bg-primary-white">
       <View className="absolute top-0">
         <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-50">
           <View className="flex w-1/3">
@@ -246,10 +271,10 @@ const DashboardMenu = () => {
             <DropDownPicker
               open={open}
               value={value}
-              items={items}
+              items={categories}
               setOpen={setOpen}
               setValue={setValue}
-              setItems={setItems}
+              setItems={setCategories}
               multiple={true}
               min={0}
               max={5}

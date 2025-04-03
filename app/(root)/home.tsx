@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CircleButton from "@/components/CircleButton";
@@ -13,14 +14,21 @@ import NamingModal from "@/components/NamingModal"; // Import NamingModal
 import PolishMenuModal from "@/components/PolishMenuModal"; // Import PolishMenuModal
 import QueryMenuModal from "@/components/QueryMenuModal"; // Import QueryMenuModal
 
-import { noteData } from "@/assets/noteData";
 import NoteComponent from "@/components/NoteComponent";
 import { EventProvider } from "react-native-outside-press";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { RootState } from "@/lib/redux/store";
 import { useMemo } from "react";
 
 DropDownPicker.setMode("BADGE");
+
+interface Note {
+  noteID: string;
+  title: string;
+  categories: { label: string; color: string }[];
+  notesContent: string;
+  date: string;
+}
 
 export default function Home() {
   const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
@@ -34,6 +42,9 @@ export default function Home() {
     useState(false);
   const [isQueryMenuModalVisible, setIsQueryMenuModalVisible] = useState(false);
 
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state
+
   const content = <Ionicons name="add-outline" size={50} color="black" />;
   const { selectedCategories, dateRange } = useSelector(
     (state: RootState) => state.filters
@@ -41,10 +52,13 @@ export default function Home() {
   const { sortType, sortOrder } = useSelector((state: RootState) => state.sort);
 
   const filteredNotes = useMemo(() => {
-    return noteData.filter((item) => {
+    return notes.filter((item) => {
+      console.log("Filters applied here:", selectedCategories, dateRange);
       const categoryMatch =
         selectedCategories.length === 0 ||
         item.categories.some((cat) => selectedCategories.includes(cat.label));
+
+      console.log("categoryMarch:", categoryMatch);
 
       const dateMatch =
         (!dateRange.startDate ||
@@ -52,11 +66,13 @@ export default function Home() {
         (!dateRange.endDate ||
           new Date(item.date) <= new Date(dateRange.endDate));
 
+      console.log("dateMarch:", dateMatch);
+
       return categoryMatch && dateMatch;
     });
   }, [
-    dateRange.endDate,
-    dateRange.startDate,
+    notes,
+    dateRange,
     selectedCategories,
     useSelector((state: RootState) => state.filters),
   ]);
@@ -100,6 +116,23 @@ export default function Home() {
     sortOrder,
     useSelector((state: RootState) => state.sort),
   ]);
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const fetchNotes = async () => {
+    try {
+      const response = await axios.get<Note[]>(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes`
+      );
+      setNotes(response.data); // Store data in state
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white pb-20">
@@ -148,7 +181,7 @@ export default function Home() {
                   noteID={item.noteID}
                   categories={item.categories}
                   notesContent={item.notesContent}
-                  date={item.date}
+                  date={new Date(item.date)}
                 />
               </View>
             )}

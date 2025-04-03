@@ -190,7 +190,7 @@ const Note = ({ text }: any) => {
             onChange={(descriptionText) => {
               setNoteContent(descriptionText);
               console.log(striptags(descriptionText));
-              console.log("descriptionText:", descriptionText); //descriptionText is for text from editor
+              console.log("descriptionText:", descriptionText);
             }}
           />
 
