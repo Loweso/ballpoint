@@ -200,7 +200,6 @@ const DashboardMenu = () => {
               router.push("/user");
             }}
           >
-            {" "}
             <Ionicons name="person-circle-outline" size={35} />
           </TouchableOpacity>
         </View>
