@@ -129,6 +129,11 @@ export default function User() {
           cancelText="Cancel"
           classnameConfirm="bg-tertiary-buttonRed"
           classnameCancel="bg-secondary-buttonGrey"
+          onConfirm={() => {
+            console.log("Confirmed Logout");
+            setIsConfirmationVisible(false);
+            router.push("/(auth)/login");
+          }}
         />
       </View>
     </SafeAreaView>

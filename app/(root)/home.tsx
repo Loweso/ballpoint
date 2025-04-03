@@ -53,20 +53,15 @@ export default function Home() {
 
   const filteredNotes = useMemo(() => {
     return notes.filter((item) => {
-      console.log("Filters applied here:", selectedCategories, dateRange);
       const categoryMatch =
         selectedCategories.length === 0 ||
         item.categories.some((cat) => selectedCategories.includes(cat.label));
-
-      console.log("categoryMarch:", categoryMatch);
 
       const dateMatch =
         (!dateRange.startDate ||
           new Date(item.date) >= new Date(dateRange.startDate)) &&
         (!dateRange.endDate ||
           new Date(item.date) <= new Date(dateRange.endDate));
-
-      console.log("dateMarch:", dateMatch);
 
       return categoryMatch && dateMatch;
     });
@@ -117,9 +112,34 @@ export default function Home() {
     useSelector((state: RootState) => state.sort),
   ]);
 
+  const searchQuery = useSelector((state: RootState) => state.search.query);
+
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    const fetchSearchResults = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`,
+          {
+            params: { search: searchQuery }, // Pass the search query as a parameter
+          }
+        );
+        setNotes(response.data); // Update notes with search results
+      } catch (err) {
+        console.error("Error fetching search results:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (searchQuery) {
+      fetchSearchResults(); // Fetch filtered notes if searchQuery is not empty
+    } else {
+      fetchNotes(); // Fetch all notes if searchQuery is empty
+    }
+
+    fetchSearchResults();
+  }, [searchQuery]);
 
   const fetchNotes = async () => {
     try {

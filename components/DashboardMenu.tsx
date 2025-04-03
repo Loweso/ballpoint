@@ -32,6 +32,7 @@ import {
   clearFilters,
 } from "@/slices/filterSlice";
 import { setSortType, setSortOrder, clearSort } from "@/slices/sortSlice";
+import { setSearchQuery } from "@/slices/searchSlice";
 import { RootState } from "@/lib/redux/store";
 
 interface Category {
@@ -199,6 +200,8 @@ const DashboardMenu = () => {
     setPressedSortOrder(null);
   };
 
+  const query = useSelector((state: RootState) => state.search.query);
+
   return (
     <View className="top-0 flex w-screen bg-primary-white">
       <View className="absolute top-0">
@@ -235,6 +238,9 @@ const DashboardMenu = () => {
               className="flex h-full w-full text-lg bg-transparent rounded-xl pr-8"
               placeholder="Search here..."
               placeholderTextColor="gray"
+              value={query}
+              onChangeText={(text) => dispatch(setSearchQuery(text))} // Update Redux state
+              returnKeyType="search"
             />
           </View>
           <TouchableOpacity

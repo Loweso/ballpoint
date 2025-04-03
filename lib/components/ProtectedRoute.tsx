@@ -12,7 +12,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const navigationState = useRootNavigationState();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, loading, accessToken } = useAppSelector(
+    (state) => state.auth
+  );
 
   // Check auth status on mount
   useEffect(() => {
@@ -28,7 +30,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       // Redirect to login if not authenticated and trying to access protected route
       router.replace("/(auth)/login");
     } else if (isAuthenticated && inAuthGroup) {
-      console.log(isAuthenticated, inAuthGroup);
+      console.log(isAuthenticated, inAuthGroup, accessToken);
       // Redirect to home if authenticated and trying to access auth routes
       router.replace("/(root)/home");
     }
@@ -50,7 +52,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         // Navigate to login
         router.replace("/(auth)/login");
       }
-    }, 14 * 60 * 1000); // Set to 30 seconds for testing
+    }, 60 * 1000); // Set to 30 seconds for testing
 
     return () => clearInterval(refreshInterval);
   }, [isAuthenticated, dispatch, segments]);
