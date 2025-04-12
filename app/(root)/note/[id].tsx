@@ -26,6 +26,7 @@ import {
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
+import { Alert } from "react-native";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -44,6 +45,44 @@ const Note = ({ text }: any) => {
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
+  };
+
+  const saveNote = async () => {
+    if (!title.trim() && !noteContent.trim()) {
+      Alert.alert(
+        "Empty Note",
+        "Please enter a title or some content before saving."
+      );
+      return;
+    }
+
+    const isNewNote = id === "NEW_NOTE";
+    const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
+
+    try {
+      const method = isNewNote ? "post" : "put";
+      const url = isNewNote
+        ? `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`
+        : `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`;
+
+      const response = await axios[method](url, {
+        title,
+        notesContent: noteContent,
+        categories: [],
+        date: today,
+      });
+
+      console.log("Sending data:", response);
+
+      Alert.alert("Success", `Note ${isNewNote ? "created" : "updated"}!`);
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Backend error response:", error.response.data);
+      } else {
+        console.error("Unexpected error:", error.message);
+      }
+      Alert.alert("Error", "Something went wrong while saving.");
+    }
   };
 
   const handlePickDocument = async () => {
@@ -95,7 +134,9 @@ const Note = ({ text }: any) => {
   const enableEditing = () => {
     setIsEditing(true);
   };
+
   const disableEditing = () => {
+    saveNote();
     setIsEditing(false);
     titleInputRef.current?.blur();
   };
@@ -151,7 +192,14 @@ const Note = ({ text }: any) => {
           </TouchableOpacity>
 
           {isEditing && (
-            <TouchableOpacity onPress={disableEditing}>
+            <TouchableOpacity
+              onPress={async () => {
+                await saveNote();
+                setIsEditing(false);
+                titleInputRef.current?.blur();
+                console.log(`${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`);
+              }}
+            >
               <Text>Done</Text>
             </TouchableOpacity>
           )}
