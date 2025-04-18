@@ -1,7 +1,15 @@
-import React from "react";
-import { Modal, View, Text, TouchableOpacity, TextInput } from "react-native";
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import axios from "axios";
 
 interface CreateNewNoteModalProps {
   isVisible: boolean;
@@ -12,13 +20,46 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
   isVisible,
   setIsVisible,
 }) => {
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+
   const closeModal = () => {
     setIsVisible(false);
-    console.log(isVisible);
   };
-  const router = useRouter();
 
-  const noteID = "NEW_NOTE";
+  const createNote = async () => {
+    const today = new Date().toISOString().split("T")[0];
+    const sanitizedTitle = title.trim() || "Untitled Note";
+
+    try {
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`,
+        {
+          title: sanitizedTitle,
+          notesContent: "",
+          categories: [],
+          date: today,
+        }
+      );
+      console.log("Create Note Response:", response.data);
+
+      const newNoteID = response.data.noteID;
+
+      if (newNoteID) {
+        setIsVisible(false);
+        router.push(`/note/${newNoteID}`);
+      } else {
+        throw new Error("No note ID returned.");
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Backend response error:", error.response.data);
+      } else {
+        console.error("Error creating note:", error.message);
+      }
+      Alert.alert("Error", "Could not create note.");
+    }
+  };
 
   return (
     <Modal
@@ -40,17 +81,16 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
           </View>
           <View className="flex flex-row w-full mt-4 text-lg bg-white rounded-xl">
             <TextInput
-              className=" h-full w-full text-lg bg-transparent border-b overflow-hidden"
+              className="h-full w-full text-lg bg-transparent border-b overflow-hidden"
               placeholder="Enter note title..."
               placeholderTextColor="gray"
+              value={title}
+              onChangeText={setTitle}
             />
           </View>
           <TouchableOpacity
-            onPress={() => {
-              router.push(`/note/${noteID}` as any);
-              setIsVisible(false);
-            }}
-            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 "
+            onPress={createNote}
+            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3"
           >
             <Text className="text-white">Create New Note</Text>
           </TouchableOpacity>

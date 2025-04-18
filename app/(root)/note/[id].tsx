@@ -48,33 +48,21 @@ const Note = ({ text }: any) => {
   };
 
   const saveNote = async () => {
-    if (!title.trim() && !noteContent.trim()) {
-      Alert.alert(
-        "Empty Note",
-        "Please enter a title or some content before saving."
-      );
-      return;
-    }
-
-    const isNewNote = id === "NEW_NOTE";
     const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
-
+    const sanitizedTitle = title.trim() || "Untitled Note";
+  
     try {
-      const method = isNewNote ? "post" : "put";
-      const url = isNewNote
-        ? `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`
-        : `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`;
-
-      const response = await axios[method](url, {
-        title,
+      const url = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`;
+  
+      const response = await axios.put(url, {
+        title: sanitizedTitle,
         notesContent: noteContent,
         categories: [],
         date: today,
       });
-
+  
       console.log("Sending data:", response);
-
-      Alert.alert("Success", `Note ${isNewNote ? "created" : "updated"}!`);
+      Alert.alert("Success", "Note updated!");
     } catch (error: any) {
       if (error.response) {
         console.error("Backend error response:", error.response.data);
@@ -84,6 +72,7 @@ const Note = ({ text }: any) => {
       Alert.alert("Error", "Something went wrong while saving.");
     }
   };
+  
 
   const handlePickDocument = async () => {
     console.log("I'm here!");
@@ -142,14 +131,21 @@ const Note = ({ text }: any) => {
   };
 
   useEffect(() => {
-    const foundNote = noteData.find((note) => note.noteID === id);
+    const fetchNote = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`
+        );
+        const note = response.data;
+        setTitle(note.title || "Untitled Note");
+        setNoteContent(note.notesContent || "");
+      } catch (error) {
+        console.error("Error fetching note:", error);
+      }
+    };
 
-    if (foundNote) {
-      setTitle(foundNote.title);
-      setNoteContent(foundNote.notesContent);
-    } else {
-      setTitle("Untitled Note");
-      setNoteContent("");
+    if (id) {
+      fetchNote();
     }
   }, [id]);
 
