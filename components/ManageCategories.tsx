@@ -8,13 +8,19 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect, useRef } from "react";
-import NamingModal from "./NamingModal";
+import CategoryNamingModal from "./CategoryNamingModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 interface ManageCategoriesProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
   initialMode?: "view" | "edit";
+}
+
+interface Category {
+  id: number;
+  label: string;
+  color: string;
 }
 
 export const ManageCategories: React.FC<ManageCategoriesProps> = ({
@@ -31,24 +37,20 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     setIsVisible(false);
   };
 
-  const [categories, setCategories] = useState([
-    "Category Name 1",
-    "Category Name 2",
-    "Category Name 3",
-    "Category Name 4",
-  ]);
-
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selected, setSelected] = useState(
     Array(categories.length).fill(false)
   );
   const [renameModalVisible, setRenameModalVisible] = useState(false);
-  const [isNamingModalVisible, setIsNamingModalVisible] = useState(false);
+  const [isCategoryNamingModalVisible, setIsCategoryNamingModalVisible] = useState(false);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<
     number | null
   >(null);
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
+  const [isSelectingForDelete, setIsSelectingForDelete] = useState(false);
+  const [categoryColor, setCategoryColor] = useState("#FF0000");
 
   const toggleSelection = (index: number) => {
     const newSelected = [...selected];
@@ -58,35 +60,106 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
 
   const handleRenameCategory = (index: number) => {
     setCurrentCategoryIndex(index);
+    setCategoryColor(categories[index].color);
     setRenameModalVisible(true);
   };
 
-  const handleRenameSubmit = (newName: string) => {
+  const handleRenameSubmit = async (newName: string, color: string) => {
     if (currentCategoryIndex !== null) {
-      const updatedCategories = [...categories];
-      updatedCategories[currentCategoryIndex] = newName;
-      setCategories(updatedCategories);
-      setRenameModalVisible(false);
+      const categoryToUpdate = categories[currentCategoryIndex];
+      try {
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/update/${categoryToUpdate.id}/`, // Use actual backend URL
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              label: newName,
+              color: color,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const updatedCategories = [...categories];
+          updatedCategories[currentCategoryIndex] = {
+            ...updatedCategories[currentCategoryIndex],
+            label: newName,
+            color: color,
+          };
+          setCategories(updatedCategories);
+          setRenameModalVisible(false);
+        } else {
+          console.error("Failed to update category");
+        }
+      } catch (error) {
+        console.error("Error updating category:", error);
+      }
     }
   };
 
-  // Open the naming modal
-  const openNamingModal = () => {
+  const openCategoryNamingModal = () => {
     console.log("Opening naming modal..."); // Debug log
-    setIsNamingModalVisible(true);
+    setIsCategoryNamingModalVisible(true);
   };
 
-  // Close the naming modal
-  const closeNamingModal = () => {
+  const closeCategoryNamingModal = () => {
     console.log("Closing naming modal..."); // Debug log
-    setIsNamingModalVisible(false);
+    setIsCategoryNamingModalVisible(false);
   };
 
-  const handleAddCategory = (newName: string) => {
-    if (newName.trim()) {
-      setCategories((prev) => [...prev, newName]);
+  const handleAddCategory = async (newName: string) => {
+    const sanitizedName = newName.trim();
+
+    if (!sanitizedName) {
+      console.log("Category name cannot be empty or just spaces.");
+      return;
     }
-    closeNamingModal();
+
+    try {
+      console.log("Sending request to create a new category...");
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/create/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            label: sanitizedName,
+            color: categoryColor, // Send selected color
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `Category creation failed: ${response.status} - ${response.statusText}`
+        );
+        console.error("Details:", errorText);
+        throw new Error("Failed to create category.");
+      }
+
+      const responseData = await response.json();
+      console.log("Category created successfully:", responseData);
+
+      setCategories((prev) => [
+        ...prev,
+        {
+          id: responseData.id,
+          label: responseData.label,
+          color: responseData.color || "#FFB300",
+        },
+      ]);
+    } catch (error: any) {
+      console.error("Error during category creation:", error.message || error);
+    } finally {
+      closeCategoryNamingModal();
+    }
   };
 
   const handleDeletePress = (index: number) => {
@@ -113,6 +186,25 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }).start();
+
+      const fetchCategories = async () => {
+        try {
+          const response = await fetch(
+            `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/`
+          );
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch categories: ${response.statusText}`
+            );
+          }
+          const categories = await response.json();
+          setCategories(categories);
+        } catch (error) {
+          console.error("Failed to fetch categories:", error);
+        }
+      };
+
+      fetchCategories();
     } else {
       Animated.timing(slideAnim, {
         toValue: screenHeight + 300,
@@ -150,7 +242,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         >
           <View className="flex flex-row w-full absolute top-[10px] justify-end">
             {mode === "edit" && (
-              <TouchableOpacity className="pr-2" onPress={openNamingModal}>
+              <TouchableOpacity className="pr-2" onPress={openCategoryNamingModal}>
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
@@ -158,11 +250,12 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
               <TouchableOpacity
                 className="pr-4"
                 onPress={() => {
-                  const selectedIndexes = selected
-                    .map((isSelected, index) => (isSelected ? index : null))
-                    .filter((index) => index !== null);
-                  if (selectedIndexes.length > 0) {
-                    handleDeletePress(selectedIndexes[0]!);
+                  // Toggle selection mode for deletion
+                  setIsSelectingForDelete((prev) => !prev);
+
+                  // Clear previous selections if exiting delete mode
+                  if (isSelectingForDelete) {
+                    setSelected(Array(categories.length).fill(false));
                   }
                 }}
               >
@@ -187,7 +280,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
                 key={index}
                 className="flex-row justify-right items-center top-[10px]"
               >
-                {mode === "edit" && (
+                {mode === "edit" && isSelectingForDelete && (
                   <TouchableOpacity onPress={() => toggleSelection(index)}>
                     <Ionicons
                       name={selected[index] ? "ellipse" : "ellipse-outline"}
@@ -197,12 +290,48 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
                   </TouchableOpacity>
                 )}
 
-                {mode === "edit" && (
-                  <Text className="py-[2px] pl-[10px] text-lg">{category}</Text>
+                {mode === "view" && (
+                  <View
+                    className="pl-[10px]"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: 1,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: category.color,
+                        marginRight: 10,
+                        borderRadius: 5,
+                      }}
+                    />
+                    <Text className="text-lg">{category.label}</Text>
+                  </View>
                 )}
 
-                {mode === "view" && (
-                  <Text className="py-[2px] pl-[32px] text-lg">{category}</Text>
+                {mode === "edit" && (
+                  <View
+                    className="pl-[10px]"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: 1,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: category.color,
+                        marginRight: 10,
+                        borderRadius: 5,
+                      }}
+                    />
+                    <Text className="text-lg">{category.label}</Text>
+                  </View>
                 )}
 
                 {mode === "edit" && (
@@ -218,21 +347,25 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           </View>
 
           {/* Naming Modal */}
-          <NamingModal
+          <CategoryNamingModal
             visible={renameModalVisible}
             onClose={() => setRenameModalVisible(false)}
             onCancel={() => setRenameModalVisible(false)}
             onProceed={handleRenameSubmit}
             placeholder="Rename category"
+            categoryColor={categoryColor}
+            setCategoryColor={setCategoryColor}
           />
 
           {/* Naming Modal */}
-          <NamingModal
-            visible={isNamingModalVisible}
-            onClose={closeNamingModal}
-            onCancel={closeNamingModal}
+          <CategoryNamingModal
+            visible={isCategoryNamingModalVisible}
+            onClose={closeCategoryNamingModal}
+            onCancel={closeCategoryNamingModal}
             onProceed={handleAddCategory}
             placeholder="Enter new category name"
+            categoryColor={categoryColor}
+            setCategoryColor={setCategoryColor}
           />
 
           {/* Confirmation Modal */}
