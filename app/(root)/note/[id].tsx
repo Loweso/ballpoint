@@ -27,6 +27,7 @@ import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
 import { Alert } from "react-native";
+import HighlightModal from "@/components/HighlightModal";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -38,6 +39,7 @@ const Note = ({ text }: any) => {
   const [noteContent, setNoteContent] = useState(text);
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [extractedText, setExtractedText] = useState(text);
+  const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
 
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
@@ -50,17 +52,17 @@ const Note = ({ text }: any) => {
   const saveNote = async () => {
     const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
     const sanitizedTitle = title.trim() || "Untitled Note";
-  
+
     try {
       const url = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`;
-  
+
       const response = await axios.put(url, {
         title: sanitizedTitle,
         notesContent: noteContent,
         categories: [],
         date: today,
       });
-  
+
       console.log("Sending data:", response);
       Alert.alert("Success", "Note updated!");
     } catch (error: any) {
@@ -72,7 +74,6 @@ const Note = ({ text }: any) => {
       Alert.alert("Error", "Something went wrong while saving.");
     }
   };
-  
 
   const handlePickDocument = async () => {
     console.log("I'm here!");
@@ -170,8 +171,12 @@ const Note = ({ text }: any) => {
 
         <View className="flex-row flex gap-x-3 justify-between items-center">
           {isEditing && (
-            <TouchableOpacity onPress={handlePickDocument}>
-              <Text>Extract</Text>
+            <TouchableOpacity
+              className="flex flex-row items-center px-3 py-1 bg-tertiary-buttonGreen rounded-2xl"
+              onPress={handlePickDocument}
+            >
+              <Text className="text-white">Extract</Text>
+              <Ionicons name="document-outline" size={20} color="white" />
             </TouchableOpacity>
           )}
 
@@ -282,6 +287,10 @@ const Note = ({ text }: any) => {
       <NoteSettings
         isVisible={isNoteSettingsVisible}
         setIsVisible={setIsNoteSettingsVisible}
+      />
+      <HighlightModal
+        isVisible={isHighlightModalOpen}
+        setIsVisible={setIsHighlightModalOpen}
       />
     </SafeAreaView>
   );
