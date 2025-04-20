@@ -1,10 +1,10 @@
-import { TouchableOpacity, View, Text } from "react-native";
+import { TouchableOpacity, View, Text, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import React from "react";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { logoutUser } from "@/lib/redux/slices/authSlice";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
@@ -14,8 +14,18 @@ export default function User() {
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
   const router = useRouter();
 
+  const dispatch = useAppDispatch();
+
   const handleUsernameChange = (text: string) => {
     setUsername(text);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   return (
@@ -114,7 +124,6 @@ export default function User() {
           <TouchableOpacity
             onPress={() => {
               setIsConfirmationVisible(true);
-              console.log("Logout button Pressed");
             }}
           >
             <Text className="text-xl text-tertiary-textRed">Log out</Text>
@@ -130,7 +139,7 @@ export default function User() {
           classnameConfirm="bg-tertiary-buttonRed"
           classnameCancel="bg-secondary-buttonGrey"
           onConfirm={() => {
-            console.log("Confirmed Logout");
+            handleLogout();
             setIsConfirmationVisible(false);
             router.push("/(auth)/login");
           }}

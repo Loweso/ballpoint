@@ -50,17 +50,17 @@ const Note = ({ text }: any) => {
   const saveNote = async () => {
     const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
     const sanitizedTitle = title.trim() || "Untitled Note";
-  
+
     try {
       const url = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`;
-  
+
       const response = await axios.put(url, {
         title: sanitizedTitle,
         notesContent: noteContent,
         categories: [],
         date: today,
       });
-  
+
       console.log("Sending data:", response);
       Alert.alert("Success", "Note updated!");
     } catch (error: any) {
@@ -72,7 +72,6 @@ const Note = ({ text }: any) => {
       Alert.alert("Error", "Something went wrong while saving.");
     }
   };
-  
 
   const handlePickDocument = async () => {
     console.log("I'm here!");
@@ -138,6 +137,7 @@ const Note = ({ text }: any) => {
         );
         const note = response.data;
         setTitle(note.title || "Untitled Note");
+        console.log(note.notesContent);
         setNoteContent(note.notesContent || "");
       } catch (error) {
         console.error("Error fetching note:", error);
