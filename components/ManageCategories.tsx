@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect, useRef } from "react";
-import NamingModal from "./NamingModal";
+import CategoryNamingModal from "./CategoryNamingModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 interface ManageCategoriesProps {
@@ -42,7 +42,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     Array(categories.length).fill(false)
   );
   const [renameModalVisible, setRenameModalVisible] = useState(false);
-  const [isNamingModalVisible, setIsNamingModalVisible] = useState(false);
+  const [isCategoryNamingModalVisible, setIsCategoryNamingModalVisible] = useState(false);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<
     number | null
   >(null);
@@ -100,15 +100,14 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     }
   };
 
-  const openNamingModal = () => {
+  const openCategoryNamingModal = () => {
     console.log("Opening naming modal..."); // Debug log
-    setIsNamingModalVisible(true);
+    setIsCategoryNamingModalVisible(true);
   };
 
-  // Close the naming modal
-  const closeNamingModal = () => {
+  const closeCategoryNamingModal = () => {
     console.log("Closing naming modal..."); // Debug log
-    setIsNamingModalVisible(false);
+    setIsCategoryNamingModalVisible(false);
   };
 
   const handleAddCategory = async (newName: string) => {
@@ -159,7 +158,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     } catch (error: any) {
       console.error("Error during category creation:", error.message || error);
     } finally {
-      closeNamingModal();
+      closeCategoryNamingModal();
     }
   };
 
@@ -243,7 +242,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         >
           <View className="flex flex-row w-full absolute top-[10px] justify-end">
             {mode === "edit" && (
-              <TouchableOpacity className="pr-2" onPress={openNamingModal}>
+              <TouchableOpacity className="pr-2" onPress={openCategoryNamingModal}>
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
@@ -348,7 +347,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           </View>
 
           {/* Naming Modal */}
-          <NamingModal
+          <CategoryNamingModal
             visible={renameModalVisible}
             onClose={() => setRenameModalVisible(false)}
             onCancel={() => setRenameModalVisible(false)}
@@ -359,10 +358,10 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           />
 
           {/* Naming Modal */}
-          <NamingModal
-            visible={isNamingModalVisible}
-            onClose={closeNamingModal}
-            onCancel={closeNamingModal}
+          <CategoryNamingModal
+            visible={isCategoryNamingModalVisible}
+            onClose={closeCategoryNamingModal}
+            onCancel={closeCategoryNamingModal}
             onProceed={handleAddCategory}
             placeholder="Enter new category name"
             categoryColor={categoryColor}
