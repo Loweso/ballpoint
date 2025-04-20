@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CircleButton from "@/components/CircleButton";
@@ -18,7 +18,7 @@ import NoteComponent from "@/components/NoteComponent";
 import { EventProvider } from "react-native-outside-press";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
-import { useMemo } from "react";
+import striptags from "striptags";
 
 DropDownPicker.setMode("BADGE");
 
@@ -124,6 +124,7 @@ export default function Home() {
             params: { search: searchQuery }, // Pass the search query as a parameter
           }
         );
+        console.log(response.data); // Log the response data for debugging
         setNotes(response.data); // Update notes with search results
       } catch (err) {
         console.error("Error fetching search results:", err);
@@ -200,7 +201,7 @@ export default function Home() {
                   title={item.title}
                   noteID={item.noteID}
                   categories={item.categories}
-                  notesContent={item.notesContent}
+                  notesContent={striptags(item.notesContent)}
                   date={new Date(item.date)}
                 />
               </View>

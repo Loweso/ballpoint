@@ -139,6 +139,7 @@ const Note = ({ text }: any) => {
         );
         const note = response.data;
         setTitle(note.title || "Untitled Note");
+        console.log(note.notesContent);
         setNoteContent(note.notesContent || "");
       } catch (error) {
         console.error("Error fetching note:", error);
