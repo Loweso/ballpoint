@@ -31,7 +31,7 @@ interface Note {
 }
 
 export default function Home() {
-  const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
+  const [isDashboardSettingsVisible, setIsDashboardSettingsVisible] =
     useState(false);
   const [isCreateNewNoteModalVisible, setIsCreateNewNoteModalVisible] =
     useState(false);
@@ -167,28 +167,6 @@ export default function Home() {
         <DashboardMenu />
 
         <View className="flex flex-col w-full pt-32 px-4">
-          {/* Buttons to Trigger Modals */}
-          <View className="flex-row justify-around py-4">
-            <TouchableOpacity
-              onPress={() => setIsNamingModalVisible(true)}
-              className="bg-yellow p-3 rounded-full shadow-md"
-            >
-              <Text>Open Naming Modal</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setIsPolishMenuModalVisible(true)}
-              className="bg-yellow p-3 rounded-full shadow-md"
-            >
-              <Text>Open Polish Menu Modal</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setIsQueryMenuModalVisible(true)}
-              className="bg-yellow p-3 rounded-full shadow-md"
-            >
-              <Text>Open Query Menu Modal</Text>
-            </TouchableOpacity>
-          </View>
-
           <Text className="text-gray-500">Ready to Create?</Text>
           <Text className="my-3 text-5xl font-bold">Your Notes</Text>
           <FlatList
@@ -203,13 +181,32 @@ export default function Home() {
                   categories={item.categories}
                   notesContent={striptags(item.notesContent)}
                   date={new Date(item.date)}
+                  onDelete={(deletedNoteID) => {
+                    setNotes((prevNotes) =>
+                      prevNotes.filter((n) => n.noteID !== deletedNoteID)
+                    );
+                  }}
                 />
               </View>
             )}
           />
         </View>
 
-        {/* Modals */}
+        <CreateNewNoteModal
+          isVisible={isCreateNewNoteModalVisible}
+          setIsVisible={setIsCreateNewNoteModalVisible}
+        />
+
+        <DashboardSettings
+          isVisible={isDashboardSettingsVisible}
+          setIsVisible={setIsDashboardSettingsVisible}
+        />
+      </EventProvider>
+    </SafeAreaView>
+  );
+}
+
+/*  
         <NamingModal
           visible={isNamingModalVisible}
           onClose={() => setIsNamingModalVisible(false)}
@@ -235,18 +232,27 @@ export default function Home() {
             console.log("Complete Highlighted Text");
             setIsPolishMenuModalVisible(false);
           }}
-        />
+        /> */
 
-        <CreateNewNoteModal
-          isVisible={isCreateNewNoteModalVisible}
-          setIsVisible={setIsCreateNewNoteModalVisible}
-        />
-
-        <DashboardSettings
-          isVisible={isDashboardSettingsVisible}
-          setIsVisible={setIsDashBoardSettingsVisible}
-        />
-      </EventProvider>
-    </SafeAreaView>
-  );
-}
+/* 
+          <View className="flex-row justify-around py-4">
+            <TouchableOpacity
+              onPress={() => setIsNamingModalVisible(true)}
+              className="bg-yellow p-3 rounded-full shadow-md"
+            >
+              <Text>Open Naming Modal</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setIsPolishMenuModalVisible(true)}
+              className="bg-yellow p-3 rounded-full shadow-md"
+            >
+              <Text>Open Polish Menu Modal</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setIsQueryMenuModalVisible(true)}
+              className="bg-yellow p-3 rounded-full shadow-md"
+            >
+              <Text>Open Query Menu Modal</Text>
+            </TouchableOpacity>
+          </View> 
+ */
