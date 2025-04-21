@@ -18,7 +18,7 @@ interface ManageCategoriesProps {
 }
 
 interface Category {
-  id: number;
+  id: string;
   label: string;
   color: string;
 }
@@ -42,7 +42,8 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     Array(categories.length).fill(false)
   );
   const [renameModalVisible, setRenameModalVisible] = useState(false);
-  const [isCategoryNamingModalVisible, setIsCategoryNamingModalVisible] = useState(false);
+  const [isCategoryNamingModalVisible, setIsCategoryNamingModalVisible] =
+    useState(false);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<
     number | null
   >(null);
@@ -162,19 +163,51 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     }
   };
 
-  const handleDeletePress = (index: number) => {
-    setCategoryToDelete(index);
-    setConfirmModalVisible(true);
+  const handleDeletePress = () => {
+    if (selected.some((value) => value)) {
+      setConfirmModalVisible(true);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    if (categoryToDelete !== null) {
+  const handleConfirmDelete = async () => {
+    const indicesToDelete = selected
+      .map((isSelected, index) => (isSelected ? index : -1))
+      .filter((index) => index !== -1);
+
+    if (indicesToDelete.length === 0) return;
+
+    try {
+      // Use Promise.all to send multiple DELETE requests
+      await Promise.all(
+        indicesToDelete.map(async (index) => {
+          const category = categories[index];
+          const response = await fetch(
+            `${
+              process.env.EXPO_PUBLIC_DEVICE_IPV4
+            }/categories/delete/${encodeURIComponent(category.id)}/`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete category: ${category.label}`);
+          }
+
+          console.log(`Successfully deleted category: ${category.label}`);
+        })
+      );
+
+      // Remove deleted categories from the state
       const updatedCategories = categories.filter(
-        (_, i) => i !== categoryToDelete
+        (_, index) => !selected[index]
       );
       setCategories(updatedCategories);
-      setCategoryToDelete(null);
+      setSelected(Array(updatedCategories.length).fill(false)); // Reset selection
+      setIsSelectingForDelete(false);
       setConfirmModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting categories:", error);
     }
   };
 
@@ -199,6 +232,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           }
           const categories = await response.json();
           setCategories(categories);
+          setSelected(Array(categories.length).fill(false));
         } catch (error) {
           console.error("Failed to fetch categories:", error);
         }
@@ -242,25 +276,36 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         >
           <View className="flex flex-row w-full absolute top-[10px] justify-end">
             {mode === "edit" && (
-              <TouchableOpacity className="pr-2" onPress={openCategoryNamingModal}>
+              <TouchableOpacity
+                className="pr-2"
+                onPress={openCategoryNamingModal}
+              >
                 <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
               </TouchableOpacity>
             )}
             {mode === "edit" && (
-              <TouchableOpacity
-                className="pr-4"
-                onPress={() => {
-                  // Toggle selection mode for deletion
-                  setIsSelectingForDelete((prev) => !prev);
-
-                  // Clear previous selections if exiting delete mode
-                  if (isSelectingForDelete) {
-                    setSelected(Array(categories.length).fill(false));
-                  }
-                }}
-              >
-                <Ionicons name="trash-outline" color="#E31E1E" size={28} />
-              </TouchableOpacity>
+              <>
+                {!isSelectingForDelete ? (
+                  // First trash icon to enter selection mode
+                  <TouchableOpacity
+                    className="pr-4"
+                    onPress={() => {
+                      setIsSelectingForDelete(true);
+                      setSelected(Array(categories.length).fill(false)); // Reset selection
+                    }}
+                  >
+                    <Ionicons name="trash-outline" color="#E31E1E" size={28} />
+                  </TouchableOpacity>
+                ) : (
+                  // Second trash icon to confirm deletion
+                  <TouchableOpacity
+                    className="pr-4"
+                    onPress={handleDeletePress}
+                  >
+                    <Ionicons name="trash" color="#E31E1E" size={28} />
+                  </TouchableOpacity>
+                )}
+              </>
             )}
             {mode === "view" && (
               <TouchableOpacity className="pl-[12px]" onPress={closeModal}>

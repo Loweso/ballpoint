@@ -26,6 +26,7 @@ import {
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
+import HighlightModal from "@/components/HighlightModal";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -37,6 +38,7 @@ const Note = ({ text }: any) => {
   const [noteContent, setNoteContent] = useState(text);
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [extractedText, setExtractedText] = useState(text);
+  const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
 
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
@@ -175,8 +177,12 @@ const Note = ({ text }: any) => {
 
         <View className="flex-row flex gap-x-3 justify-between items-center">
           {isEditing && (
-            <TouchableOpacity onPress={handlePickDocument}>
-              <Text>Extract</Text>
+            <TouchableOpacity
+              className="flex flex-row items-center px-3 py-1 bg-tertiary-buttonGreen rounded-2xl"
+              onPress={handlePickDocument}
+            >
+              <Text className="text-white">Extract</Text>
+              <Ionicons name="document-outline" size={20} color="white" />
             </TouchableOpacity>
           )}
 
@@ -288,6 +294,10 @@ const Note = ({ text }: any) => {
         isVisible={isNoteSettingsVisible}
         setIsVisible={setIsNoteSettingsVisible}
         onDelete={deleteNote}
+      />
+      <HighlightModal
+        isVisible={isHighlightModalOpen}
+        setIsVisible={setIsHighlightModalOpen}
       />
     </SafeAreaView>
   );
