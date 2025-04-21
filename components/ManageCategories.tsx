@@ -50,7 +50,6 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     number | null
   >(null);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
   const [isSelectingForDelete, setIsSelectingForDelete] = useState(false);
   const [categoryColor, setCategoryColor] = useState("#FF0000");
 
