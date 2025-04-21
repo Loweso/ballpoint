@@ -6,11 +6,14 @@ import {
   View,
   Modal,
   TextInput,
+  Alert,
 } from "react-native";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
+import NoteSettingsConfirmationModal from "./NoteSettingsConfirmationModal";
+import axios from "axios";
 
 type NoteComponentProps = {
   title: string;
@@ -18,6 +21,7 @@ type NoteComponentProps = {
   categories: { label: string; color?: string }[];
   notesContent: string;
   date: Date;
+  onDelete: (noteID: string) => void;
 };
 
 const NoteComponent: React.FC<NoteComponentProps> = ({
@@ -26,9 +30,12 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
   categories,
   notesContent,
   date,
+  onDelete,
 }) => {
   const router = useRouter();
 
+  const [noteSettingsDeleteVisible, setNoteSettingsDeleteVisible] =
+    useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
@@ -57,6 +64,20 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
     setIsRenameModalVisible(false);
   };
 
+  const deleteNote = async () => {
+    try {
+      const response = await axios.delete(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${noteID}/`
+      );
+      console.log("Note deleted:", response.data);
+      Alert.alert("Success", "Note deleted!");
+      onDelete(noteID);
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      Alert.alert("Error", "Something went wrong while deleting.");
+    }
+  };
+
   return (
     <Pressable
       className="w-full bg-primary-white rounded-2xl border-2 border-slate-400 p-4"
@@ -76,7 +97,9 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
           >
             <TouchableOpacity
               className="flex flex-row items-center justify-between w-full"
-              onPress={() => console.log("Delete Pressed")}
+              onPress={() => {
+                setNoteSettingsDeleteVisible(true);
+              }}
             >
               <Text className="text-tertiary-textRed">Delete</Text>
               <Feather name="trash-2" size={20} color="red" />
@@ -164,6 +187,13 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
           </View>
         </View>
       </Modal>
+
+      <NoteSettingsConfirmationModal
+        isVisible={noteSettingsDeleteVisible}
+        setIsVisible={setNoteSettingsDeleteVisible}
+        onConfirm={deleteNote}
+        noteName={title}
+      />
     </Pressable>
   );
 };

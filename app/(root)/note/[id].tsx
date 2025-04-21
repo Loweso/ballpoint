@@ -7,13 +7,13 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument, File } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
-import { noteData } from "@/assets/noteData";
 import CircleButton from "@/components/CircleButton";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import HTMLView from "react-native-htmlview";
@@ -29,7 +29,6 @@ import {
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
-import { Alert } from "react-native";
 import HighlightModal from "@/components/HighlightModal";
 
 const Note = ({ text }: any) => {
@@ -128,6 +127,19 @@ const Note = ({ text }: any) => {
     }
   };
 
+  const deleteNote = async () => {
+    try {
+      const response = await axios.delete(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`
+      );
+      console.log("Note deleted:", response.data);
+      Alert.alert("Success", "Note deleted!");
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      Alert.alert("Error", "Something went wrong while deleting.");
+    }
+  };
+
   const content = <Ionicons name="pencil-outline" size={40} color="black" />;
 
   const AiModalOpenIcon = () => (
@@ -138,12 +150,6 @@ const Note = ({ text }: any) => {
     setIsEditing(true);
   };
 
-  const handleLongPress = (event) => {
-    const { pageX, pageY } = event.nativeEvent;
-    setHighlightPosition({ top: pageY, left: pageX });
-    setIsHighlightModalOpen(true);
-  };
-
   useEffect(() => {
     const fetchNote = async () => {
       try {
@@ -152,7 +158,6 @@ const Note = ({ text }: any) => {
         );
         const note = response.data;
         setTitle(note.title || "Untitled Note");
-        console.log(note.notesContent);
         setNoteContent(note.notesContent || "");
       } catch (error) {
         console.error("Error fetching note:", error);
@@ -309,6 +314,7 @@ const Note = ({ text }: any) => {
       <NoteSettings
         isVisible={isNoteSettingsVisible}
         setIsVisible={setIsNoteSettingsVisible}
+        onDelete={deleteNote}
       />
       <HighlightModal
         isVisible={isHighlightModalOpen}

@@ -4,15 +4,18 @@ import { ManageCategories } from "./ManageCategories";
 import NamingModal from "./NamingModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 import React, { useState, useRef } from "react";
+import { useRouter } from "expo-router";
 
 interface NoteSettingsModalProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
+  onDelete: () => Promise<void>;
 }
 
 export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
   isVisible,
   setIsVisible,
+  onDelete,
 }) => {
   const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
     useState(false);
@@ -21,6 +24,8 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
   const containerHeight = useRef(new Animated.Value(240)).current;
+
+  const router = useRouter();
 
   const closeModal = () => {
     Animated.timing(containerHeight, {
@@ -43,9 +48,9 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
     setRenameModalVisible(false);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("Category Deleted");
-    setConfirmModalVisible(false);
+  const confirmDelete = async () => {
+    await onDelete();
+    setIsVisible(false);
   };
 
   return (
@@ -81,14 +86,15 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
           {/* Action Buttons */}
           <View className="-mx-5">
             <View className="h-full w-full flex flex-row justify-center mt-4">
-              <TouchableOpacity onPress={() => console.log("Search in Note Pressed")}>
+              <TouchableOpacity
+                onPress={() => console.log("Search in Note Pressed")}
+              >
                 <View className="h-[110px] w-[75px] items-center bg-secondary-buttonGrey rounded-xl p-3">
                   <Ionicons name="search-outline" color="#080808" size={48} />
                   <Text className="text-center text-sm">Search in Note</Text>
                 </View>
               </TouchableOpacity>
 
-              
               <TouchableOpacity
                 className="ml-2"
                 onPress={() => toggleManageCategories("view")}
@@ -141,7 +147,6 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               onProceed={handleRenameSubmit}
               placeholder="Rename Note Title"
             />
-          
 
             {/* Confirmation Modal */}
             <ConfirmationModal
@@ -152,7 +157,10 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               cancelText="Cancel"
               classnameConfirm="bg-tertiary-buttonRed"
               classnameCancel="bg-secondary-buttonGrey"
-              onConfirm={handleConfirmDelete}
+              onConfirm={() => {
+                confirmDelete();
+                router.replace("/home");
+              }}
             />
           </View>
         </Animated.View>
