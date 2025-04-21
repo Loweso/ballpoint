@@ -490,11 +490,6 @@ const DashboardMenu = () => {
         isVisible={isDashboardSettingsVisible}
         setIsVisible={setIsDashBoardSettingsVisible}
       />
-
-      <HighlightModal
-        isVisible={isHighlightModalVisible}
-        setIsVisible={setIsHighlightModalVisible}
-      />
     </View>
   );
 };
