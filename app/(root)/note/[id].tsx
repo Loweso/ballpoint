@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
+  Pressable,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -16,6 +17,8 @@ import { noteData } from "@/assets/noteData";
 import CircleButton from "@/components/CircleButton";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import HTMLView from "react-native-htmlview";
+import RenderHTML from "react-native-render-html";
+import { useWindowDimensions } from "react-native";
 import striptags from "striptags";
 
 import {
@@ -40,10 +43,16 @@ const Note = ({ text }: any) => {
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [extractedText, setExtractedText] = useState(text);
   const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
+  const [highlightPosition, setHighlightPosition] = useState({
+    top: 0,
+    left: 0,
+  });
 
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
   const { id } = useLocalSearchParams();
+
+  const { width } = useWindowDimensions();
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -125,10 +134,16 @@ const Note = ({ text }: any) => {
     setIsEditing(true);
   };
 
-  const disableEditing = () => {
-    saveNote();
-    setIsEditing(false);
-    titleInputRef.current?.blur();
+  const handleLongPress = (event) => {
+    // Capture the long-press location
+    const { locationX, locationY } = event.nativeEvent;
+
+    setHighlightPosition({
+      top: locationY - 40,
+      left: locationX - 80,
+    });
+
+    setIsHighlightModalOpen(true);
   };
 
   useEffect(() => {
@@ -220,7 +235,6 @@ const Note = ({ text }: any) => {
         className="text-2xl mx-2 font-semibold"
         placeholder="Title"
         onChangeText={setTitle}
-        onPress={enableEditing}
         value={title}
       />
 
@@ -264,7 +278,6 @@ const Note = ({ text }: any) => {
       ) : (
         <TouchableWithoutFeedback
           onPress={() => {
-            enableEditing();
             setTimeout(() => {
               if (RichText.current) {
                 RichText.current.focusContentEditor(); // This forces the cursor to appear
@@ -274,7 +287,17 @@ const Note = ({ text }: any) => {
         >
           <View className="mx-3 mt-2">
             {noteContent ? (
-              <HTMLView value={noteContent} />
+              <Pressable onLongPress={handleLongPress} delayLongPress={300}>
+                <RenderHTML
+                  contentWidth={width}
+                  source={{ html: noteContent }}
+                  baseStyle={{
+                    fontSize: 16,
+                    color: "#000",
+                  }}
+                  defaultTextProps={{ selectable: true }}
+                />
+              </Pressable>
             ) : (
               <Text className="text-gray-600">Start Writing!</Text>
             )}
@@ -292,6 +315,7 @@ const Note = ({ text }: any) => {
       <HighlightModal
         isVisible={isHighlightModalOpen}
         setIsVisible={setIsHighlightModalOpen}
+        position={highlightPosition}
       />
     </SafeAreaView>
   );

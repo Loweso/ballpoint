@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Keyboard } from "react-native";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import QueryMenuModal from "./QueryMenuModal";
 import { useState } from "react";
@@ -8,11 +8,13 @@ import { useState } from "react";
 interface HighlightModalProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
+  position: { top: number; left: number };
 }
 
 export const HighlightModal: React.FC<HighlightModalProps> = ({
   isVisible,
   setIsVisible,
+  position,
 }) => {
   if (!isVisible) return null;
 
@@ -25,13 +27,18 @@ export const HighlightModal: React.FC<HighlightModalProps> = ({
   };
 
   return (
-    <View className="w-[92px] h-[36px] z-50 mx-10 bg-white rounded-2xl shadow-md items-center">
+    <View
+      className="w-[120px] h-[36px] z-100 mx-10 bg-white rounded-2xl shadow-md items-center"
+      style={{ top: position.top, left: position.left }}
+    >
       <View className="flex flex-row justify-content-center">
         <TouchableOpacity
           className="mx-1 mt-2"
-          onPress={() => console.log("Highlight text")}
+          onPress={() => {
+            console.log("Highlight text");
+          }}
         >
-          <FontAwesome6 name="highlighter" size={20} color="gray" />
+          <FontAwesome6 name="highlighter" size={22} color="gray" />
         </TouchableOpacity>
 
         <View className="w-[1%] h-[65%] m-1 mt-2 bg-[#D3D3D3] rounded" />
@@ -53,6 +60,17 @@ export const HighlightModal: React.FC<HighlightModalProps> = ({
             size={20}
             color="white"
           />
+        </TouchableOpacity>
+
+        <View className="w-[1%] h-[65%] m-1 mt-2 bg-[#D3D3D3] rounded" />
+
+        <TouchableOpacity
+          className="mx-1 mt-2"
+          onPress={() => {
+            closeModal();
+          }}
+        >
+          <Ionicons name="close-circle-outline" size={22} color="#bf5e5e" />
         </TouchableOpacity>
       </View>
 
