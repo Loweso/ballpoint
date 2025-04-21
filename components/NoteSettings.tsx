@@ -1,6 +1,6 @@
 import { Modal, View, Text, TouchableOpacity, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ManageCategories } from "./ManageCategories";
+import ManageCategoriesInNote from "./ManageCategoriesInNote";
 import NamingModal from "./NamingModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 import React, { useState, useRef } from "react";
@@ -63,7 +63,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
       <View className="bg-black/30 h-full flex justify-end items-center">
         <Animated.View
           style={{
-            height: containerHeight,
+            height: "35%",
             width: "100%",
             backgroundColor: "#e1f1e8",
             paddingHorizontal: 16,
@@ -85,7 +85,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
 
           {/* Action Buttons */}
           <View className="-mx-5">
-            <View className="h-full w-full flex flex-row justify-center mt-4">
+            <View className="h-full w-full flex flex-row justify-center pt-8">
               <TouchableOpacity
                 onPress={() => console.log("Search in Note Pressed")}
               >
@@ -132,7 +132,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               </TouchableOpacity>
 
               {/* Manage Categories */}
-              <ManageCategories
+              <ManageCategoriesInNote
                 isVisible={isManageCategoriesVisible}
                 setIsVisible={setIsManageCategoriesVisible}
                 initialMode={manageMode}
