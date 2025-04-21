@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Keyboard } from "react-native";
+import { View, TouchableOpacity, Keyboard, Dimensions } from "react-native";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import QueryMenuModal from "./QueryMenuModal";
@@ -19,6 +19,18 @@ export const HighlightModal: React.FC<HighlightModalProps> = ({
   if (!isVisible) return null;
 
   const [isQueryMenuModal, setIsQueryMenuModalVisible] = useState(false);
+  const screen = Dimensions.get("window");
+  const MODAL_WIDTH = 120;
+  const MODAL_HEIGHT = 36;
+
+  let top = position.top + 10;
+  let left = position.left;
+
+  if (left < 10) left = 10;
+  if (left + MODAL_WIDTH > screen.width) left = screen.width - MODAL_WIDTH - 10;
+
+  if (top < 10) top = 10;
+  if (top + MODAL_HEIGHT > screen.height) top = screen.height - MODAL_HEIGHT;
 
   const closeModal = () => {
     setIsVisible(false);
@@ -28,8 +40,13 @@ export const HighlightModal: React.FC<HighlightModalProps> = ({
 
   return (
     <View
-      className="w-[120px] h-[36px] z-100 mx-10 bg-white rounded-2xl shadow-md items-center"
-      style={{ top: position.top, left: position.left }}
+      className="absolute z-100 bg-white rounded-2xl shadow-md items-center"
+      style={{
+        top,
+        left,
+        width: MODAL_WIDTH,
+        height: MODAL_HEIGHT,
+      }}
     >
       <View className="flex flex-row justify-content-center">
         <TouchableOpacity

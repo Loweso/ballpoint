@@ -53,6 +53,10 @@ const Note = ({ text }: any) => {
   const { id } = useLocalSearchParams();
 
   const { width } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  const MODAL_WIDTH = 120;
+  const MODAL_HEIGHT = 36;
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -135,14 +139,8 @@ const Note = ({ text }: any) => {
   };
 
   const handleLongPress = (event) => {
-    // Capture the long-press location
-    const { locationX, locationY } = event.nativeEvent;
-
-    setHighlightPosition({
-      top: locationY - 40,
-      left: locationX - 80,
-    });
-
+    const { pageX, pageY } = event.nativeEvent;
+    setHighlightPosition({ top: pageY, left: pageX });
     setIsHighlightModalOpen(true);
   };
 
