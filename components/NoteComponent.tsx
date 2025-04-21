@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
 import NoteSettingsConfirmationModal from "./NoteSettingsConfirmationModal";
-import axios from "axios";
+import api from "@/lib/redux/slices/authSlice";
 
 type NoteComponentProps = {
   title: string;
@@ -66,9 +66,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
 
   const deleteNote = async () => {
     try {
-      const response = await axios.delete(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${noteID}/`
-      );
+      const response = await api.delete(`/notes/${noteID}/`);
       console.log("Note deleted:", response.data);
       Alert.alert("Success", "Note deleted!");
       onDelete(noteID);

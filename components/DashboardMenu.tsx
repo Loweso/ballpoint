@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useRef, useState, useEffect } from "react";
 import {
   Animated,
@@ -34,6 +33,7 @@ import {
 import { setSortType, setSortOrder, clearSort } from "@/slices/sortSlice";
 import { setSearchQuery } from "@/slices/searchSlice";
 import { RootState } from "@/lib/redux/store";
+import { api } from "@/lib/redux/slices/authSlice";
 
 interface Category {
   label: string;
@@ -90,9 +90,7 @@ const DashboardMenu = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get<Category[]>(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/`
-      );
+      const response = await api.get<Category[]>("notes/categories/");
 
       const formattedCategories = response.data.map((category) => ({
         label: category.label,

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import axios from "axios";
+import { api } from "@/lib/redux/slices/authSlice";
 
 interface CreateNewNoteModalProps {
   isVisible: boolean;
@@ -32,15 +32,12 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
     const sanitizedTitle = title.trim() || "Untitled Note";
 
     try {
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`,
-        {
-          title: sanitizedTitle,
-          notesContent: "",
-          categories: [],
-          date: today,
-        }
-      );
+      const response = await api.post("/notes/", {
+        title: sanitizedTitle,
+        notesContent: "",
+        categories: [],
+        date: today,
+      });
       console.log("Create Note Response:", response.data);
 
       const newNoteID = response.data.noteID;

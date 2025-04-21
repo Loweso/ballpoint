@@ -12,6 +12,8 @@ import { Link, router } from "expo-router";
 import { images } from "@/constants";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { loginUser, clearError } from "@/lib/redux/slices/authSlice";
+import GoogleSignInButton from "@/components/google/SignInWithGoogle";
+
 
 const LoginPage = () => {
   const dispatch = useAppDispatch();
@@ -152,19 +154,7 @@ const LoginPage = () => {
           <View className="flex-1 h-px bg-gray-300" />
         </View>
 
-        <TouchableOpacity
-          className="p-4 flex-row justify-center items-center"
-          onPress={() => console.log("Log In with Google Button Pressed")}
-        >
-          <Image
-            source={images.googleLogo}
-            className="w-10 h-10"
-            resizeMode="contain"
-          />
-          <Text className="text-tertiary-buttonGreen m-2">
-            Log in with your Google Account
-          </Text>
-        </TouchableOpacity>
+        <GoogleSignInButton />
 
         <Link href="/signup" asChild>
           <TouchableOpacity>
