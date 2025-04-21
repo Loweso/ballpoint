@@ -247,7 +247,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [isVisible]);
+  }, [isVisible, screenHeight, slideAnim]);
 
   return (
     <>
@@ -260,11 +260,11 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           paddingLeft: 2,
           paddingRight: 2,
           paddingTop: 4,
-          top: mode === "view" ? 54 : "auto",
+          top: mode === "view" ? 0 : "auto",
           left: mode === "view" ? 0 : "auto",
           right: mode === "view" ? 0 : "auto",
           bottom: mode === "view" ? 0 : "auto",
-          justifyContent: "flex-end",
+          justifyContent: "flex-start",
           alignItems: "center",
           backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
         }}
@@ -319,7 +319,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           </View>
 
           {/* Category List */}
-          <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[20px] rounded-xl">
+          <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[40px] rounded-xl">
             {categories.map((category, index) => (
               <View
                 key={index}
