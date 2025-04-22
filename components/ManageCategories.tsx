@@ -69,7 +69,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       const categoryToUpdate = categories[currentCategoryIndex];
       try {
         const response = await fetch(
-          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/update/${categoryToUpdate.id}/`, // Use actual backend URL
+          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/update/${categoryToUpdate.id}/`, // Use actual backend URL
           {
             method: "PUT",
             headers: {
@@ -122,7 +122,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       console.log("Sending request to create a new category...");
 
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/create/`,
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/create/`,
         {
           method: "POST",
           headers: {
@@ -167,8 +167,36 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     setConfirmModalVisible(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (categoryToDelete !== null) {
+  const handleConfirmDelete = async () => {
+    const indicesToDelete = selected
+      .map((isSelected, index) => (isSelected ? index : -1))
+      .filter((index) => index !== -1);
+
+    if (indicesToDelete.length === 0) return;
+
+    try {
+      // Use Promise.all to send multiple DELETE requests
+      await Promise.all(
+        indicesToDelete.map(async (index) => {
+          const category = categories[index];
+          const response = await fetch(
+            `${
+              process.env.EXPO_PUBLIC_DEVICE_IPV4
+            }/notes/categories/delete/${encodeURIComponent(category.id)}/`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete category: ${category.label}`);
+          }
+
+          console.log(`Successfully deleted category: ${category.label}`);
+        })
+      );
+
+      // Remove deleted categories from the state
       const updatedCategories = categories.filter(
         (_, i) => i !== categoryToDelete
       );
@@ -190,7 +218,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       const fetchCategories = async () => {
         try {
           const response = await fetch(
-            `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/`
+            `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/`
           );
           if (!response.ok) {
             throw new Error(
