@@ -205,89 +205,93 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [isVisible]);
+  }, [isVisible, screenHeight, slideAnim]);
 
   return (
-    <Animated.View
-      style={{
-        transform: [{ translateY: slideAnim }],
-        position: mode === "view" ? "absolute" : "relative",
-        zIndex: 10,
-        flex: 1,
-        paddingLeft: 2,
-        paddingRight: 2,
-        paddingTop: 4,
-        top: mode === "view" ? 54 : "auto",
-        left: mode === "view" ? 0 : "auto",
-        right: mode === "view" ? 0 : "auto",
-        bottom: mode === "view" ? 0 : "auto",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
-      }}
-    >
-      {/* Header */}
-      <View
-        className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
-        style={{ width: mode === "view" ? "90%" : "100%" }}
+    <>
+      <Animated.View
+        style={{
+          transform: [{ translateY: slideAnim }],
+          position: mode === "view" ? "absolute" : "relative",
+          zIndex: 10,
+          flex: 1,
+          paddingLeft: 2,
+          paddingRight: 2,
+          paddingTop: 4,
+          top: mode === "view" ? 0 : "auto",
+          left: mode === "view" ? 0 : "auto",
+          right: mode === "view" ? 0 : "auto",
+          bottom: mode === "view" ? 0 : "auto",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
+        }}
       >
-        <View className="flex flex-row w-full absolute top-[10px] justify-end">
-          {mode === "edit" && (
-            <TouchableOpacity
-              className="pr-2"
-              onPress={openCategoryNamingModal}
-            >
-              <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
-            </TouchableOpacity>
-          )}
-          {mode === "edit" && (
-            <>
-              {!isSelectingForDelete ? (
-                // First trash icon to enter selection mode
-                <TouchableOpacity
-                  className="pr-4"
-                  onPress={() => {
-                    setIsSelectingForDelete(true);
-                    setSelected(Array(categories.length).fill(false)); // Reset selection
-                  }}
-                >
-                  <Ionicons name="trash-outline" color="#E31E1E" size={28} />
-                </TouchableOpacity>
-              ) : (
-                // Second trash icon to confirm deletion
-                <TouchableOpacity className="pr-4" onPress={handleDeletePress}>
-                  <Ionicons name="trash" color="#E31E1E" size={28} />
-                </TouchableOpacity>
-              )}
-            </>
-          )}
-          {mode === "view" && (
-            <TouchableOpacity className="pl-[12px]" onPress={closeModal}>
-              <Ionicons
-                name="arrow-back-circle-outline"
-                color="#080808"
-                size={28}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
+        {/* Header */}
+        <View
+          className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
+          style={{ width: mode === "view" ? "90%" : "100%" }}
+        >
+          <View className="flex flex-row w-full absolute top-[10px] justify-end">
+            {mode === "edit" && (
+              <TouchableOpacity
+                className="pr-2"
+                onPress={openCategoryNamingModal}
+              >
+                <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
+              </TouchableOpacity>
+            )}
+            {mode === "edit" && (
+              <>
+                {!isSelectingForDelete ? (
+                  // First trash icon to enter selection mode
+                  <TouchableOpacity
+                    className="pr-4"
+                    onPress={() => {
+                      setIsSelectingForDelete(true);
+                      setSelected(Array(categories.length).fill(false)); // Reset selection
+                    }}
+                  >
+                    <Ionicons name="trash-outline" color="#E31E1E" size={28} />
+                  </TouchableOpacity>
+                ) : (
+                  // Second trash icon to confirm deletion
+                  <TouchableOpacity
+                    className="pr-4"
+                    onPress={handleDeletePress}
+                  >
+                    <Ionicons name="trash" color="#E31E1E" size={28} />
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+            {mode === "view" && (
+              <TouchableOpacity className="pl-[12px]" onPress={closeModal}>
+                <Ionicons
+                  name="arrow-back-circle-outline"
+                  color="#080808"
+                  size={28}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
 
-        {/* Category List */}
-        <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[20px] rounded-xl">
-          {categories.map((category, index) => (
-            <View
-              key={index}
-              className="flex-row justify-right items-center top-[10px]"
-            >
-              {mode === "edit" && isSelectingForDelete && (
-                <TouchableOpacity onPress={() => toggleSelection(index)}>
-                  <Ionicons
-                    name={selected[index] ? "ellipse" : "ellipse-outline"}
-                    color={selected[index] ? "#6a994e" : "#a09d45"}
-                    size={20}
-                  />
-                </TouchableOpacity>
-              )}
+          {/* Category List */}
+          <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[40px] rounded-xl">
+            {categories.map((category, index) => (
+              <View
+                key={index}
+                className="flex-row justify-right items-center top-[10px]"
+              >
+                {mode === "edit" && isSelectingForDelete && (
+                  <TouchableOpacity onPress={() => toggleSelection(index)}>
+                    <Ionicons
+                      name={selected[index] ? "ellipse" : "ellipse-outline"}
+                      color={selected[index] ? "#6a994e" : "#a09d45"}
+                      size={20}
+                    />
+                  </TouchableOpacity>
+                )}
 
               {mode === "view" && (
                 <View
