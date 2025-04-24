@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import axios from "axios";
+import { api } from "@/lib/redux/slices/authSlice";
 
 interface Category {
   id: number;
@@ -47,9 +47,7 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/`
-      );
+      const response = await api.get("/notes/categories/");
       setCategories(response.data);
       console.log("Fetched categories:", response.data);
     } catch (error) {

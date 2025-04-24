@@ -90,7 +90,7 @@ const DashboardMenu = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get<Category[]>("notes/categories/");
+      const response = await api.get<Category[]>("/notes/categories/");
 
       const formattedCategories = response.data.map((category) => ({
         label: category.label,
