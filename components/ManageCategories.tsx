@@ -19,7 +19,7 @@ interface ManageCategoriesProps {
 }
 
 interface Category {
-  id: number;
+  id: string;
   label: string;
   color: string;
 }
@@ -131,19 +131,51 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     }
   };
 
-  const handleDeletePress = (index: number) => {
-    setCategoryToDelete(index);
-    setConfirmModalVisible(true);
+  const handleDeletePress = () => {
+    if (selected.some((value) => value)) {
+      setConfirmModalVisible(true);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    if (categoryToDelete !== null) {
+  const handleConfirmDelete = async () => {
+    const indicesToDelete = selected
+      .map((isSelected, index) => (isSelected ? index : -1))
+      .filter((index) => index !== -1);
+
+    if (indicesToDelete.length === 0) return;
+
+    try {
+      // Use Promise.all to send multiple DELETE requests
+      await Promise.all(
+        indicesToDelete.map(async (index) => {
+          const category = categories[index];
+          const response = await fetch(
+            `${
+              process.env.EXPO_PUBLIC_DEVICE_IPV4
+            }/categories/delete/${encodeURIComponent(category.id)}/`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete category: ${category.label}`);
+          }
+
+          console.log(`Successfully deleted category: ${category.label}`);
+        })
+      );
+
+      // Remove deleted categories from the state
       const updatedCategories = categories.filter(
-        (_, i) => i !== categoryToDelete
+        (_, index) => !selected[index]
       );
       setCategories(updatedCategories);
-      setCategoryToDelete(null);
+      setSelected(Array(updatedCategories.length).fill(false)); // Reset selection
+      setIsSelectingForDelete(false);
       setConfirmModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting categories:", error);
     }
   };
 
@@ -161,6 +193,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           const response = await api.get("/categories/");
           const categories = response.data; // axios already parses JSON
           setCategories(categories);
+          setSelected(Array(categories.length).fill(false));
         } catch (error) {
           console.error("Failed to fetch categories:", error);
         }
@@ -175,84 +208,93 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [isVisible]);
+  }, [isVisible, screenHeight, slideAnim]);
 
   return (
-    <Animated.View
-      style={{
-        transform: [{ translateY: slideAnim }],
-        position: mode === "view" ? "absolute" : "relative",
-        zIndex: 10,
-        flex: 1,
-        paddingLeft: 2,
-        paddingRight: 2,
-        paddingTop: 4,
-        top: mode === "view" ? 54 : "auto",
-        left: mode === "view" ? 0 : "auto",
-        right: mode === "view" ? 0 : "auto",
-        bottom: mode === "view" ? 0 : "auto",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
-      }}
-    >
-      {/* Header */}
-      <View
-        className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
-        style={{ width: mode === "view" ? "90%" : "100%" }}
+    <>
+      <Animated.View
+        style={{
+          transform: [{ translateY: slideAnim }],
+          position: mode === "view" ? "absolute" : "relative",
+          zIndex: 10,
+          flex: 1,
+          paddingLeft: 2,
+          paddingRight: 2,
+          paddingTop: 4,
+          top: mode === "view" ? 0 : "auto",
+          left: mode === "view" ? 0 : "auto",
+          right: mode === "view" ? 0 : "auto",
+          bottom: mode === "view" ? 0 : "auto",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          backgroundColor: mode === "view" ? "rgba(0,0,0,0.5)" : "transparent",
+        }}
       >
-        <View className="flex flex-row w-full absolute top-[10px] justify-end">
-          {mode === "edit" && (
-            <TouchableOpacity
-              className="pr-2"
-              onPress={openCategoryNamingModal}
-            >
-              <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
-            </TouchableOpacity>
-          )}
-          {mode === "edit" && (
-            <TouchableOpacity
-              className="pr-4"
-              onPress={() => {
-                // Toggle selection mode for deletion
-                setIsSelectingForDelete((prev) => !prev);
+        {/* Header */}
+        <View
+          className="flex flex-row mt-2 mb-4 bg-secondary-categlistyellow rounded-xl justify-center items-center"
+          style={{ width: mode === "view" ? "90%" : "100%" }}
+        >
+          <View className="flex flex-row w-full absolute top-[10px] justify-end">
+            {mode === "edit" && (
+              <TouchableOpacity
+                className="pr-2"
+                onPress={openCategoryNamingModal}
+              >
+                <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
+              </TouchableOpacity>
+            )}
+            {mode === "edit" && (
+              <>
+                {!isSelectingForDelete ? (
+                  // First trash icon to enter selection mode
+                  <TouchableOpacity
+                    className="pr-4"
+                    onPress={() => {
+                      setIsSelectingForDelete(true);
+                      setSelected(Array(categories.length).fill(false)); // Reset selection
+                    }}
+                  >
+                    <Ionicons name="trash-outline" color="#E31E1E" size={28} />
+                  </TouchableOpacity>
+                ) : (
+                  // Second trash icon to confirm deletion
+                  <TouchableOpacity
+                    className="pr-4"
+                    onPress={handleDeletePress}
+                  >
+                    <Ionicons name="trash" color="#E31E1E" size={28} />
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+            {mode === "view" && (
+              <TouchableOpacity className="pl-[12px]" onPress={closeModal}>
+                <Ionicons
+                  name="arrow-back-circle-outline"
+                  color="#080808"
+                  size={28}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
 
-                // Clear previous selections if exiting delete mode
-                if (isSelectingForDelete) {
-                  setSelected(Array(categories.length).fill(false));
-                }
-              }}
-            >
-              <Ionicons name="trash-outline" color="#E31E1E" size={28} />
-            </TouchableOpacity>
-          )}
-          {mode === "view" && (
-            <TouchableOpacity className="pl-[12px]" onPress={closeModal}>
-              <Ionicons
-                name="arrow-back-circle-outline"
-                color="#080808"
-                size={28}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Category List */}
-        <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[20px] rounded-xl">
-          {categories.map((category, index) => (
-            <View
-              key={index}
-              className="flex-row justify-right items-center top-[10px]"
-            >
-              {mode === "edit" && isSelectingForDelete && (
-                <TouchableOpacity onPress={() => toggleSelection(index)}>
-                  <Ionicons
-                    name={selected[index] ? "ellipse" : "ellipse-outline"}
-                    color={selected[index] ? "#6a994e" : "#a09d45"}
-                    size={20}
-                  />
-                </TouchableOpacity>
-              )}
+          {/* Category List */}
+          <View className="w-full h-full pl-[10px] pr-[10px] pt-[30px] pb-[40px] rounded-xl">
+            {categories.map((category, index) => (
+              <View
+                key={index}
+                className="flex-row justify-right items-center top-[10px]"
+              >
+                {mode === "edit" && isSelectingForDelete && (
+                  <TouchableOpacity onPress={() => toggleSelection(index)}>
+                    <Ionicons
+                      name={selected[index] ? "ellipse" : "ellipse-outline"}
+                      color={selected[index] ? "#6a994e" : "#a09d45"}
+                      size={20}
+                    />
+                  </TouchableOpacity>
+                )}
 
               {mode === "view" && (
                 <View
