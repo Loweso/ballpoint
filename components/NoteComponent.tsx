@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
 import NoteSettingsConfirmationModal from "./NoteSettingsConfirmationModal";
-import api from "@/lib/redux/slices/authSlice";
+import { api } from "@/lib/redux/slices/authSlice";
 
 type NoteComponentProps = {
   title: string;

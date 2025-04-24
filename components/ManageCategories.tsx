@@ -148,14 +148,15 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       await Promise.all(
         indicesToDelete.map(async (index) => {
           const category = categories[index];
-
-          // Use axios instance for DELETE request
-          const response = await api.delete(
-            `/categories/delete/${encodeURIComponent(category.id)}/`
-          );
-
-          if (response.status !== 200) {
-            throw new Error(`Failed to delete category: ${category.label}`);
+          try {
+            const response = await api.delete(
+              `/categories/delete/${category.id}/`
+            );
+            console.log("Category deleted:", response.data);
+            // You can do something after successful deletion, like refreshing the list
+          } catch (error) {
+            console.error("Error deleting category:", error);
+            // You can show an error message to the user here
           }
 
           console.log(`Successfully deleted category: ${category.label}`);
