@@ -6,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import axios from "axios";
 
@@ -21,7 +22,6 @@ interface ManageCategoriesProps {
   initialMode?: "view" | "edit";
 }
 
-// Utility function to check if background color is light or dark
 const isColorLight = (hexColor: string) => {
   if (!hexColor) return true; // fallback to light
   const color = hexColor.replace("#", "");
@@ -41,14 +41,16 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
   initialMode = "view",
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [noteCategories, setNoteCategories] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const { id } = useLocalSearchParams();
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/`
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/`
       );
       setCategories(response.data);
       console.log("Fetched categories:", response.data);
@@ -59,22 +61,53 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
     }
   };
 
+  const fetchNoteCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`
+      );
+      const note = response.data;
+      const categoryIds = note.categories.map((cat: Category) => cat.id); // Extract category IDs
+      setNoteCategories(categoryIds);
+      console.log("Fetched note categories:", categoryIds);
+    } catch (error) {
+      console.error("Failed to fetch note categories:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateNoteCategories = async () => {
+    try {
+      console.log("damn note categories:", noteCategories);
+      const response = await axios.put(
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/update-categories/`,
+        { categories: noteCategories }
+      );
+      console.log("Updated note categories:", response.data);
+    } catch (error) {
+      console.error("Failed to update note categories:", error);
+    }
+  };
+
   useEffect(() => {
     if (isVisible) {
       fetchCategories();
+      fetchNoteCategories();
     }
   }, [isVisible]);
 
   const mergedCategories = [
-    ...categories.filter((cat) => selectedCategoryIds.includes(cat.id)),
-    ...categories.filter((cat) => !selectedCategoryIds.includes(cat.id)),
+    ...categories.filter((cat) => noteCategories.includes(cat.id)),
+    ...categories.filter((cat) => !noteCategories.includes(cat.id)),
   ];
 
   const toggleCategory = (categoryId: number) => {
-    if (selectedCategoryIds.includes(categoryId)) {
-      setSelectedCategoryIds((prev) => prev.filter((id) => id !== categoryId));
+    if (noteCategories.includes(categoryId)) {
+      setNoteCategories((prev) => prev.filter((id) => id !== categoryId));
     } else {
-      setSelectedCategoryIds((prev) => [...prev, categoryId]);
+      setNoteCategories((prev) => [...prev, categoryId]);
     }
   };
 
@@ -87,7 +120,12 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
       <View className="flex flex-col bg-white h-3/4 w-3/4 p-3 rounded-lg">
         <View className="flex flex-row justify-between items-center mb-2">
           <Text className="font-bold text-center">Select Note Categories</Text>
-          <TouchableOpacity onPress={() => setIsVisible(false)}>
+          <TouchableOpacity
+            onPress={() => {
+              updateNoteCategories();
+              setIsVisible(false);
+            }}
+          >
             <AntDesign name="close" size={24} color="grey" />
           </TouchableOpacity>
         </View>
@@ -99,7 +137,7 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
             data={mergedCategories}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => {
-              const isSelected = selectedCategoryIds.includes(item.id);
+              const isSelected = noteCategories.includes(item.id);
               const useDarkText = isColorLight(item.color);
 
               return (

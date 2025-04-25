@@ -70,7 +70,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       const categoryToUpdate = categories[currentCategoryIndex];
       try {
         const response = await fetch(
-          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/update/${categoryToUpdate.id}/`, // Use actual backend URL
+          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/update/${categoryToUpdate.id}/`, // Use actual backend URL
           {
             method: "PUT",
             headers: {
@@ -123,7 +123,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       console.log("Sending request to create a new category...");
 
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/create/`,
+        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/create/`,
         {
           method: "POST",
           headers: {
@@ -184,7 +184,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           const response = await fetch(
             `${
               process.env.EXPO_PUBLIC_DEVICE_IPV4
-            }/categories/delete/${encodeURIComponent(category.id)}/`,
+            }/notes/categories/delete/${encodeURIComponent(category.id)}/`,
             {
               method: "DELETE",
             }
@@ -223,7 +223,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       const fetchCategories = async () => {
         try {
           const response = await fetch(
-            `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/categories/`
+            `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/categories/`
           );
           if (!response.ok) {
             throw new Error(
