@@ -62,9 +62,7 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
   const fetchNoteCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`
-      );
+      const response = await api.get(`/notes/${id}/`);
       const note = response.data;
       const categoryIds = note.categories.map((cat: Category) => cat.id); // Extract category IDs
       setNoteCategories(categoryIds);
@@ -79,10 +77,9 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
   const updateNoteCategories = async () => {
     try {
       console.log("damn note categories:", noteCategories);
-      const response = await axios.put(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/update-categories/`,
-        { categories: noteCategories }
-      );
+      const response = await api.put(`/notes/categories/update/${id}/`, {
+        categories: noteCategories,
+      });
       console.log("Updated note categories:", response.data);
     } catch (error) {
       console.error("Failed to update note categories:", error);
