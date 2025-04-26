@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   Image,
   TouchableOpacity,
@@ -20,6 +19,7 @@ import HTMLView from "react-native-htmlview";
 import RenderHTML from "react-native-render-html";
 import { useWindowDimensions } from "react-native";
 import striptags from "striptags";
+import { api } from "@/lib/redux/slices/authSlice";
 
 import {
   actions,
@@ -62,9 +62,7 @@ const Note = ({ text }: any) => {
     const sanitizedTitle = title.trim() || "Untitled Note";
 
     try {
-      const url = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`;
-
-      const response = await axios.put(url, {
+      const response = await api.put(`/notes/${id}/`, {
         title: sanitizedTitle,
         notesContent: noteContent,
         categories: [],
@@ -99,15 +97,11 @@ const Note = ({ text }: any) => {
         type: "image/*", // Adjust according to the actual file type
       });
 
-      const uploadResponse = await axios.post(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/extract/extract-text`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const uploadResponse = await api.post("extract/extract-text", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       console.log("Upload successful:", uploadResponse.data);
 
@@ -125,9 +119,7 @@ const Note = ({ text }: any) => {
 
   const deleteNote = async () => {
     try {
-      const response = await axios.delete(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`
-      );
+      const response = await api.delete(`notes/${id}/`);
       console.log("Note deleted:", response.data);
       Alert.alert("Success", "Note deleted!");
     } catch (error) {
@@ -155,9 +147,7 @@ const Note = ({ text }: any) => {
   useEffect(() => {
     const fetchNote = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/${id}/`
-        );
+        const response = await api.get(`/notes/${id}/`);
         const note = response.data;
         setTitle(note.title || "Untitled Note");
         setNoteContent(note.notesContent || "");

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 
-const API_URL = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/api`;
+const API_URL = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}`;
 
 // Configure axios instance
 const api = axios.create({
@@ -30,7 +30,7 @@ export const registerUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.post("/register", {
+      const response = await api.post("/api/register", {
         username,
         email,
         password,
@@ -52,7 +52,7 @@ export const loginUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.post("/login", { email, password });
+      const response = await api.post("/api/login", { email, password });
       const { access, refresh } = response.data;
 
       await Promise.all([
@@ -69,11 +69,36 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+export const googleLogin = createAsyncThunk(
+  "auth/googleLogin",
+  async (idToken: string, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.post("/api/google", {
+        id_token: idToken,
+      });
+
+      const { access, refresh } = response.data;
+
+      // Save tokens securely
+      await Promise.all([
+        SecureStore.setItemAsync("access_token", access),
+        SecureStore.setItemAsync("refresh_token", refresh),
+      ]);
+
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data || { message: "Google login failed" }
+      );
+    }
+  }
+);
+
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      await api.post("/logout");
+      await api.post("/api/logout");
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || { message: "Logout failed" }
@@ -94,7 +119,7 @@ export const refreshToken = createAsyncThunk(
         throw new Error("No refresh token available");
       }
 
-      const response = await api.post("/refresh", {
+      const response = await api.post("/api/refresh", {
         refresh: refreshToken,
       });
 
@@ -144,7 +169,7 @@ export const clearAuthTokens = async () => {
 
 // Configure axios interceptors
 api.interceptors.request.use(async (config) => {
-  const unauthenticatedPaths = ["/login", "/register"];
+  const unauthenticatedPaths = ["/api/login", "/api/register", "/api/google"];
 
   if (!unauthenticatedPaths.includes(config.url!)) {
     const accessToken = await SecureStore.getItemAsync("access_token");
@@ -256,9 +281,25 @@ const authSlice = createSlice({
       // Refresh Token
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.accessToken = action.payload;
+      })
+      .addCase(googleLogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.accessToken = action.payload.access;
+        state.refreshToken = action.payload.refresh;
+        state.user = action.payload.user;
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
 export const { clearError } = authSlice.actions;
 export default authSlice.reducer;
+export { api };

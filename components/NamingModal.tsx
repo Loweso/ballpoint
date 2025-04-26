@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  TextInput,
-  TouchableWithoutFeedback,
-  TouchableOpacity,
-  Text,
-  Modal,
-} from "react-native";
+import { View, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface NamingModalProps {

@@ -1,6 +1,6 @@
-import axios from "axios";
+import { api } from "@/lib/redux/slices/authSlice";
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CircleButton from "@/components/CircleButton";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -8,6 +8,7 @@ import { CreateNewNoteModal } from "@/components/CreateNewNoteModal";
 import { DashboardSettings } from "@/components/DashboardSettings";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DashboardMenu from "@/components/DashboardMenu";
+
 import NoteComponent from "@/components/NoteComponent";
 import { EventProvider } from "react-native-outside-press";
 import { useSelector } from "react-redux";
@@ -106,12 +107,9 @@ export default function Home() {
     const fetchSearchResults = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`,
-          {
-            params: { search: searchQuery }, // Pass the search query as a parameter
-          }
-        );
+        const response = await api.get(`/notes`, {
+          params: { search: searchQuery }, // Pass the search query as a parameter
+        });
         console.log(response.data); // Log the response data for debugging
         setNotes(response.data); // Update notes with search results
       } catch (err) {
@@ -126,15 +124,11 @@ export default function Home() {
     } else {
       fetchNotes(); // Fetch all notes if searchQuery is empty
     }
-
-    fetchSearchResults();
   }, [searchQuery]);
 
   const fetchNotes = async () => {
     try {
-      const response = await axios.get<Note[]>(
-        `${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes`
-      );
+      const response = await api.get(`/notes`);
       setNotes(response.data); // Store data in state
     } catch (error) {
       console.error("Error fetching notes:", error);
