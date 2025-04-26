@@ -114,6 +114,9 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         color: categoryColor,
       });
 
+    
+
+  
       console.log("Category created successfully:", response.data);
 
       setCategories((prev) => [
@@ -152,7 +155,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           const response = await fetch(
             `${
               process.env.EXPO_PUBLIC_DEVICE_IPV4
-            }/categories/delete/${encodeURIComponent(category.id)}/`,
+            }/notes/categories/delete/${encodeURIComponent(category.id)}/`,
             {
               method: "DELETE",
             }
@@ -211,7 +214,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
   }, [isVisible, screenHeight, slideAnim]);
 
   return (
-    <>
+  
       <Animated.View
         style={{
           transform: [{ translateY: slideAnim }],
