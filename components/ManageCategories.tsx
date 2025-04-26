@@ -113,6 +113,9 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         color: categoryColor,
       });
 
+    
+
+  
       console.log("Category created successfully:", response.data);
 
       setCategories((prev) => [
