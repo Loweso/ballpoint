@@ -2,6 +2,7 @@
   "expo": {
     "name": "ballpoint",
     "slug": "ballpoint",
+    "owner": "huwaw2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/ballpointLogo.png",
