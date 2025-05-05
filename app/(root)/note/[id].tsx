@@ -40,7 +40,7 @@ const Note = ({ text }: any) => {
   const [isEditing, setIsEditing] = useState(false);
   const [noteContent, setNoteContent] = useState(text);
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
-  const [extractedText, setExtractedText] = useState(text);
+  const [aiText, setAiText] = useState(text);
   const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
   const [highlightPosition, setHighlightPosition] = useState({
     top: 0,
@@ -55,6 +55,29 @@ const Note = ({ text }: any) => {
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
+  };
+
+  const summarizeNotes = async () => {
+    const text = striptags(noteContent);
+    if (!striptags(text).trim()) {
+      alert("Please enter some text.");
+      return;
+    }
+    try {
+      const response = await api.post("extract/summarize-text", {
+        text: text,
+      });
+      console.log(response.data.summary);
+      setAiText(response.data.summary);
+
+      setTimeout(() => {
+        toggleAIPolishModal();
+        setIsExtractionWindowVisible(true);
+      }, 600);
+    } catch (error) {
+      console.error(error);
+      alert("Error summarizing text.");
+    }
   };
 
   const saveNote = async () => {
@@ -106,7 +129,7 @@ const Note = ({ text }: any) => {
       console.log("Upload successful:", uploadResponse.data);
 
       if (uploadResponse.data) {
-        setExtractedText(uploadResponse.data.text);
+        setAiText(uploadResponse.data.text);
       }
 
       setTimeout(() => {
@@ -209,7 +232,6 @@ const Note = ({ text }: any) => {
                 await saveNote();
                 setIsEditing(false);
                 titleInputRef.current?.blur();
-                console.log(`${process.env.EXPO_PUBLIC_DEVICE_IPV4}/notes/`);
               }}
             >
               <Text>Done</Text>
@@ -222,7 +244,7 @@ const Note = ({ text }: any) => {
         isVisible={isExtractionWindowVisible}
         setIsVisible={setIsExtractionWindowVisible}
         selectedFile={selectedFile}
-        content={extractedText}
+        content={aiText}
       />
 
       <TextInput
@@ -302,6 +324,7 @@ const Note = ({ text }: any) => {
       <PolishMenuModal
         visible={isAIPolishModalOpen}
         onClose={() => toggleAIPolishModal()}
+        summarizeNotes={summarizeNotes}
       />
       <NoteSettings
         isVisible={isNoteSettingsVisible}
