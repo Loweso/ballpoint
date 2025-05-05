@@ -29,6 +29,7 @@ import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
 import HighlightModal from "@/components/HighlightModal";
+import { OrganizePreferencesModal } from "@/components/OrganizePreferencesModal";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -41,6 +42,8 @@ const Note = ({ text }: any) => {
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [aiText, setAiText] = useState(text);
   const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
+  const [isOrganizePreferencesModalOpen, setIsOrganizePreferencesModalOpen] =
+    useState(false);
   const [highlightPosition, setHighlightPosition] = useState({
     top: 0,
     left: 0,
@@ -55,6 +58,10 @@ const Note = ({ text }: any) => {
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
   };
+
+  useEffect(() => {
+    console.log(isOrganizePreferencesModalOpen, "organize");
+  }, [isOrganizePreferencesModalOpen]);
 
   const summarizeNotes = async () => {
     const text = striptags(noteContent);
@@ -71,6 +78,30 @@ const Note = ({ text }: any) => {
 
       setTimeout(() => {
         toggleAIPolishModal();
+        setIsExtractionWindowVisible(true);
+      }, 600);
+    } catch (error) {
+      console.error(error);
+      alert("Error summarizing text.");
+    }
+  };
+
+  const organizeNotes = async (mode: string) => {
+    const text = striptags(noteContent);
+    if (!striptags(text).trim()) {
+      alert("Please enter some text.");
+      return;
+    }
+    try {
+      const response = await api.post("extract/organize-text", {
+        mode: mode,
+        text: text,
+      });
+      console.log(response.data.organized);
+      setAiText(response.data.organized);
+
+      setTimeout(() => {
+        setIsOrganizePreferencesModalOpen(false);
         setIsExtractionWindowVisible(true);
       }, 600);
     } catch (error) {
@@ -352,6 +383,7 @@ const Note = ({ text }: any) => {
         visible={isAIPolishModalOpen}
         onClose={() => toggleAIPolishModal()}
         summarizeNotes={summarizeNotes}
+        setIsOrganizePreferencesModalOpen={setIsOrganizePreferencesModalOpen}
       />
       <NoteSettings
         isVisible={isNoteSettingsVisible}
@@ -362,6 +394,12 @@ const Note = ({ text }: any) => {
         isVisible={isHighlightModalOpen}
         setIsVisible={setIsHighlightModalOpen}
         position={highlightPosition}
+      />
+
+      <OrganizePreferencesModal
+        isVisible={isOrganizePreferencesModalOpen}
+        setIsVisible={setIsOrganizePreferencesModalOpen}
+        organizeNotes={organizeNotes}
       />
     </SafeAreaView>
   );

@@ -1,18 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { Dropdown } from "react-native-element-dropdown";
 
 interface OrganizePreferencesModalProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
+  organizeNotes: (mode: string) => void;
 }
 
 export const OrganizePreferencesModal: React.FC<
   OrganizePreferencesModalProps
-> = ({ isVisible, setIsVisible }) => {
-  const [value, setValue] = useState(null);
+> = ({ isVisible, setIsVisible, organizeNotes }) => {
+  const [value, setValue] = useState("bulleted");
 
   const closeModal = () => {
     setIsVisible(false);
@@ -20,9 +20,8 @@ export const OrganizePreferencesModal: React.FC<
   };
 
   const data = [
-    { label: "Item 1", value: "1" },
-    { label: "Item 2", value: "2" },
-    { label: "Item 3", value: "3" },
+    { label: "bulleted", value: "bulleted" },
+    { label: "paragraph", value: "paragraph" },
   ];
 
   const styles = StyleSheet.create({
@@ -76,9 +75,7 @@ export const OrganizePreferencesModal: React.FC<
             />
           </View>
           <TouchableOpacity
-            onPress={() => {
-              setIsVisible(false);
-            }}
+            onPress={() => organizeNotes(value)}
             className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3 "
           >
             <Text className="text-white">Organize Notes</Text>

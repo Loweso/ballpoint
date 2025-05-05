@@ -13,12 +13,14 @@ interface PolishModalProps {
   visible: boolean;
   onClose: () => void;
   summarizeNotes: () => void;
+  setIsOrganizePreferencesModalOpen: (open: boolean) => void;
 }
 
 const PolishModal: React.FC<PolishModalProps> = ({
   visible,
   onClose,
   summarizeNotes,
+  setIsOrganizePreferencesModalOpen,
 }) => {
   return (
     <Modal
@@ -49,7 +51,12 @@ const PolishModal: React.FC<PolishModalProps> = ({
 
               <TouchableOpacity
                 className="flex-row m-1 gap-2 items-center rounded-lg"
-                onPress={() => console.log("Organize notes")}
+                onPress={() => {
+                  setIsOrganizePreferencesModalOpen(true);
+                  setTimeout(() => {
+                    onClose();
+                  }, 100);
+                }}
               >
                 <View className="flex-none p-1 rounded-md">
                   <MaterialCommunityIcons
