@@ -7,6 +7,7 @@ import {
   TouchableWithoutFeedback,
   Pressable,
   Alert,
+  useWindowDimensions,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -15,9 +16,7 @@ import { pickDocument, File } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
 import CircleButton from "@/components/CircleButton";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import HTMLView from "react-native-htmlview";
 import RenderHTML from "react-native-render-html";
-import { useWindowDimensions } from "react-native";
 import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
 
@@ -134,7 +133,7 @@ const Note = ({ text }: any) => {
           },
         });
 
-      console.log("Upload successful:", uploadResponse.data);
+        console.log("Upload successful:", uploadResponse.data);
 
         if (uploadResponse.data) {
           setAiText(uploadResponse.data.text);
@@ -189,7 +188,7 @@ const Note = ({ text }: any) => {
     setIsEditing(true);
   };
 
-  const handleLongPress = (event) => {
+  const handleLongPress = (event: any) => {
     const { pageX, pageY } = event.nativeEvent;
     setHighlightPosition({ top: pageY, left: pageX });
     setIsHighlightModalOpen(true);
