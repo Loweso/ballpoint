@@ -4,12 +4,13 @@ export type File = {
   name: string;
   size: number;
   uri: string;
+  mimeType?: string;
 };
 
 export const pickDocument = async (): Promise<File | null> => {
   try {
     const result = await DocumentPicker.getDocumentAsync({
-      type: ["image/png", "image/jpg"],
+      type: ["image/*", "audio/*"],
     });
 
     if (result.canceled) {
@@ -22,6 +23,7 @@ export const pickDocument = async (): Promise<File | null> => {
         name: asset.name ?? "Unnamed file",
         size: asset.size ?? 0,
         uri: asset.uri,
+        mimeType: asset.mimeType ?? undefined,
       };
 
       if (

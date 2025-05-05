@@ -88,32 +88,58 @@ const Note = ({ text }: any) => {
 
     if (!file) return;
 
+    const isAudio = file.mimeType?.startsWith("audio");
+    const isImage = file.mimeType?.startsWith("image");
+
+    console.log("Insights: ", isAudio, file.mimeType);
+
+    const formData = new FormData();
+
+    formData.append(isImage ? "image" : "audio", {
+      name: file.name,
+      uri: file.uri,
+      type: file.mimeType || "application/octet-stream",
+    });
+
     try {
-      const formData = new FormData();
+      let uploadResponse;
 
-      formData.append("image", {
-        name: file.name,
-        uri: file.uri,
-        type: "image/*", // Adjust according to the actual file type
-      });
+      if (isImage) {
+        uploadResponse = await api.post("extract/extract-text", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-      const uploadResponse = await api.post("extract/extract-text", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+        if (uploadResponse.data) {
+          setExtractedText(uploadResponse.data.text);
+        }
+      } else if (isAudio) {
+        uploadResponse = await api.post("extract/whisper-audio", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (uploadResponse.data) {
+          setExtractedText(uploadResponse.data.transcript);
+        }
+      } else {
+        Alert.alert(
+          "Unsupported File",
+          "Please select an image or audio file."
+        );
+        return;
+      }
 
       console.log("Upload successful:", uploadResponse.data);
-
-      if (uploadResponse.data) {
-        setExtractedText(uploadResponse.data.text);
-      }
 
       setTimeout(() => {
         setIsExtractionWindowVisible(true);
       }, 600);
     } catch (error) {
       console.error("Error uploading file:", error);
+      Alert.alert("Error", "Upload failed. Check your backend and try again.");
     }
   };
 
