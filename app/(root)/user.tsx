@@ -3,21 +3,23 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { useAppDispatch } from "@/lib/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { logoutUser } from "@/lib/redux/slices/authSlice";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
 export default function User() {
-  const [username, setUsername] = useState("Username");
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
   const router = useRouter();
 
+  const { user } = useAppSelector((state) => state.auth);
+  const [editedUsername, setEditedUsername] = useState(user?.username ?? "");
+
   const dispatch = useAppDispatch();
 
   const handleUsernameChange = (text: string) => {
-    setUsername(text);
+    setEditedUsername(text);
   };
 
   const handleLogout = async () => {
@@ -76,7 +78,7 @@ export default function User() {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {username}
+              {editedUsername || user?.username || "Guest"}
             </Text>
           </View>
         </View>
@@ -92,7 +94,7 @@ export default function User() {
             >
               {isEditing ? (
                 <TextInput
-                  value={username}
+                  value={editedUsername}
                   onChangeText={handleUsernameChange}
                   onBlur={() => setIsEditing(false)}
                   autoFocus
@@ -100,7 +102,7 @@ export default function User() {
                 />
               ) : (
                 <>
-                  <Text className="text-2xl">{username}</Text>
+                  <Text className="text-2xl">{user?.username ?? "Guest"}</Text>
                   <Text className="text-tertiary-textGray">
                     Tap to change username
                   </Text>
@@ -109,12 +111,18 @@ export default function User() {
             </TouchableOpacity>
 
             <View className="pt-4">
-              <Text className="text-2xl">MM/DD/YYYY</Text>
-              <Text className="text-tertiary-textGray">Date of Birth</Text>
+              <Text className="text-2xl">{user?.date_joined
+      ? new Date(user.date_joined).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "MM/DD/YYYY"}</Text>
+              <Text className="text-tertiary-textGray">Date Joined</Text>
             </View>
 
             <View className="pt-4">
-              <Text className="text-2xl underline">user@gmail.com</Text>
+              <Text className="text-2xl underline">{user?.email ?? "N/A"}</Text>
               <Text className="text-tertiary-textGray">Email</Text>
             </View>
           </View>
