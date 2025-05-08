@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
+import { RootState } from "../store";
 
 const API_URL = `${process.env.EXPO_PUBLIC_DEVICE_IPV4}`;
 
@@ -167,6 +168,32 @@ export const clearAuthTokens = async () => {
   ]);
 };
 
+export const updateUsername = createAsyncThunk(
+  "auth/updateUsername",
+  async (
+    { username }: { username: string },
+    { rejectWithValue, getState }
+  ) => {
+    try {
+      // Explicitly define the state type as RootState
+      const state = getState() as RootState;
+      const token = state.auth.accessToken; // Now TypeScript knows the type of state
+
+      const response = await api.patch("/api/user/update-username", { username }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data; // This will return the updated user data
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data || { message: "Failed to update username" }
+      );
+    }
+  }
+);
+
 // Configure axios interceptors
 api.interceptors.request.use(async (config) => {
   const unauthenticatedPaths = ["/api/login", "/api/register", "/api/google"];
@@ -296,6 +323,11 @@ const authSlice = createSlice({
       .addCase(googleLogin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(updateUsername.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user.username = action.payload.username;
+        }
       });
   },
 });

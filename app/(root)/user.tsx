@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { logoutUser } from "@/lib/redux/slices/authSlice";
+import { logoutUser, updateUsername } from "@/lib/redux/slices/authSlice";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
@@ -20,6 +20,16 @@ export default function User() {
 
   const handleUsernameChange = (text: string) => {
     setEditedUsername(text);
+  };
+
+  const handleSaveUsername = async () => {
+    try {
+      const updatedUser = await dispatch(updateUsername({ username: editedUsername })).unwrap();
+
+      setEditedUsername(updatedUser.username);
+    } catch (err) {
+      console.error("Error updating username:", err);
+    }
   };
 
   const handleLogout = async () => {
@@ -96,7 +106,9 @@ export default function User() {
                 <TextInput
                   value={editedUsername}
                   onChangeText={handleUsernameChange}
-                  onBlur={() => setIsEditing(false)}
+                  onBlur={() => {
+                    setIsEditing(false);
+                    handleSaveUsername();}}
                   autoFocus
                   className="text-2xl border-b border-gray-200"
                 />
