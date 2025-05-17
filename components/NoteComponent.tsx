@@ -24,6 +24,22 @@ type NoteComponentProps = {
   onDelete: (noteID: string) => void;
 };
 
+function getReadableTextColor(hex: string): string {
+  // Remove '#' if present
+  const cleanedHex = hex.replace("#", "");
+
+  // Parse r, g, b
+  const r = parseInt(cleanedHex.substring(0, 2), 16);
+  const g = parseInt(cleanedHex.substring(2, 4), 16);
+  const b = parseInt(cleanedHex.substring(4, 6), 16);
+
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  // Return black for bright backgrounds, white for dark ones
+  return luminance > 0.6 ? "#000000" : "#ffffff";
+}
+
 const NoteComponent: React.FC<NoteComponentProps> = ({
   title,
   noteID,
@@ -143,15 +159,22 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
       </View>
 
       <View className="flex flex-row flex-wrap my-2 gap-4">
-        {categories.map((category, index) => (
-          <View
-            key={index}
-            style={{ backgroundColor: category.color || "#fffee1" }} // Use style instead
-            className="h-8 py-1 px-4"
-          >
-            <Text className="font-bold">{String(category.label)}</Text>
-          </View>
-        ))}
+        {categories.map((category, index) => {
+          const backgroundColor = category.color || "#fffee1";
+          const textColor = getReadableTextColor(backgroundColor);
+
+          return (
+            <View
+              key={index}
+              style={{ backgroundColor }}
+              className="h-8 py-1 px-4"
+            >
+              <Text style={{ color: textColor }} className="font-bold">
+                {String(category.label)}
+              </Text>
+            </View>
+          );
+        })}
       </View>
 
       <Text className="text-sm text-justify" numberOfLines={4}>
