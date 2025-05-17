@@ -20,7 +20,8 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
   isVisible,
   setIsVisible,
 }) => {
-  const [isManageCategoriesVisible, setIsManageCategoriesVisible] = useState(false);
+  const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
+    useState(false);
 
   const contentRef = useRef<View>(null);
   const { height } = useWindowDimensions();
