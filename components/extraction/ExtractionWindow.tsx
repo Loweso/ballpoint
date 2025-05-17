@@ -7,14 +7,17 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Markdown from "react-native-markdown-display";
 
 interface ExtractionWindowProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
   selectedFile?: File | null;
   content: string;
+  onInsert: (content: string) => void;
 }
 
 export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
@@ -22,51 +25,77 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
   setIsVisible,
   selectedFile,
   content,
+  onInsert,
 }) => {
-  const closeModal = () => {
-    setIsVisible(false);
-  };
+  const closeModal = () => setIsVisible(false);
+  const { height } = useWindowDimensions();
 
   return (
     <Modal
       animationType="slide"
       transparent={true}
       visible={isVisible}
-      onRequestClose={closeModal}
+      onRequestClose={() => {}}
     >
-      <View className="bg-black/30 h-full flex relative ">
-        <View className="flex flex-col max-h-[80%] w-full bg-primary-green px-6 py-8 rounded-t-xl shadow-md absolute bottom-0 left-0">
-          {selectedFile?.name ? (
-            <Text className="">{selectedFile.name}</Text>
-          ) : null}
-          <TouchableOpacity
-            className="absolute right-0 px-6 py-8"
-            onPress={closeModal}
+      <View style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
+        <View className="flex-1 justify-end items-center">
+          <View
+            style={{
+              width: "100%",
+              backgroundColor: "#d7eedd", // bg-primary-green
+              paddingHorizontal: 16,
+              paddingVertical: 16,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              shadowOpacity: 0.2,
+              maxHeight: height * 0.9,
+              minHeight: 180,
+            }}
           >
-            <Ionicons name="exit-outline" color="#5A5353" size={32} />
-          </TouchableOpacity>
-          <ScrollView className="mt-8 border p-4">
-            <View className="gap-y-3">
-              <Text className="text-justify">{content || ""}</Text>
+            {/* Close Button */}
+            <View className="relative items-end justify-center">
+              <TouchableOpacity onPress={closeModal}>
+                <Ionicons name="exit-outline" color="#5A5353" size={32} />
+              </TouchableOpacity>
             </View>
-          </ScrollView>
 
-          <Text className="text-center mt-4 font-semibold text-lg">
-            Insert to notes?
-          </Text>
-          <View className="flex flex-row justify-around mt-2 ">
-            <Pressable
-              onPress={closeModal}
-              className="shadow-md py-2 w-[40%] flex flex-row justify-center rounded-xl bg-zinc-100"
+            {/* Filename */}
+            {selectedFile?.name ? (
+              <Text className="mt-2 font-semibold">{selectedFile.name}</Text>
+            ) : null}
+
+            {/* Scrollable Markdown Content */}
+            <ScrollView
+              className="mt-4 border"
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={true}
             >
-              <Text className="text-2xl">Cancel</Text>
-            </Pressable>
-            <Pressable
-              onPress={closeModal}
-              className="shadow-md py-2 w-[40%] flex flex-row justify-center rounded-xl bg-secondary-yellow"
-            >
-              <Text className="text-2xl">Insert</Text>
-            </Pressable>
+              <View className="gap-y-3">
+                <Markdown>{content || ""}</Markdown>
+              </View>
+            </ScrollView>
+
+            {/* Prompt + Buttons */}
+            <Text className="text-center mt-4 font-semibold text-lg">
+              Insert to notes?
+            </Text>
+            <View className="flex flex-row justify-around mt-2">
+              <Pressable
+                onPress={closeModal}
+                className="shadow-md py-2 w-[40%] flex flex-row justify-center rounded-xl bg-zinc-100"
+              >
+                <Text className="text-2xl">Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  onInsert(content);
+                  closeModal();
+                }}
+                className="shadow-md py-2 w-[40%] flex flex-row justify-center rounded-xl bg-secondary-yellow"
+              >
+                <Text className="text-2xl">Insert</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </View>
