@@ -161,7 +161,7 @@ export default function Home() {
                   title={item.title}
                   noteID={item.noteID}
                   categories={item.categories}
-                  notesContent={striptags(item.notesContent)}
+                  notesContent={item.notesContent}
                   date={new Date(item.date)}
                   onDelete={(deletedNoteID) => {
                     setNotes((prevNotes) =>
