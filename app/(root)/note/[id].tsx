@@ -155,14 +155,11 @@ const Note = ({ text }: any) => {
 
     const formData = new FormData();
 
-    formData.append(
-      isImage ? "image" : "audio",
-      {
-        uri: file.uri,
-        type: file.mimeType || "application/octet-stream",
-        name: file.name,
-      } as any
-    );
+    formData.append(isImage ? "image" : "audio", {
+      uri: file.uri,
+      type: file.mimeType || "application/octet-stream",
+      name: file.name,
+    } as any);
 
     try {
       let uploadResponse;
