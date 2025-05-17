@@ -1,6 +1,7 @@
 import {
   Image,
   TouchableOpacity,
+  ScrollView,
   View,
   Text,
   TextInput,
@@ -360,19 +361,21 @@ const Note = ({ text }: any) => {
             }, 100);
           }}
         >
-          <View className="mx-3 mt-2">
+          <View className="mx-3 mt-2 mb-6" style={{ flex: 1 }}>
             {noteContent ? (
-              <Pressable onLongPress={handleLongPress} delayLongPress={300}>
-                <RenderHTML
-                  contentWidth={width}
-                  source={{ html: noteContent }}
-                  baseStyle={{
-                    fontSize: 16,
-                    color: "#000",
-                  }}
-                  defaultTextProps={{ selectable: true }}
-                />
-              </Pressable>
+              <ScrollView>
+                <Pressable onLongPress={handleLongPress} delayLongPress={300}>
+                  <RenderHTML
+                    contentWidth={width}
+                    source={{ html: noteContent }}
+                    baseStyle={{
+                      fontSize: 16,
+                      color: "#000",
+                    }}
+                    defaultTextProps={{ selectable: true }}
+                  />
+                </Pressable>
+              </ScrollView>
             ) : (
               <Text className="text-gray-600">Start Writing!</Text>
             )}
