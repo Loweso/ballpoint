@@ -52,7 +52,6 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
       onRequestClose={closeModal}
     >
       <Pressable
-        onPress={closeModal}
         style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)" }}
       >
         <View className="flex-1 justify-end items-center">

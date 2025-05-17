@@ -11,6 +11,7 @@ import React, { useState, useEffect, useRef } from "react";
 import CategoryNamingModal from "./CategoryNamingModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { api } from "@/lib/redux/slices/authSlice";
+import { ScrollView } from "react-native";
 
 interface ManageCategoriesProps {
   isVisible: boolean;
@@ -246,49 +247,55 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
             )}
           </View>
 
-          {categories.map((category, index) => (
-            <View
-              key={index}
-              className="flex-row justify-right items-center p-2"
-            >
-              {isSelectingForDelete && (
-                <TouchableOpacity onPress={() => toggleSelection(index)}>
-                  <Ionicons
-                    name={selected[index] ? "ellipse" : "ellipse-outline"}
-                    color={selected[index] ? "#6a994e" : "#a09d45"}
-                    size={20}
-                  />
-                </TouchableOpacity>
-              )}
-
+          <ScrollView
+            style={{ maxHeight: 200, width: "100%" }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={true}
+          >
+            {categories.map((category, index) => (
               <View
-                className="pl-[10px]"
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  flex: 1,
-                }}
+                key={index}
+                className="flex-row justify-right items-center p-2"
               >
-                <View
-                  style={{
-                    width: 20,
-                    height: 20,
-                    backgroundColor: category.color,
-                    marginRight: 10,
-                    borderRadius: 5,
-                  }}
-                />
-                <Text className="text-xl">{category.label}</Text>
-              </View>
+                {isSelectingForDelete && (
+                  <TouchableOpacity onPress={() => toggleSelection(index)}>
+                    <Ionicons
+                      name={selected[index] ? "ellipse" : "ellipse-outline"}
+                      color={selected[index] ? "#6a994e" : "#a09d45"}
+                      size={20}
+                    />
+                  </TouchableOpacity>
+                )}
 
-              <TouchableOpacity
-                className="absolute right-[10px]"
-                onPress={() => handleRenameCategory(index)}
-              >
-                <Text className="text-lg text-tertiary-textGray">Rename</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+                <View
+                  className="pl-[10px]"
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      backgroundColor: category.color,
+                      marginRight: 10,
+                      borderRadius: 5,
+                    }}
+                  />
+                  <Text className="text-xl">{category.label}</Text>
+                </View>
+
+                <TouchableOpacity
+                  className="absolute right-[10px]"
+                  onPress={() => handleRenameCategory(index)}
+                >
+                  <Text className="text-lg text-tertiary-textGray">Rename</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
         </View>
 
         {/* Naming Modal */}
