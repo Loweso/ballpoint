@@ -20,6 +20,7 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import RenderHTML from "react-native-render-html";
 import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
+import MarkdownIt from "markdown-it";
 
 import {
   actions,
@@ -50,6 +51,9 @@ const Note = ({ text }: any) => {
     left: 0,
   });
 
+  const md = new MarkdownIt();
+  const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
+
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
   const { id } = useLocalSearchParams();
@@ -75,6 +79,7 @@ const Note = ({ text }: any) => {
         text: text,
       });
       console.log(response.data.summary);
+      setInsertMode("append");
       setAiText(response.data.summary);
 
       setTimeout(() => {
@@ -99,6 +104,7 @@ const Note = ({ text }: any) => {
         text: text,
       });
       console.log(response.data.organized);
+      setInsertMode("replace");
       setAiText(response.data.organized);
 
       setTimeout(() => {
@@ -149,11 +155,14 @@ const Note = ({ text }: any) => {
 
     const formData = new FormData();
 
-    formData.append(isImage ? "image" : "audio", {
-      name: file.name,
-      uri: file.uri,
-      type: file.mimeType || "application/octet-stream",
-    });
+    formData.append(
+      isImage ? "image" : "audio",
+      {
+        uri: file.uri,
+        type: file.mimeType || "application/octet-stream",
+        name: file.name,
+      } as any
+    );
 
     try {
       let uploadResponse;
@@ -304,6 +313,42 @@ const Note = ({ text }: any) => {
         setIsVisible={setIsExtractionWindowVisible}
         selectedFile={selectedFile}
         content={aiText}
+        onInsert={(insertedMarkdown) => {
+          if (!isEditing || !RichText.current) {
+            Alert.alert(
+              "Edit Mode Required",
+              "Enable editing to insert content."
+            );
+            return;
+          }
+
+          const html = md.render(insertedMarkdown);
+
+          if (insertMode === "replace") {
+            Alert.alert(
+              "Replace Note?",
+              "This will replace the entire note. Are you sure?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+                {
+                  text: "Replace",
+                  style: "destructive",
+                  onPress: () => {
+                    RichText.current?.setContentHTML(html);
+                    setNoteContent(html);
+                    setInsertMode("append");
+                  },
+                },
+              ]
+            );
+          } else {
+            RichText.current.insertHTML(html);
+            setNoteContent((prev: string) => prev + html);
+          }
+        }}
       />
 
       <TextInput

@@ -14,6 +14,7 @@ import { EventProvider } from "react-native-outside-press";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import striptags from "striptags";
+import { useFocusEffect } from "@react-navigation/native";
 
 DropDownPicker.setMode("BADGE");
 
@@ -155,6 +156,10 @@ export default function Home() {
             data={sortedNotes}
             keyExtractor={(item) => item.noteID}
             contentContainerStyle={{ paddingBottom: 100 }}
+            refreshing={loading}
+            onRefresh={() => {
+              fetchNotes();
+            }}
             renderItem={({ item }) => (
               <View style={{ marginBottom: 20 }}>
                 <NoteComponent
