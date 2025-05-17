@@ -20,16 +20,13 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
   isVisible,
   setIsVisible,
 }) => {
-  const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
-    useState(false);
-  const [manageMode, setManageMode] = useState<"view" | "edit">("edit");
+  const [isManageCategoriesVisible, setIsManageCategoriesVisible] = useState(false);
 
   const contentRef = useRef<View>(null);
   const { height } = useWindowDimensions();
   const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
-    // Adjust modal height dynamically based on content
     if (contentRef.current) {
       contentRef.current.measure((x, y, width, height) => {
         setContentHeight(height);
@@ -42,9 +39,8 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
     setIsManageCategoriesVisible(false);
   };
 
-  const toggleManageCategories = (mode: "view" | "edit") => {
+  const toggleManageCategories = () => {
     setIsManageCategoriesVisible(!isManageCategoriesVisible);
-    setManageMode(mode);
   };
 
   return (
@@ -55,7 +51,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
       onRequestClose={closeModal}
     >
       <Pressable
-        onPress={closeModal} // Close when tapping outside
+        onPress={closeModal}
         style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)" }}
       >
         <View className="flex-1 justify-end items-center">
@@ -68,8 +64,8 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               shadowOpacity: 0.2,
-              minHeight: 180, // Minimum height
-              maxHeight: height * 0.9, // Maximum height (90% of screen)
+              minHeight: 180,
+              maxHeight: height * 0.9,
             }}
           >
             {/* Close Button */}
@@ -89,7 +85,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
               showsVerticalScrollIndicator={false}
             >
               {/* Manage Categories Button */}
-              <TouchableOpacity onPress={() => toggleManageCategories("edit")}>
+              <TouchableOpacity onPress={toggleManageCategories}>
                 <View className="flex flex-row h-[40px] w-full mt-16 bg-secondary-lightyellow rounded-xl items-center">
                   <Text className="absolute left-[10px] text-tertiary-textYellow text-xl">
                     Manage Categories
@@ -108,7 +104,7 @@ export const DashboardSettings: React.FC<DashboardSettingsModalProps> = ({
                 <ManageCategories
                   isVisible={isManageCategoriesVisible}
                   setIsVisible={setIsManageCategoriesVisible}
-                  initialMode={manageMode}
+                  // initialMode prop removed here
                 />
               )}
             </ScrollView>

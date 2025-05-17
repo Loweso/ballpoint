@@ -38,7 +38,6 @@ const isColorLight = (hexColor: string) => {
 const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
   isVisible,
   setIsVisible,
-  initialMode = "view",
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [noteCategories, setNoteCategories] = useState<number[]>([]);
@@ -106,13 +105,32 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
     }
   };
 
+  if (!isVisible) return null;
+
   return (
     <View
-      className={`${
-        isVisible ? "flex" : "hidden"
-      } absolute w-full h-full justify-center items-center bg-black/25 z-10 pb-8`}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.25)",
+        zIndex: 1000,
+      }}
     >
-      <View className="flex flex-col bg-white h-3/4 w-3/4 p-3 rounded-lg">
+      {/* inner modal box */}
+      <View
+        style={{
+          width: "75%",
+          height: "75%",
+          backgroundColor: "white",
+          padding: 12,
+          borderRadius: 10,
+        }}
+      >
         <View className="flex flex-row justify-between items-center mb-2">
           <Text className="font-bold text-center">Select Note Categories</Text>
           <TouchableOpacity
