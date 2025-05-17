@@ -67,6 +67,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
           placeholderTextColor="#6B7280"
           value={name}
           onChangeText={setName}
+          maxLength={20}
         />
 
         {/* Color Circle Toggle */}
