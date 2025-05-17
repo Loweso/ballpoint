@@ -32,8 +32,10 @@ import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
 import HighlightModal from "@/components/HighlightModal";
 import { OrganizePreferencesModal } from "@/components/OrganizePreferencesModal";
+import { LoadingModal } from "@/components/LoadingModal";
 
 const Note = ({ text }: any) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
     useState(false);
@@ -142,7 +144,6 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
-    console.log("I'm here!");
     const file = await pickDocument();
     setSelectedFile(file);
 
@@ -151,10 +152,7 @@ const Note = ({ text }: any) => {
     const isAudio = file.mimeType?.startsWith("audio");
     const isImage = file.mimeType?.startsWith("image");
 
-    console.log("Insights: ", isAudio, file.mimeType);
-
     const formData = new FormData();
-
     formData.append(isImage ? "image" : "audio", {
       uri: file.uri,
       type: file.mimeType || "application/octet-stream",
@@ -162,6 +160,7 @@ const Note = ({ text }: any) => {
     } as any);
 
     try {
+      setIsLoading(true);
       let uploadResponse;
 
       if (isImage) {
@@ -170,8 +169,6 @@ const Note = ({ text }: any) => {
             "Content-Type": "multipart/form-data",
           },
         });
-
-        console.log("Upload successful:", uploadResponse.data);
 
         if (uploadResponse.data) {
           setAiText(uploadResponse.data.text);
@@ -194,14 +191,14 @@ const Note = ({ text }: any) => {
         return;
       }
 
-      console.log("Upload successful:", uploadResponse.data);
-
       setTimeout(() => {
         setIsExtractionWindowVisible(true);
       }, 600);
     } catch (error) {
       console.error("Error uploading file:", error);
       Alert.alert("Error", "Upload failed. Check your backend and try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -251,6 +248,8 @@ const Note = ({ text }: any) => {
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
+      <LoadingModal visible={isLoading} />
+
       {!isEditing && (
         <CircleButton
           className="absolute bottom-10 right-8"

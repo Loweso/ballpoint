@@ -32,10 +32,6 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
 
   const slideAnim = useRef(new Animated.Value(screenHeight + 100)).current;
 
-  const closeModal = () => {
-    setIsVisible(false);
-  };
-
   const [categories, setCategories] = useState<Category[]>([]);
   const [selected, setSelected] = useState(
     Array(categories.length).fill(false)

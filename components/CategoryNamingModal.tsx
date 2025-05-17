@@ -38,6 +38,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
       if (setCategoryColor) setCategoryColor("#EAB308");
       setShowColorPicker(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const handleProceed = () => {
