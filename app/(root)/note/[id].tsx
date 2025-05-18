@@ -1,6 +1,7 @@
 import {
   Image,
   TouchableOpacity,
+  ScrollView,
   View,
   Text,
   TextInput,
@@ -20,6 +21,7 @@ import RenderHTML from "react-native-render-html";
 import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
 import MarkdownIt from "markdown-it";
+import { highlightVisibleTextOnly } from "@/utils/highlightTextinHTML";
 
 import {
   actions,
@@ -31,32 +33,37 @@ import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
 import HighlightModal from "@/components/HighlightModal";
 import { OrganizePreferencesModal } from "@/components/OrganizePreferencesModal";
+import { LoadingModal } from "@/components/LoadingModal";
+import SearchNavigation from "@/components/FindWordOverlay";
 
 const Note = ({ text }: any) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
-    useState(false);
-  const [title, setTitle] = useState("");
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [noteContent, setNoteContent] = useState(text);
-  const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
-  const [aiText, setAiText] = useState(text);
+  const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
+    useState(false);
   const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [isOrganizePreferencesModalOpen, setIsOrganizePreferencesModalOpen] =
     useState(false);
+  const [isSearchNavOpen, setIsSearchNavOpen] = useState(false);
+
+  const [aiText, setAiText] = useState(text);
+  const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
+  const [noteContent, setNoteContent] = useState(text);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+
   const [highlightPosition, setHighlightPosition] = useState({
     top: 0,
     left: 0,
   });
 
   const md = new MarkdownIt();
-  const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
-
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
   const { id } = useLocalSearchParams();
-
   const { width } = useWindowDimensions();
 
   const toggleAIPolishModal = () => {
@@ -141,7 +148,6 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
-    console.log("I'm here!");
     const file = await pickDocument();
     setSelectedFile(file);
 
@@ -150,20 +156,15 @@ const Note = ({ text }: any) => {
     const isAudio = file.mimeType?.startsWith("audio");
     const isImage = file.mimeType?.startsWith("image");
 
-    console.log("Insights: ", isAudio, file.mimeType);
-
     const formData = new FormData();
-
-    formData.append(
-      isImage ? "image" : "audio",
-      {
-        uri: file.uri,
-        type: file.mimeType || "application/octet-stream",
-        name: file.name,
-      } as any
-    );
+    formData.append(isImage ? "image" : "audio", {
+      uri: file.uri,
+      type: file.mimeType || "application/octet-stream",
+      name: file.name,
+    } as any);
 
     try {
+      setIsLoading(true);
       let uploadResponse;
 
       if (isImage) {
@@ -172,8 +173,6 @@ const Note = ({ text }: any) => {
             "Content-Type": "multipart/form-data",
           },
         });
-
-        console.log("Upload successful:", uploadResponse.data);
 
         if (uploadResponse.data) {
           setAiText(uploadResponse.data.text);
@@ -196,14 +195,14 @@ const Note = ({ text }: any) => {
         return;
       }
 
-      console.log("Upload successful:", uploadResponse.data);
-
       setTimeout(() => {
         setIsExtractionWindowVisible(true);
       }, 600);
     } catch (error) {
       console.error("Error uploading file:", error);
       Alert.alert("Error", "Upload failed. Check your backend and try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -251,8 +250,16 @@ const Note = ({ text }: any) => {
     }
   }, [id]);
 
+  const handleSearchModal = (isOpen: boolean) => {
+    setSearchQuery("");
+    setIsNoteSettingsVisible(false);
+    setIsSearchNavOpen(isOpen);
+  };
+
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
+      <LoadingModal visible={isLoading} />
+
       {!isEditing && (
         <CircleButton
           className="absolute bottom-10 right-8"
@@ -405,19 +412,23 @@ const Note = ({ text }: any) => {
             }, 100);
           }}
         >
-          <View className="mx-3 mt-2">
+          <View className="mx-3 mt-2 mb-6" style={{ flex: 1 }}>
             {noteContent ? (
-              <Pressable onLongPress={handleLongPress} delayLongPress={300}>
-                <RenderHTML
-                  contentWidth={width}
-                  source={{ html: noteContent }}
-                  baseStyle={{
-                    fontSize: 16,
-                    color: "#000",
-                  }}
-                  defaultTextProps={{ selectable: true }}
-                />
-              </Pressable>
+              <ScrollView>
+                <Pressable onLongPress={handleLongPress} delayLongPress={300}>
+                  <RenderHTML
+                    contentWidth={width}
+                    source={{
+                      html: highlightVisibleTextOnly(noteContent, searchQuery),
+                    }}
+                    baseStyle={{
+                      fontSize: 16,
+                      color: "#000",
+                    }}
+                    defaultTextProps={{ selectable: true }}
+                  />
+                </Pressable>
+              </ScrollView>
             ) : (
               <Text className="text-gray-600">Start Writing!</Text>
             )}
@@ -434,6 +445,8 @@ const Note = ({ text }: any) => {
         isVisible={isNoteSettingsVisible}
         setIsVisible={setIsNoteSettingsVisible}
         onDelete={deleteNote}
+        handleSearchModal={handleSearchModal}
+        isEditing={isEditing}
       />
       <HighlightModal
         isVisible={isHighlightModalOpen}
@@ -445,6 +458,12 @@ const Note = ({ text }: any) => {
         isVisible={isOrganizePreferencesModalOpen}
         setIsVisible={setIsOrganizePreferencesModalOpen}
         organizeNotes={organizeNotes}
+      />
+      <SearchNavigation
+        query={searchQuery}
+        onChangeQuery={setSearchQuery}
+        isModalOpen={isSearchNavOpen}
+        handleModalClose={handleSearchModal}
       />
     </SafeAreaView>
   );
