@@ -21,6 +21,7 @@ import RenderHTML from "react-native-render-html";
 import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
 import MarkdownIt from "markdown-it";
+import { highlightVisibleTextOnly } from "@/utils/highlightTextinHTML";
 
 import {
   actions,
@@ -33,33 +34,36 @@ import NoteSettings from "@/components/NoteSettings";
 import HighlightModal from "@/components/HighlightModal";
 import { OrganizePreferencesModal } from "@/components/OrganizePreferencesModal";
 import { LoadingModal } from "@/components/LoadingModal";
+import SearchNavigation from "@/components/FindWordOverlay";
 
 const Note = ({ text }: any) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
-    useState(false);
-  const [title, setTitle] = useState("");
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [noteContent, setNoteContent] = useState(text);
-  const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
-  const [aiText, setAiText] = useState(text);
+  const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
+    useState(false);
   const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [isOrganizePreferencesModalOpen, setIsOrganizePreferencesModalOpen] =
     useState(false);
+  const [isSearchNavOpen, setIsSearchNavOpen] = useState(false);
+
+  const [aiText, setAiText] = useState(text);
+  const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
+  const [noteContent, setNoteContent] = useState(text);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+
   const [highlightPosition, setHighlightPosition] = useState({
     top: 0,
     left: 0,
   });
 
   const md = new MarkdownIt();
-  const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
-
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
   const { id } = useLocalSearchParams();
-
   const { width } = useWindowDimensions();
 
   const toggleAIPolishModal = () => {
@@ -246,6 +250,12 @@ const Note = ({ text }: any) => {
     }
   }, [id]);
 
+  const handleSearchModal = (isOpen: boolean) => {
+    setSearchQuery("");
+    setIsNoteSettingsVisible(false);
+    setIsSearchNavOpen(isOpen);
+  };
+
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
       <LoadingModal visible={isLoading} />
@@ -408,7 +418,9 @@ const Note = ({ text }: any) => {
                 <Pressable onLongPress={handleLongPress} delayLongPress={300}>
                   <RenderHTML
                     contentWidth={width}
-                    source={{ html: noteContent }}
+                    source={{
+                      html: highlightVisibleTextOnly(noteContent, searchQuery),
+                    }}
                     baseStyle={{
                       fontSize: 16,
                       color: "#000",
@@ -433,6 +445,8 @@ const Note = ({ text }: any) => {
         isVisible={isNoteSettingsVisible}
         setIsVisible={setIsNoteSettingsVisible}
         onDelete={deleteNote}
+        handleSearchModal={handleSearchModal}
+        isEditing={isEditing}
       />
       <HighlightModal
         isVisible={isHighlightModalOpen}
@@ -444,6 +458,12 @@ const Note = ({ text }: any) => {
         isVisible={isOrganizePreferencesModalOpen}
         setIsVisible={setIsOrganizePreferencesModalOpen}
         organizeNotes={organizeNotes}
+      />
+      <SearchNavigation
+        query={searchQuery}
+        onChangeQuery={setSearchQuery}
+        isModalOpen={isSearchNavOpen}
+        handleModalClose={handleSearchModal}
       />
     </SafeAreaView>
   );

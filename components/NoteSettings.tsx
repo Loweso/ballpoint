@@ -11,12 +11,16 @@ interface NoteSettingsModalProps {
   isVisible: boolean;
   setIsVisible: (value: boolean) => void;
   onDelete: () => Promise<void>;
+  handleSearchModal: (value: boolean) => void;
+  isEditing: boolean;
 }
 
 export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
   isVisible,
   setIsVisible,
   onDelete,
+  handleSearchModal,
+  isEditing,
 }) => {
   const [isManageCategoriesVisible, setIsManageCategoriesVisible] =
     useState(false);
@@ -48,9 +52,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
       visible={isVisible}
       onRequestClose={closeModal}
     >
-      <Pressable
-        style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)" }}
-      >
+      <Pressable style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
         <View className="flex-1 justify-end items-center">
           <View
             style={{
@@ -78,9 +80,16 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
               <View className="flex flex-row justify-center pt-2 pb-24">
                 <TouchableOpacity
                   className="m-2"
-                  onPress={() => console.log("Search in Note Pressed")}
+                  onPress={() => handleSearchModal(true)}
+                  disabled={isEditing}
                 >
-                  <View className="h-[110px] w-[90px] justify-center items-center bg-secondary-buttonGrey rounded-xl p-3">
+                  <View
+                    className="h-[110px] w-[90px] justify-center items-center rounded-xl p-3"
+                    style={{
+                      backgroundColor: "#d3d3d3", // faded grey when disabled
+                      opacity: isEditing ? 0.5 : 1,
+                    }}
+                  >
                     <Ionicons name="search-outline" color="#080808" size={48} />
                     <Text
                       className="min-h-[35px] w-full text-center text-sm"
