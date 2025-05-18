@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 import { RootState } from "../store";
@@ -170,25 +170,59 @@ export const clearAuthTokens = async () => {
 
 export const updateUsername = createAsyncThunk(
   "auth/updateUsername",
-  async (
-    { username }: { username: string },
-    { rejectWithValue, getState }
-  ) => {
+  async ({ username }: { username: string }, { rejectWithValue, getState }) => {
     try {
-      // Explicitly define the state type as RootState
       const state = getState() as RootState;
-      const token = state.auth.accessToken; // Now TypeScript knows the type of state
+      const token = state.auth.accessToken;
 
-      const response = await api.patch("/api/user/update-username", { username }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.patch(
+        "/api/update-username",
+        { username },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      return response.data; // This will return the updated user data
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || { message: "Failed to update username" }
+      );
+    }
+  }
+);
+
+export const updateProfilePicture = createAsyncThunk(
+  "auth/updateProfilePicture",
+  async ({ photo }: { photo: any }, { rejectWithValue, getState }) => {
+    try {
+      const state = getState() as RootState;
+      const token = state.auth.accessToken;
+
+      const formData = new FormData();
+
+      const file = {
+        uri: photo.uri,
+        name: photo.name || "profile.jpg",
+        type: photo.type || "image/jpeg",
+      };
+
+      formData.append("photo", file as any);
+
+      const response = await api.post("api/profile-picture", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Received URL: ", response.data.photo);
+      return response.data; // Expecting { photo: 'url' }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data || { message: "Profile picture update failed" }
       );
     }
   }
@@ -324,10 +358,20 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
+      // Update username
       .addCase(updateUsername.fulfilled, (state, action) => {
         if (state.user) {
           state.user.username = action.payload.username;
         }
+      })
+      // Update Profile Picture
+      .addCase(updateProfilePicture.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user.profile_picture = action.payload.profile_picture;
+        }
+      })
+      .addCase(updateProfilePicture.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });

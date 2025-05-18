@@ -54,7 +54,6 @@ const DashboardMenu = () => {
   const [isSortMenuVisible, setSortMenuVisible] = useState(false);
   const [isDashboardSettingsVisible, setIsDashBoardSettingsVisible] =
     useState(false);
-  const [isHighlightModalVisible, setIsHighlightModalVisible] = useState(false);
   const filterSlideAnim = useRef(new Animated.Value(-200)).current;
   const sortSlideAnim = useRef(new Animated.Value(-200)).current;
 

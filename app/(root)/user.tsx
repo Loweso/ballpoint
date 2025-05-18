@@ -1,10 +1,22 @@
-import { TouchableOpacity, View, Text, TextInput } from "react-native";
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  TextInput,
+  Image,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { useRouter } from "expo-router";
+import { pickDocument } from "@/hooks/DocumentPicker";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { logoutUser, updateUsername } from "@/lib/redux/slices/authSlice";
+import {
+  logoutUser,
+  updateUsername,
+  updateProfilePicture,
+} from "@/lib/redux/slices/authSlice";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
@@ -24,7 +36,9 @@ export default function User() {
 
   const handleSaveUsername = async () => {
     try {
-      const updatedUser = await dispatch(updateUsername({ username: editedUsername })).unwrap();
+      const updatedUser = await dispatch(
+        updateUsername({ username: editedUsername })
+      ).unwrap();
 
       setEditedUsername(updatedUser.username);
     } catch (err) {
@@ -40,6 +54,46 @@ export default function User() {
     }
   };
 
+  const pickImage = async () => {
+    console.log("Picking image through document picker...");
+
+    const file = await pickDocument();
+    if (!file) return;
+
+    const isImage = file.mimeType?.startsWith("image");
+
+    if (!isImage) {
+      Alert.alert("Unsupported File", "Please select a valid image file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("photo", {
+      name: file.name,
+      uri: file.uri,
+      type: file.mimeType || "image/jpeg",
+    });
+
+    try {
+      const response = await dispatch(
+        updateProfilePicture({ photo: file })
+      ).unwrap();
+
+      if (response?.profile_picture) {
+        dispatch(updateProfilePicture(response.profile_picture));
+        console.log(
+          "Profile picture updated successfully:",
+          response.profile_picture
+        );
+      } else {
+        console.error("Error: No photo in response", response);
+      }
+    } catch (err) {
+      console.error("Failed to upload profile picture:", err);
+      Alert.alert("Error", "Upload failed. Please try again.");
+    }
+  };
+
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
       <View className="flex min-h-screen bg-gray-200">
@@ -52,16 +106,25 @@ export default function User() {
           </TouchableOpacity>
 
           <View className="flex-row items-center justify-baseline pt-8 pr-10">
-            {/*Placeholder icon for user profile*/}
-            <Ionicons
-              name="person-circle-outline"
-              className="px-6"
-              size={130}
-            />
+            {user?.profile_picture ? (
+              <Image
+                source={{ uri: user.profile_picture }}
+                className="rounded-full w-[115px] h-[115px] mx-6 border"
+              />
+            ) : (
+              <Ionicons
+                name="person-circle-outline"
+                className="px-4"
+                size={130}
+              />
+            )}
 
             <TouchableOpacity
               className="absolute left-28 bottom-4 bg-transparent w-16"
-              onPress={() => console.log("User Profile Picture Change")}
+              onPress={() => {
+                pickImage();
+                console.log("User Profile Picture Change");
+              }}
             >
               <Ionicons
                 name="camera-reverse"
@@ -108,7 +171,8 @@ export default function User() {
                   onChangeText={handleUsernameChange}
                   onBlur={() => {
                     setIsEditing(false);
-                    handleSaveUsername();}}
+                    handleSaveUsername();
+                  }}
                   autoFocus
                   className="text-2xl border-b border-gray-200"
                 />
@@ -123,13 +187,15 @@ export default function User() {
             </TouchableOpacity>
 
             <View className="pt-4">
-              <Text className="text-2xl">{user?.date_joined
-      ? new Date(user.date_joined).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        })
-      : "MM/DD/YYYY"}</Text>
+              <Text className="text-2xl">
+                {user?.date_joined
+                  ? new Date(user.date_joined).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "MM/DD/YYYY"}
+              </Text>
               <Text className="text-tertiary-textGray">Date Joined</Text>
             </View>
 
