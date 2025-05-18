@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  Pressable,
   Alert,
   useWindowDimensions,
 } from "react-native";
@@ -29,8 +28,9 @@ import {
 import PolishMenuModal from "@/components/PolishMenuModal";
 import { images } from "@/constants";
 import NoteSettings from "@/components/NoteSettings";
-import HighlightModal from "@/components/HighlightModal";
 import { OrganizePreferencesModal } from "@/components/OrganizePreferencesModal";
+import QueryMenuModal from "@/components/QueryMenuModal";
+import TextReplacementModal from "@/components/TextReplacementModal";
 
 const Note = ({ text }: any) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -42,13 +42,16 @@ const Note = ({ text }: any) => {
   const [noteContent, setNoteContent] = useState(text);
   const [isNoteSettingsVisible, setIsNoteSettingsVisible] = useState(false);
   const [aiText, setAiText] = useState(text);
-  const [isHighlightModalOpen, setIsHighlightModalOpen] = useState(false);
   const [isOrganizePreferencesModalOpen, setIsOrganizePreferencesModalOpen] =
     useState(false);
-  const [highlightPosition, setHighlightPosition] = useState({
-    top: 0,
-    left: 0,
-  });
+
+  const [selectedText, setSelectedText] = useState("");
+  const [queryText, setQueryText] = useState("");
+  const [selectionRange, setSelectionRange] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
+  const [isQueryMenuModalOpen, setIsQueryMenuModalOpen] = useState(false);
 
   const md = new MarkdownIt();
   const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
@@ -59,6 +62,11 @@ const Note = ({ text }: any) => {
 
   const { width } = useWindowDimensions();
 
+  const [isReplacementModalVisible, setIsReplacementModalVisible] =
+    useState(false);
+  const [processedText, setProcessedText] = useState("");
+  const [isFromQuery, setIsFromQuery] = useState(false);
+
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
   };
@@ -66,6 +74,13 @@ const Note = ({ text }: any) => {
   useEffect(() => {
     console.log(isOrganizePreferencesModalOpen, "organize");
   }, [isOrganizePreferencesModalOpen]);
+
+  useEffect(() => {
+    console.log("selected");
+    if (selectedText) {
+      console.log("Selected text updated:", selectedText);
+    }
+  }, [selectedText]);
 
   const summarizeNotes = async () => {
     const text = striptags(noteContent);
@@ -116,6 +131,61 @@ const Note = ({ text }: any) => {
     }
   };
 
+  const processQuery = async () => {
+    const noteText = striptags(noteContent);
+    if (!striptags(noteText).trim()) {
+      alert("Please enter some text.");
+      return;
+    }
+    try {
+      const response = await api.post("extract/query-text", {
+        selected_text: selectedText,
+        note_content: noteText,
+        query: queryText,
+      });
+      setProcessedText(response.data.answer);
+      setIsFromQuery(true);
+      setIsQueryMenuModalOpen(false);
+      setIsReplacementModalVisible(true);
+    } catch (error) {
+      console.error(error);
+      alert("Error processing query.");
+    }
+  };
+
+  const onCompleteHighlightedText = async () => {
+    const noteText = striptags(noteContent);
+    if (!striptags(noteText).trim()) {
+      alert("Please enter some text.");
+      return;
+    }
+    try {
+      const response = await api.post("extract/complete-text", {
+        selected_text: selectedText,
+        note_content: noteText,
+      });
+      setProcessedText(response.data.completedText);
+      setIsFromQuery(false);
+      setIsQueryMenuModalOpen(false);
+      setIsReplacementModalVisible(true);
+    } catch (error) {
+      console.error(error);
+      alert("Error processing text.");
+    }
+  };
+
+  const handleReplace = () => {
+    if (RichText.current) {
+      if (isFromQuery) {
+        RichText.current.insertHTML(processedText);
+        setNoteContent((prev: string) => prev + processedText);
+      } else {
+        replaceSelectedText(processedText);
+      }
+    }
+    setIsReplacementModalVisible(false);
+  };
+
   const saveNote = async () => {
     const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
     const sanitizedTitle = title.trim() || "Untitled Note";
@@ -154,14 +224,11 @@ const Note = ({ text }: any) => {
 
     const formData = new FormData();
 
-    formData.append(
-      isImage ? "image" : "audio",
-      {
-        uri: file.uri,
-        type: file.mimeType || "application/octet-stream",
-        name: file.name,
-      } as any
-    );
+    formData.append(isImage ? "image" : "audio", {
+      uri: file.uri,
+      type: file.mimeType || "application/octet-stream",
+      name: file.name,
+    } as any);
 
     try {
       let uploadResponse;
@@ -224,14 +291,12 @@ const Note = ({ text }: any) => {
     <Image source={images.aiPolish} className="w-7 h-7" />
   );
 
+  const ReplaceIcon = () => (
+    <Ionicons name="swap-horizontal" size={20} color="black" />
+  );
+
   const enableEditing = () => {
     setIsEditing(true);
-  };
-
-  const handleLongPress = (event: any) => {
-    const { pageX, pageY } = event.nativeEvent;
-    setHighlightPosition({ top: pageY, left: pageX });
-    setIsHighlightModalOpen(true);
   };
 
   useEffect(() => {
@@ -250,6 +315,44 @@ const Note = ({ text }: any) => {
       fetchNote();
     }
   }, [id]);
+
+  const replaceSelectedText = (newText: string) => {
+    if (RichText.current && selectionRange) {
+      RichText.current.insertHTML(newText);
+    }
+  };
+
+  const onInjectJavascript = () => {
+    const script = `(function() {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const value = selection.toString() || '';
+        window.ReactNativeWebView.postMessage(JSON.stringify({ 
+          data: {
+            type: 'SELECTION_CHANGE', 
+            value,
+            range: {
+              start: range.startOffset,
+              end: range.endOffset
+            }
+          } 
+        }));
+      }
+      void(0);
+    })();`;
+    RichText.current?.injectJavascript(script);
+  };
+
+  const handleOnMessage = (event: { type: string; id: string; data?: any }) => {
+    if (event?.data?.type === "SELECTION_CHANGE") {
+      const selected = event?.data?.value;
+      const range = event?.data?.range;
+      setSelectedText(selected);
+      setSelectionRange(range);
+      console.log("Selected text", selected, "Range:", range);
+    }
+  };
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
@@ -373,15 +476,15 @@ const Note = ({ text }: any) => {
             initialContentHTML={noteContent}
             onChange={(descriptionText) => {
               setNoteContent(descriptionText);
-              console.log(striptags(descriptionText));
-              console.log("descriptionText:", descriptionText);
             }}
+            onMessage={handleOnMessage}
           />
 
           <RichToolbar
             editor={RichText}
             actions={[
               "openAIPolishModal",
+              "replaceText",
               actions.undo,
               actions.redo,
               actions.setBold,
@@ -391,8 +494,17 @@ const Note = ({ text }: any) => {
             ]}
             iconMap={{
               openAIPolishModal: AiModalOpenIcon,
+              replaceText: ReplaceIcon,
             }}
             openAIPolishModal={toggleAIPolishModal}
+            replaceText={() => {
+              onInjectJavascript();
+              setTimeout(() => {
+                if (selectedText) {
+                  setIsQueryMenuModalOpen(true);
+                }
+              }, 100);
+            }}
           />
         </>
       ) : (
@@ -400,24 +512,21 @@ const Note = ({ text }: any) => {
           onPress={() => {
             setTimeout(() => {
               if (RichText.current) {
-                RichText.current.focusContentEditor(); // This forces the cursor to appear
+                RichText.current.focusContentEditor(); 
               }
             }, 100);
           }}
         >
           <View className="mx-3 mt-2">
             {noteContent ? (
-              <Pressable onLongPress={handleLongPress} delayLongPress={300}>
-                <RenderHTML
-                  contentWidth={width}
-                  source={{ html: noteContent }}
-                  baseStyle={{
-                    fontSize: 16,
-                    color: "#000",
-                  }}
-                  defaultTextProps={{ selectable: true }}
-                />
-              </Pressable>
+              <RenderHTML
+                contentWidth={width}
+                source={{ html: noteContent }}
+                baseStyle={{
+                  fontSize: 16,
+                  color: "#000",
+                }}
+              />
             ) : (
               <Text className="text-gray-600">Start Writing!</Text>
             )}
@@ -435,16 +544,24 @@ const Note = ({ text }: any) => {
         setIsVisible={setIsNoteSettingsVisible}
         onDelete={deleteNote}
       />
-      <HighlightModal
-        isVisible={isHighlightModalOpen}
-        setIsVisible={setIsHighlightModalOpen}
-        position={highlightPosition}
+      <QueryMenuModal
+        visible={isQueryMenuModalOpen}
+        onClose={() => setIsQueryMenuModalOpen(false)}
+        onProcessQuery={processQuery}
+        onCompleteHighlightedText={onCompleteHighlightedText}
+        setQueryText={setQueryText}
+        queryText={queryText}
       />
-
       <OrganizePreferencesModal
         isVisible={isOrganizePreferencesModalOpen}
         setIsVisible={setIsOrganizePreferencesModalOpen}
         organizeNotes={organizeNotes}
+      />
+      <TextReplacementModal
+        visible={isReplacementModalVisible}
+        onClose={() => setIsReplacementModalVisible(false)}
+        onReplace={handleReplace}
+        processedText={processedText}
       />
     </SafeAreaView>
   );
