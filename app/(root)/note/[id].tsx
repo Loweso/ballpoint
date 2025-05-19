@@ -36,6 +36,7 @@ const Note = ({ text }: any) => {
   const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
     useState(false);
   const [title, setTitle] = useState("");
+  const [extractionTitle, setExtractionTitle] = useState("");
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [noteContent, setNoteContent] = useState(text);
@@ -75,6 +76,7 @@ const Note = ({ text }: any) => {
       });
       console.log(response.data.summary);
       setAiText(response.data.summary);
+      setExtractionTitle("Summary of Notes");
 
       setTimeout(() => {
         toggleAIPolishModal();
@@ -99,6 +101,7 @@ const Note = ({ text }: any) => {
       });
       console.log(response.data.organized);
       setAiText(response.data.organized);
+      setExtractionTitle(`Organized Notes: ${mode}`);
 
       setTimeout(() => {
         setIsOrganizePreferencesModalOpen(false);
@@ -303,6 +306,7 @@ const Note = ({ text }: any) => {
         setIsVisible={setIsExtractionWindowVisible}
         selectedFile={selectedFile}
         content={aiText}
+        title={extractionTitle}
       />
 
       <TextInput

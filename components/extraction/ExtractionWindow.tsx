@@ -15,6 +15,7 @@ interface ExtractionWindowProps {
   setIsVisible: (value: boolean) => void;
   selectedFile?: File | null;
   content: string;
+  title?: string;
 }
 
 export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
@@ -22,6 +23,7 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
   setIsVisible,
   selectedFile,
   content,
+  title,
 }) => {
   const closeModal = () => {
     setIsVisible(false);
@@ -36,8 +38,10 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
     >
       <View className="bg-black/30 h-full flex relative ">
         <View className="flex flex-col max-h-[80%] w-full bg-primary-green px-6 py-8 rounded-t-xl shadow-md absolute bottom-0 left-0">
-          {selectedFile?.name ? (
-            <Text className="">{selectedFile.name}</Text>
+          {title || selectedFile?.name ? (
+            <Text className="text-tertiary-buttonGreen text-lg font-semibold">
+              {title || selectedFile?.name}
+            </Text>
           ) : null}
           <TouchableOpacity
             className="absolute right-0 px-6 py-8"
