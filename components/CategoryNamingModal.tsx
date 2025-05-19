@@ -38,6 +38,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
       if (setCategoryColor) setCategoryColor("#EAB308");
       setShowColorPicker(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const handleProceed = () => {
@@ -67,6 +68,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
           placeholderTextColor="#6B7280"
           value={name}
           onChangeText={setName}
+          maxLength={20}
         />
 
         {/* Color Circle Toggle */}

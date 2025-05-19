@@ -16,6 +16,7 @@ interface QueryMenuModalProps {
   onProcessQuery: () => void;
   onCompleteHighlightedText: () => void;
   setQueryText: (str: string) => void;
+  setSelectedText: (str: string) => void;
   queryText: string;
 }
 
@@ -25,6 +26,7 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
   onProcessQuery,
   onCompleteHighlightedText,
   setQueryText,
+  setSelectedText,
   queryText,
 }) => {
   return (
@@ -88,6 +90,8 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
                 onPress={() => {
                   console.log("Cancel button pressed");
                   onClose();
+                  setQueryText(""); // Clear the query text
+                  setSelectedText("");
                 }}
               >
                 <View className="flex-none p-1 rounded-md">

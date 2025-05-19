@@ -14,6 +14,7 @@ import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
 import NoteSettingsConfirmationModal from "./NoteSettingsConfirmationModal";
 import { api } from "@/lib/redux/slices/authSlice";
+import RenderHTML from "react-native-render-html";
 
 type NoteComponentProps = {
   title: string;
@@ -23,6 +24,22 @@ type NoteComponentProps = {
   date: Date;
   onDelete: (noteID: string) => void;
 };
+
+function getReadableTextColor(hex: string): string {
+  // Remove '#' if present
+  const cleanedHex = hex.replace("#", "");
+
+  // Parse r, g, b
+  const r = parseInt(cleanedHex.substring(0, 2), 16);
+  const g = parseInt(cleanedHex.substring(2, 4), 16);
+  const b = parseInt(cleanedHex.substring(4, 6), 16);
+
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  // Return black for bright backgrounds, white for dark ones
+  return luminance > 0.6 ? "#000000" : "#ffffff";
+}
 
 const NoteComponent: React.FC<NoteComponentProps> = ({
   title,
@@ -59,9 +76,22 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
     setNewTitle(prevTitle);
     setIsRenameModalVisible(false);
   };
-  const handleRename = () => {
-    console.log("Renamed to:", newTitle);
-    setIsRenameModalVisible(false);
+  const handleRename = async () => {
+    const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
+
+    try {
+      await api.put(`/notes/${noteID}/`, {
+        title: newTitle,
+        notesContent: notesContent,
+        categories: [],
+        date: today,
+      });
+      console.log("Renamed to:", newTitle);
+      setIsRenameModalVisible(false);
+    } catch (error) {
+      console.error("Error renaming note:", error);
+      Alert.alert("Error", "Failed to rename the note.");
+    }
   };
 
   const deleteNote = async () => {
@@ -126,7 +156,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
         </OutsidePressHandler>
       )}
 
-      <View className="flex flex-row items-center justify-between">
+      <View className="flex flex-row items-center justify-between -ml-1">
         <Text
           className="text-3xl w-3/4"
           style={{ fontFamily: "Comfortaa-Medium", overflow: "hidden" }}
@@ -142,21 +172,44 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
         </View>
       </View>
 
-      <View className="flex flex-row flex-wrap my-2 gap-4">
-        {categories.map((category, index) => (
-          <View
-            key={index}
-            style={{ backgroundColor: category.color || "#fffee1" }} // Use style instead
-            className="h-8 py-1 px-4"
-          >
-            <Text className="font-bold">{String(category.label)}</Text>
-          </View>
-        ))}
+      <View className="flex flex-row flex-wrap my-2 gap-2">
+        {[...categories] // create a shallow copy to avoid mutating the original
+          .sort((a, b) => b.label.length - a.label.length) // sort by label length (descending)
+          .map((category, index) => {
+            const backgroundColor = category.color || "#fffee1";
+            const textColor = getReadableTextColor(backgroundColor);
+
+            return (
+              <View
+                key={index}
+                style={{ backgroundColor }}
+                className="h-8 py-1 px-4"
+              >
+                <Text style={{ color: textColor }} className="font-bold">
+                  {String(category.label)}
+                </Text>
+              </View>
+            );
+          })}
       </View>
 
-      <Text className="text-sm text-justify" numberOfLines={4}>
-        {notesContent}
-      </Text>
+      <View
+        style={{
+          maxHeight: 66, // ~4 lines based on font size/line height
+          overflow: "hidden",
+        }}
+      >
+        <RenderHTML
+          contentWidth={200}
+          source={{ html: notesContent }}
+          baseStyle={{
+            fontSize: 12,
+            color: "#1a1a1a",
+            lineHeight: 16,
+            textAlign: "justify",
+          }}
+        />
+      </View>
 
       <Modal visible={isRenameModalVisible} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/50 p-4">
