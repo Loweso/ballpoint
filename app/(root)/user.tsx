@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { pickDocument } from "@/hooks/DocumentPicker";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
@@ -27,6 +27,12 @@ export default function User() {
 
   const { user } = useAppSelector((state) => state.auth);
   const [editedUsername, setEditedUsername] = useState(user?.username ?? "");
+
+  useEffect(() => {
+    if (user) {
+      console.log(user);
+    }
+  }, [user]);
 
   const dispatch = useAppDispatch();
 

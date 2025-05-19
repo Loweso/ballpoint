@@ -224,8 +224,10 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
+    console.log(extractionTitle, "extraction title");
     const file = await pickDocument();
     setSelectedFile(file);
+    setInsertMode("append");
 
     if (!file) return;
 
@@ -471,6 +473,8 @@ const Note = ({ text }: any) => {
           }
         }}
         title={extractionTitle}
+        setTitle={setExtractionTitle}
+        setSelectedFile={setSelectedFile}
       />
 
       <TextInput
