@@ -1,23 +1,55 @@
-import { TouchableOpacity, View, Text, TextInput } from "react-native";
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  TextInput,
+  Image,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { useAppDispatch } from "@/lib/redux/hooks";
-import { logoutUser } from "@/lib/redux/slices/authSlice";
+import { pickDocument } from "@/hooks/DocumentPicker";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import {
+  logoutUser,
+  updateUsername,
+  updateProfilePicture,
+} from "@/lib/redux/slices/authSlice";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
 export default function User() {
-  const [username, setUsername] = useState("Username");
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
   const router = useRouter();
 
+  const { user } = useAppSelector((state) => state.auth);
+  const [editedUsername, setEditedUsername] = useState(user?.username ?? "");
+
+  useEffect(() => {
+    if (user) {
+      console.log(user);
+    }
+  }, [user]);
+
   const dispatch = useAppDispatch();
 
   const handleUsernameChange = (text: string) => {
-    setUsername(text);
+    setEditedUsername(text);
+  };
+
+  const handleSaveUsername = async () => {
+    try {
+      const updatedUser = await dispatch(
+        updateUsername({ username: editedUsername })
+      ).unwrap();
+
+      setEditedUsername(updatedUser.username);
+    } catch (err) {
+      console.error("Error updating username:", err);
+    }
   };
 
   const handleLogout = async () => {
@@ -25,6 +57,46 @@ export default function User() {
       await dispatch(logoutUser()).unwrap();
     } catch (err) {
       console.error("Logout failed:", err);
+    }
+  };
+
+  const pickImage = async () => {
+    console.log("Picking image through document picker...");
+
+    const file = await pickDocument();
+    if (!file) return;
+
+    const isImage = file.mimeType?.startsWith("image");
+
+    if (!isImage) {
+      Alert.alert("Unsupported File", "Please select a valid image file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("photo", {
+      name: file.name,
+      uri: file.uri,
+      type: file.mimeType || "image/jpeg",
+    });
+
+    try {
+      const response = await dispatch(
+        updateProfilePicture({ photo: file })
+      ).unwrap();
+
+      if (response?.profile_picture) {
+        dispatch(updateProfilePicture(response.profile_picture));
+        console.log(
+          "Profile picture updated successfully:",
+          response.profile_picture
+        );
+      } else {
+        console.error("Error: No photo in response", response);
+      }
+    } catch (err) {
+      console.error("Failed to upload profile picture:", err);
+      Alert.alert("Error", "Upload failed. Please try again.");
     }
   };
 
@@ -40,16 +112,25 @@ export default function User() {
           </TouchableOpacity>
 
           <View className="flex-row items-center justify-baseline pt-8 pr-10">
-            {/*Placeholder icon for user profile*/}
-            <Ionicons
-              name="person-circle-outline"
-              className="px-6"
-              size={130}
-            />
+            {user?.profile_picture ? (
+              <Image
+                source={{ uri: user.profile_picture }}
+                className="rounded-full w-[115px] h-[115px] mx-6 border"
+              />
+            ) : (
+              <Ionicons
+                name="person-circle-outline"
+                className="px-4"
+                size={130}
+              />
+            )}
 
             <TouchableOpacity
               className="absolute left-28 bottom-4 bg-transparent w-16"
-              onPress={() => console.log("User Profile Picture Change")}
+              onPress={() => {
+                pickImage();
+                console.log("User Profile Picture Change");
+              }}
             >
               <Ionicons
                 name="camera-reverse"
@@ -76,7 +157,7 @@ export default function User() {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {username}
+              {editedUsername || user?.username || "Guest"}
             </Text>
           </View>
         </View>
@@ -92,15 +173,18 @@ export default function User() {
             >
               {isEditing ? (
                 <TextInput
-                  value={username}
+                  value={editedUsername}
                   onChangeText={handleUsernameChange}
-                  onBlur={() => setIsEditing(false)}
+                  onBlur={() => {
+                    setIsEditing(false);
+                    handleSaveUsername();
+                  }}
                   autoFocus
                   className="text-2xl border-b border-gray-200"
                 />
               ) : (
                 <>
-                  <Text className="text-2xl">{username}</Text>
+                  <Text className="text-2xl">{user?.username ?? "Guest"}</Text>
                   <Text className="text-tertiary-textGray">
                     Tap to change username
                   </Text>
@@ -109,12 +193,20 @@ export default function User() {
             </TouchableOpacity>
 
             <View className="pt-4">
-              <Text className="text-2xl">MM/DD/YYYY</Text>
-              <Text className="text-tertiary-textGray">Date of Birth</Text>
+              <Text className="text-2xl">
+                {user?.date_joined
+                  ? new Date(user.date_joined).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "MM/DD/YYYY"}
+              </Text>
+              <Text className="text-tertiary-textGray">Date Joined</Text>
             </View>
 
             <View className="pt-4">
-              <Text className="text-2xl underline">user@gmail.com</Text>
+              <Text className="text-2xl underline">{user?.email ?? "N/A"}</Text>
               <Text className="text-tertiary-textGray">Email</Text>
             </View>
           </View>

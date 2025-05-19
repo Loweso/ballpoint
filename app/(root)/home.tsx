@@ -149,7 +149,7 @@ export default function Home() {
 
         <DashboardMenu />
 
-        <View className="flex flex-col w-full pt-32 px-4">
+        <View className="flex flex-col w-full pt-40 px-4">
           <Text className="text-gray-500">Ready to Create?</Text>
           <Text className="my-3 text-5xl font-bold">Your Notes</Text>
           <FlatList
@@ -176,6 +176,15 @@ export default function Home() {
                 />
               </View>
             )}
+            ListEmptyComponent={
+              !loading ? (
+                <View className="flex-1 justify-center items-center mt-36">
+                  <Text className="text-gray-400 text-2xl text-center">
+                    No Notes Yet.{"\n"}Click (+) to start!
+                  </Text>
+                </View>
+              ) : null
+            }
           />
         </View>
 

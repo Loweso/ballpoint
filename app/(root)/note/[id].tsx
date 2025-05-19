@@ -37,6 +37,7 @@ import { LoadingModal } from "@/components/LoadingModal";
 import SearchNavigation from "@/components/FindWordOverlay";
 
 const Note = ({ text }: any) => {
+  const [extractionTitle, setExtractionTitle] = useState("");
   const [isAIPolishModalOpen, setIsAIPolishModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isExtractionWindowVisible, setIsExtractionWindowVisible] =
@@ -101,6 +102,7 @@ const Note = ({ text }: any) => {
       console.log(response.data.summary);
       setInsertMode("append");
       setAiText(response.data.summary);
+      setExtractionTitle("Summary of Notes");
 
       setTimeout(() => {
         toggleAIPolishModal();
@@ -126,6 +128,7 @@ const Note = ({ text }: any) => {
       console.log(response.data.organized);
       setInsertMode("replace");
       setAiText(response.data.organized);
+      setExtractionTitle(`Organized Notes: ${mode}`);
 
       setTimeout(() => {
         setIsOrganizePreferencesModalOpen(false);
@@ -221,8 +224,10 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
+    console.log(extractionTitle, "extraction title");
     const file = await pickDocument();
     setSelectedFile(file);
+    setInsertMode("append");
 
     if (!file) return;
 
@@ -467,6 +472,9 @@ const Note = ({ text }: any) => {
             setNoteContent((prev: string) => prev + html);
           }
         }}
+        title={extractionTitle}
+        setTitle={setExtractionTitle}
+        setSelectedFile={setSelectedFile}
       />
 
       <TextInput

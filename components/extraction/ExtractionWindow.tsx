@@ -18,6 +18,9 @@ interface ExtractionWindowProps {
   selectedFile?: File | null;
   content: string;
   onInsert: (content: string) => void;
+  title?: string;
+  setSelectedFile: (file: File | null) => void;
+  setTitle: (title: string) => void;
 }
 
 export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
@@ -26,6 +29,9 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
   selectedFile,
   content,
   onInsert,
+  title,
+  setSelectedFile,
+  setTitle,
 }) => {
   const closeModal = () => setIsVisible(false);
   const { height } = useWindowDimensions();
@@ -54,14 +60,22 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
           >
             {/* Close Button */}
             <View className="relative items-end justify-center">
-              <TouchableOpacity onPress={closeModal}>
+              <TouchableOpacity
+                onPress={() => {
+                  closeModal();
+                  setSelectedFile(null);
+                  setTitle("");
+                }}
+              >
                 <Ionicons name="exit-outline" color="#5A5353" size={32} />
               </TouchableOpacity>
             </View>
 
             {/* Filename */}
-            {selectedFile?.name ? (
-              <Text className="mt-2 font-semibold">{selectedFile.name}</Text>
+            {title || selectedFile?.name ? (
+              <Text className="text-tertiary-buttonGreen text-lg font-semibold">
+                {title || selectedFile?.name}
+              </Text>
             ) : null}
 
             {/* Scrollable Markdown Content */}
@@ -81,7 +95,11 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
             </Text>
             <View className="flex flex-row justify-around mt-2">
               <Pressable
-                onPress={closeModal}
+                onPress={() => {
+                  closeModal();
+                  setSelectedFile(null);
+                  setTitle("");
+                }}
                 className="shadow-md py-2 w-[40%] flex flex-row justify-center rounded-xl bg-zinc-100"
               >
                 <Text className="text-2xl">Cancel</Text>
@@ -90,6 +108,8 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
                 onPress={() => {
                   onInsert(content);
                   closeModal();
+                  setSelectedFile(null);
+                  setTitle("");
                 }}
                 className="shadow-md py-2 w-[40%] flex flex-row justify-center rounded-xl bg-secondary-yellow"
               >
