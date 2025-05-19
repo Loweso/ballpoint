@@ -15,6 +15,9 @@ interface QueryMenuModalProps {
   onClose: () => void;
   onProcessQuery: () => void;
   onCompleteHighlightedText: () => void;
+  setQueryText: (str: string) => void;
+  setSelectedText: (str: string) => void;
+  queryText: string;
 }
 
 const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
@@ -22,9 +25,10 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
   onClose,
   onProcessQuery,
   onCompleteHighlightedText,
+  setQueryText,
+  setSelectedText,
+  queryText,
 }) => {
-  const [queryText, setQueryText] = useState("");
-
   return (
     <Modal
       animationType="fade"
@@ -40,7 +44,7 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
               <View className="flex-row items-center bg-gray-100 rounded-lg p-2">
                 <TextInput
                   value={queryText}
-                  onChangeText={setQueryText}
+                  onChangeText={(text) => setQueryText(text)}
                   placeholder="Improve with a query..."
                   style={{ width: 230, fontSize: 15 }}
                   className="flex-1 text-lg text-gray-800"
@@ -86,6 +90,8 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
                 onPress={() => {
                   console.log("Cancel button pressed");
                   onClose();
+                  setQueryText(""); // Clear the query text
+                  setSelectedText("");
                 }}
               >
                 <View className="flex-none p-1 rounded-md">

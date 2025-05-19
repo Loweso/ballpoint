@@ -228,6 +228,21 @@ export const updateProfilePicture = createAsyncThunk(
   }
 );
 
+const getRefreshToken = async () =>
+  await SecureStore.getItemAsync("refresh_token");
+
+const saveTokens = async ({
+  access,
+  refresh,
+}: {
+  access: string;
+  refresh: string;
+}) => {
+  await Promise.all([
+    SecureStore.setItemAsync("access_token", access),
+    SecureStore.setItemAsync("refresh_token", refresh),
+  ]);
+};
 // Configure axios interceptors
 api.interceptors.request.use(async (config) => {
   const unauthenticatedPaths = ["/api/login", "/api/register", "/api/google"];
@@ -241,25 +256,91 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+let isRefreshing = false;
+let requestQueue: {
+  resolve: (token: string) => void;
+  reject: (error: any) => void;
+}[] = [];
+
+const processQueue = (error: any, token: string | null) => {
+  requestQueue.forEach(({ resolve, reject }) => {
+    if (token) {
+      resolve(token);
+    } else {
+      reject(error);
+    }
+  });
+  requestQueue = [];
+};
+
+const isPublicEndpoint = (url?: string): boolean => {
+  if (!url) return false;
+
+  const publicEndpoints = [
+    "/api/login",
+    "/api/register",
+    "/api/google",
+    "/api/refresh",
+  ];
+
+  return publicEndpoints.some((endpoint) => url.includes(endpoint));
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const newAccessToken = await refreshToken();
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        await clearAuthTokens();
-        throw error;
-      }
+    // Skip if not 401 or already retried or public endpoint
+    if (
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      isPublicEndpoint(originalRequest.url)
+    ) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    originalRequest._retry = true;
+
+    const refreshTokenValue = getRefreshToken();
+    if (!refreshTokenValue) {
+      await clearAuthTokens();
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        requestQueue.push({
+          resolve: (token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          },
+          reject: (err) => reject(err),
+        });
+      });
+    }
+
+    isRefreshing = true;
+
+    try {
+      const response = await api.post("/api/user/token/refresh/", {
+        refresh: refreshTokenValue,
+      });
+
+      const { access, refresh } = response.data;
+      saveTokens({ access, refresh });
+
+      processQueue(null, access);
+
+      originalRequest.headers.Authorization = `Bearer ${access}`;
+      return api(originalRequest);
+    } catch (refreshError) {
+      processQueue(refreshError, null);
+      await clearAuthTokens();
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 

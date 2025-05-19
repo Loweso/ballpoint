@@ -38,7 +38,6 @@ const isColorLight = (hexColor: string) => {
 const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
   isVisible,
   setIsVisible,
-  initialMode = "view",
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [noteCategories, setNoteCategories] = useState<number[]>([]);
@@ -91,6 +90,7 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
       fetchCategories();
       fetchNoteCategories();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   const mergedCategories = [
@@ -106,18 +106,36 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
     }
   };
 
+  if (!isVisible) return null;
+
   return (
     <View
-      className={`${
-        isVisible ? "flex" : "hidden"
-      } absolute w-full h-full justify-center items-center bg-black/25 z-10 pb-8`}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.25)",
+        zIndex: 1000,
+      }}
     >
-      <View className="flex flex-col bg-white h-3/4 w-3/4 p-3 rounded-lg">
+      {/* inner modal box */}
+      <View
+        style={{
+          width: "85%",
+          height: "95%",
+          backgroundColor: "white",
+          padding: 12,
+          borderRadius: 10,
+        }}
+      >
         <View className="flex flex-row justify-between items-center mb-2">
           <Text className="font-bold text-center">Select Note Categories</Text>
           <TouchableOpacity
             onPress={() => {
-              updateNoteCategories();
               setIsVisible(false);
             }}
           >
@@ -128,47 +146,64 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
         {loading ? (
           <ActivityIndicator size="large" color="black" className="mt-8" />
         ) : (
-          <FlatList
-            data={mergedCategories}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => {
-              const isSelected = noteCategories.includes(item.id);
-              const useDarkText = isColorLight(item.color);
+          <>
+            <FlatList
+              data={mergedCategories}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => {
+                const isSelected = noteCategories.includes(item.id);
+                const useDarkText = isColorLight(item.color);
 
-              return (
-                <TouchableOpacity
-                  onPress={() => toggleCategory(item.id)}
-                  className="flex flex-row items-center w-full p-3 mb-2 rounded-lg"
-                  style={{
-                    backgroundColor: item.color,
-                  }}
-                >
-                  {/* Custom Circle */}
-                  <View
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: 10,
-                      backgroundColor: isSelected ? "black" : "white",
-                      borderWidth: 2,
-                      borderColor: "black",
-                      marginRight: 10,
-                    }}
-                  />
-
-                  {/* Category Label */}
-                  <Text
-                    style={{
-                      color: useDarkText ? "black" : "white",
-                      fontWeight: isSelected ? "bold" : "normal",
-                    }}
+                return (
+                  <TouchableOpacity
+                    onPress={() => toggleCategory(item.id)}
+                    className="flex flex-row items-center w-full p-3 mb-2 rounded-lg"
+                    style={{ backgroundColor: item.color }}
                   >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            }}
-          />
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 10,
+                        backgroundColor: isSelected ? "black" : "white",
+                        borderWidth: 2,
+                        borderColor: "black",
+                        marginRight: 10,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        color: useDarkText ? "black" : "white",
+                        fontWeight: isSelected ? "bold" : "normal",
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+
+            {/* Buttons */}
+            <View className="flex flex-row justify-end gap-2 mt-2">
+              <TouchableOpacity
+                onPress={() => setIsVisible(false)}
+                className="px-4 py-2 bg-gray-300 rounded-md"
+              >
+                <Text className="text-black font-semibold">Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  updateNoteCategories();
+                  setIsVisible(false);
+                }}
+                className="px-4 py-2 bg-black rounded-md"
+              >
+                <Text className="text-white font-semibold">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </>
         )}
       </View>
     </View>
