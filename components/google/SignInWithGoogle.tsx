@@ -6,6 +6,7 @@ import { useAppDispatch } from "@/lib/redux/hooks"; // import dispatch
 import { googleLogin } from "@/lib/redux/slices/authSlice"; // import your auth slice
 import { router } from "expo-router"; // for redirect
 import * as Google from "expo-auth-session/providers/google"; // for Google Auth
+import { useEffect } from "react";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -19,17 +20,16 @@ export default function GoogleSignInButton() {
 
   const authenticateWithBackend = async (idToken: string) => {
     try {
-      // Dispatch the googleLogin thunk to handle the logic
-      const res = await dispatch(googleLogin(idToken)).unwrap();
+      await dispatch(googleLogin(idToken)).unwrap();
 
-      console.log(res.data);
       router.replace("/(root)/home");
     } catch (err: any) {
+      console.log(err, "ashgdsahda");
       console.error(err.response?.data || err.message);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("Client ID:", process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID);
 
     // If Google login is successful

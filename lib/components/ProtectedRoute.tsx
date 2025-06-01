@@ -28,6 +28,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
     if (!isAuthenticated && !inAuthGroup) {
       // Redirect to login if not authenticated and trying to access protected route
+      console.log("asdsadasdasreal");
       router.replace("/(auth)/login");
     } else if (isAuthenticated && inAuthGroup) {
       console.log(isAuthenticated, inAuthGroup, accessToken);

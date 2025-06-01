@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -8,14 +8,15 @@ import {
   Image,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { images } from "@/constants";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { registerUser, clearError } from "@/lib/redux/slices/authSlice";
+import * as SecureStore from "expo-secure-store";
 
 const SignupPage = () => {
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const { loading } = useAppSelector((state) => state.auth);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -29,6 +30,7 @@ const SignupPage = () => {
     password: "",
     passwordConfirmation: "",
   });
+  const [generalError, setGeneralError] = useState("");
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -69,6 +71,7 @@ const SignupPage = () => {
     }
 
     setValidationErrors(newErrors);
+    setGeneralError(""); // Clear any general errors when validating
     return isValid;
   };
 
@@ -86,18 +89,60 @@ const SignupPage = () => {
           passwordConfirmation,
         })
       ).unwrap();
-
-      alert("Signup successful! Please log in.");
+      await SecureStore.setItemAsync("authState", "login");
       router.push("/(auth)/login");
-    } catch (error: any) {
-      console.error("Signup error:", error);
+    } catch (err: any) {
+      console.error("Signup failed:", err);
+
+      // Handle backend validation errors
+      if (
+        err.username ||
+        err.email ||
+        err.password ||
+        err.password_confirmation ||
+        err.non_field_errors
+      ) {
+        const backendErrors = {
+          username: err.username?.[0] || "",
+          email: err.email?.[0] || "",
+          password: err.password?.[0] || "",
+          passwordConfirmation: err.password_confirmation?.[0] || "",
+        };
+        setValidationErrors(backendErrors);
+        setGeneralError(err.non_field_errors?.[0] || "");
+      } else if (err.message) {
+        // Handle general error messages
+        setGeneralError(err.message);
+        setValidationErrors({
+          username: "",
+          email: "",
+          password: "",
+          passwordConfirmation: "",
+        });
+      } else {
+        // Handle network or unexpected errors
+        setGeneralError("An unexpected error occurred. Please try again.");
+        setValidationErrors({
+          username: "",
+          email: "",
+          password: "",
+          passwordConfirmation: "",
+        });
+      }
     }
   };
 
   // Clear error when component unmounts
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       dispatch(clearError());
+      setGeneralError("");
+      setValidationErrors({
+        username: "",
+        email: "",
+        password: "",
+        passwordConfirmation: "",
+      });
     };
   }, [dispatch]);
 
@@ -188,11 +233,11 @@ const SignupPage = () => {
           </Text>
         ) : null}
 
-        {error && (
+        {generalError ? (
           <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
-            {error}
+            {generalError}
           </Text>
-        )}
+        ) : null}
 
         <TouchableOpacity
           className="bg-tertiary-buttonGreen p-2 rounded-md m-2"
@@ -204,36 +249,19 @@ const SignupPage = () => {
           </Text>
         </TouchableOpacity>
 
-        <View className="flex-row items-center m-4">
-          <View className="flex-1 h-px bg-gray-300" />
-          <Text className="px-2 text-gray-500">OR</Text>
-          <View className="flex-1 h-px bg-gray-300" />
-        </View>
-
         <TouchableOpacity
-          className="p-4 flex-row justify-center items-center"
-          onPress={() => console.log("Sign Up with Google Button Pressed")}
+          onPress={async () => {
+            await SecureStore.setItemAsync("authState", "login");
+            router.replace("/(auth)/login");
+          }}
         >
-          <Image
-            source={images.googleLogo}
-            className="w-10 h-10"
-            resizeMode="contain"
-          />
-          <Text className="text-tertiary-buttonGreen m-2">
-            Sign up with your Google Account
+          <Text className="border border-gray-300 text-center text-gray-500 p-3 mt-4">
+            Already have an account?{" "}
+            <Text className="text-tertiary-buttonGreen font-semibold">
+              Log in!
+            </Text>
           </Text>
         </TouchableOpacity>
-
-        <Link href="/login" asChild>
-          <TouchableOpacity>
-            <Text className="border border-gray-300 text-center text-gray-500 p-3 mt-8">
-              Already have an account?{" "}
-              <Text className="text-tertiary-buttonGreen font-semibold">
-                Log in!
-              </Text>
-            </Text>
-          </TouchableOpacity>
-        </Link>
       </View>
     </SafeAreaView>
   );

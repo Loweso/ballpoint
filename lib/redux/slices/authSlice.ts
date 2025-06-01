@@ -13,6 +13,15 @@ const api = axios.create({
   },
 });
 
+interface AuthError {
+  message?: string;
+  non_field_errors?: string[];
+  username?: string[];
+  email?: string[];
+  password?: string[];
+  password_confirmation?: string[];
+}
+
 // Async thunks
 export const registerUser = createAsyncThunk(
   "auth/register",
@@ -39,9 +48,8 @@ export const registerUser = createAsyncThunk(
       });
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || { message: "Registration failed" }
-      );
+      const errorData = error.response?.data as AuthError;
+      return rejectWithValue(errorData || { message: "Registration failed" });
     }
   }
 );
@@ -63,9 +71,8 @@ export const loginUser = createAsyncThunk(
 
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || { message: "Login failed" }
-      );
+      const errorData = error.response?.data as AuthError;
+      return rejectWithValue(errorData || { message: "Login failed" });
     }
   }
 );
@@ -350,7 +357,7 @@ interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   loading: boolean;
-  error: string | null;
+  error: AuthError | null;
 }
 
 const initialState: AuthState = {
@@ -394,7 +401,7 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload as AuthError;
       })
       // Login
       .addCase(loginUser.pending, (state) => {
@@ -410,7 +417,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload as AuthError;
       })
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {
@@ -437,7 +444,7 @@ const authSlice = createSlice({
       })
       .addCase(googleLogin.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload as AuthError;
       })
       // Update username
       .addCase(updateUsername.fulfilled, (state, action) => {
@@ -452,7 +459,7 @@ const authSlice = createSlice({
         }
       })
       .addCase(updateProfilePicture.rejected, (state, action) => {
-        state.error = action.payload as string;
+        state.error = action.payload as AuthError;
       });
   },
 });
