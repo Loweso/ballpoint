@@ -37,18 +37,13 @@ export default function Index() {
     checkOnboarding();
   }, []);
 
-  // Show nothing while checking onboarding status
-  if (authState === null) {
-    return null;
-  }
-
   // If user is authenticated, go to home
   if (isAuthenticated) {
     return <Redirect href="/(root)/home" />;
   }
 
   // If not onboarded, go to onboarding
-  if (authState === "onboarding") {
+  if (authState === "onboarding" || authState === null) {
     return <Redirect href="/(auth)/onboardingscreen" />;
   }
 
