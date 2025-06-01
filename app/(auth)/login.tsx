@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
   SafeAreaView,
   View,
@@ -14,7 +15,6 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { loginUser, clearError } from "@/lib/redux/slices/authSlice";
 import GoogleSignInButton from "@/components/google/SignInWithGoogle";
 
-
 const LoginPage = () => {
   const dispatch = useAppDispatch();
   const { loading, error, isAuthenticated } = useAppSelector(
@@ -28,6 +28,11 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
+  const [generalError, setGeneralError] = useState("");
+
+  useEffect(() => {
+    console.log("sdsd");
+  }, []);
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -53,6 +58,7 @@ const LoginPage = () => {
     }
 
     setValidationErrors(newErrors);
+    setGeneralError(""); // Clear any general errors when validating
     return isValid;
   };
 
@@ -60,21 +66,38 @@ const LoginPage = () => {
     if (!validateForm()) {
       return;
     }
-
     try {
       await dispatch(loginUser({ email, password })).unwrap();
-      // If login is successful, the isAuthenticated state will be true
       router.replace("/(root)/home");
-    } catch (error: any) {
-      // Error is already handled in Redux state
-      console.error("Login error:", error);
+    } catch (err: any) {
+      console.error("Login failed:", err);
+
+      // Handle backend validation errors
+      if (err.email || err.password || err.non_field_errors) {
+        const backendErrors = {
+          email: err.email?.[0] || "",
+          password: err.password?.[0] || "",
+        };
+        setValidationErrors(backendErrors);
+        setGeneralError(err.non_field_errors?.[0] || "");
+      } else if (err.message) {
+        // Handle general error messages
+        setGeneralError(err.message);
+        setValidationErrors({ email: "", password: "" });
+      } else {
+        // Handle network or unexpected errors
+        setGeneralError("An unexpected error occurred. Please try again.");
+        setValidationErrors({ email: "", password: "" });
+      }
     }
   };
 
   // Clear error when component unmounts
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       dispatch(clearError());
+      setGeneralError("");
+      setValidationErrors({ email: "", password: "" });
     };
   }, [dispatch]);
 
@@ -126,11 +149,11 @@ const LoginPage = () => {
           </Text>
         ) : null}
 
-        {error && (
+        {generalError ? (
           <Text className="text-red-500 mx-3 flex-wrap text-xs text-justify">
-            {error}
+            {generalError}
           </Text>
-        )}
+        ) : null}
 
         <TouchableOpacity
           className="bg-tertiary-buttonGreen p-2 rounded-md m-2"
@@ -156,16 +179,19 @@ const LoginPage = () => {
 
         <GoogleSignInButton />
 
-        <Link href="/signup" asChild>
-          <TouchableOpacity>
-            <Text className="border border-gray-300 text-center text-gray-500 p-3 mt-8">
-              Don't have an account?{" "}
-              <Text className="text-tertiary-buttonGreen font-semibold">
-                Sign up!
-              </Text>
+        <TouchableOpacity
+          onPress={async () => {
+            await SecureStore.setItemAsync("authState", "signup");
+            router.replace("/(auth)/signup");
+          }}
+        >
+          <Text className="border border-gray-300 text-center text-gray-500 p-3 mt-8">
+            Don't have an account?{" "}
+            <Text className="text-tertiary-buttonGreen font-semibold">
+              Sign up!
             </Text>
-          </TouchableOpacity>
-        </Link>
+          </Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

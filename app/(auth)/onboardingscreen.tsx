@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
   View,
   Text,
@@ -13,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import Swiper from "react-native-swiper";
 import "nativewind";
+import { router } from "expo-router";
 import { Link } from "expo-router";
 
 const { width } = Dimensions.get("window");
@@ -30,6 +32,15 @@ const OnboardingScreen = () => {
     ScreenType.WELCOME
   );
   const swiperRef = useRef<Swiper>(null);
+
+  const finishOnboardingLogin = async () => {
+    await SecureStore.setItemAsync("authState", "login");
+    router.replace("/(auth)/login"); // or home if they're already authenticated
+  };
+  const finishOnboardingSignup = async () => {
+    await SecureStore.setItemAsync("authState", "signup");
+    router.replace("/(auth)/signup"); // or home if they're already authenticated
+  };
 
   // Feature data for the swiper
   const features = [
@@ -64,7 +75,7 @@ const OnboardingScreen = () => {
       width: 200,
       height: 200,
       hasExtraContent: true,
-      marginTop: 0, 
+      marginTop: 0,
     },
   ];
 
@@ -94,7 +105,7 @@ const OnboardingScreen = () => {
     hasExtraContent?: boolean,
     width: string | number = "100%",
     height: string | number = "auto",
-    marginTop: number = 0 
+    marginTop: number = 0
   ) => {
     const imageStyle = {
       width: typeof width === "number" ? width : parseFloat(width),
@@ -237,19 +248,19 @@ const OnboardingScreen = () => {
         </View>
 
         <View className="mb-8">
-          <Link href="/login" asChild>
-            <TouchableOpacity className="bg-tertiary-buttonGreen py-4 rounded-lg mb-2">
-              <Text className="text-center text-white font-semibold">
-                Log In
-              </Text>
-            </TouchableOpacity>
-          </Link>
+          <TouchableOpacity
+            className="bg-tertiary-buttonGreen py-4 rounded-lg mb-2"
+            onPress={finishOnboardingLogin}
+          >
+            <Text className="text-center text-white font-semibold">Log In</Text>
+          </TouchableOpacity>
 
-          <Link href="/signup" asChild>
-            <TouchableOpacity className="bg-white py-4 rounded-lg border-2 border-tertiary-buttonGreen">
-              <Text className="text-center font-semibold">Sign Up</Text>
-            </TouchableOpacity>
-          </Link>
+          <TouchableOpacity
+            className="bg-white py-4 rounded-lg border-2 border-tertiary-buttonGreen"
+            onPress={finishOnboardingSignup}
+          >
+            <Text className="text-center font-senbomibold">Sign Up</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
