@@ -256,7 +256,7 @@ const Note = ({ text }: any) => {
           setAiText(uploadResponse.data.text);
         }
       } else if (isAudio) {
-        uploadResponse = await api.post("extract/whisper-audio", formData, {
+        uploadResponse = await api.post("extract/google-stt", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
