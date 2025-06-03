@@ -18,9 +18,8 @@ import {
 } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
 import { DashboardSettings } from "./DashboardSettings";
-import HighlightModal from "./HighlightModal";
-
 import { DatePickerModal } from "react-native-paper-dates";
+import { LoadingModal } from "./LoadingModal";
 import { format } from "date-fns";
 import { images } from "@/constants";
 
@@ -44,7 +43,8 @@ const DashboardMenu = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
   const clearCategories = () => {
     setValue([]);
@@ -99,8 +99,6 @@ const DashboardMenu = () => {
       setCategories(formattedCategories);
     } catch (error) {
       console.error("Error fetching notes:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -165,42 +163,65 @@ const DashboardMenu = () => {
   const sortOrder = useSelector((state: RootState) => state.sort.sortOrder);
 
   const handleApplyFilters = () => {
-    dispatch(setSelectedCategories(value ?? []));
-    dispatch(
-      setDateRange({
-        startDate: range.startDate ? range.startDate.toISOString() : null,
-        endDate: range.endDate ? range.endDate.toISOString() : null,
-      })
-    );
-    console.log("Filters applied:", selectedCategories, dateRange);
+    setLoadingMessage("Applying filters...");
+    setIsLoading(true);
+
+    setTimeout(() => {
+      dispatch(setSelectedCategories(value ?? []));
+      dispatch(
+        setDateRange({
+          startDate: range.startDate ? range.startDate.toISOString() : null,
+          endDate: range.endDate ? range.endDate.toISOString() : null,
+        })
+      );
+      console.log("Filters applied:", value, range);
+
+      setIsLoading(false);
+      setLoadingMessage("Loading...");
+    }, 500); // Adjust delay as needed
   };
 
-  const handleApplySorts = () => {
-    dispatch(
-      setSortType(sortType === pressedSortType ? null : pressedSortType)
-    );
-    dispatch(
-      setSortOrder(sortOrder === pressedSortOrder ? null : pressedSortOrder)
-    );
+  const handleApplySorts = async () => {
+    setLoadingMessage("Sorting notes...");
+    setIsLoading(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay
+
+    dispatch(setSortType(pressedSortType));
+    dispatch(setSortOrder(pressedSortOrder));
     console.log("Sort settings applied:", pressedSortType, pressedSortOrder);
+
+    setIsLoading(false);
+    setLoadingMessage("Loading...");
   };
 
-  const handleClearFilters = () => {
-    dispatch(clearFilters());
-    clearCategories();
-    console.log("Filters cleared");
+  const handleClearFilters = async () => {
+    setIsLoading(true);
+    try {
+      dispatch(clearFilters());
+      clearCategories();
+      console.log("Filters cleared");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleClearSort = () => {
-    dispatch(clearSort());
-    setPressedSortType(null);
-    setPressedSortOrder(null);
+  const handleClearSort = async () => {
+    setIsLoading(true);
+    try {
+      dispatch(clearSort());
+      setPressedSortType(null);
+      setPressedSortOrder(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const query = useSelector((state: RootState) => state.search.query);
 
   return (
     <View className="top-0 flex w-screen bg-primary-white">
+      <LoadingModal visible={isLoading} message={loadingMessage} />
       <View className="absolute top-0">
         <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-50">
           <View className="flex w-1/3">

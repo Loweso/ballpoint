@@ -5,7 +5,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
+  // TouchableWithoutFeedback,
   Alert,
   useWindowDimensions,
 } from "react-native";
@@ -51,6 +51,7 @@ const Note = ({ text }: any) => {
 
   const [aiText, setAiText] = useState(text);
   const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
+  const [loadingMessage, setLoadingMessage] = useState("");
   const [noteContent, setNoteContent] = useState(text);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -89,6 +90,12 @@ const Note = ({ text }: any) => {
     }
   }, [selectedText]);
 
+  useEffect(() => {
+    if (isEditing && RichText.current) {
+      RichText.current.setContentHTML(noteContent);
+    }
+  }, [isEditing, noteContent]);
+
   const summarizeNotes = async () => {
     const text = striptags(noteContent);
     if (!striptags(text).trim()) {
@@ -96,6 +103,8 @@ const Note = ({ text }: any) => {
       return;
     }
     try {
+      setLoadingMessage("Summarizing notes...");
+      setIsLoading(true);
       const response = await api.post("extract/summarize-text", {
         text: text,
       });
@@ -111,6 +120,9 @@ const Note = ({ text }: any) => {
     } catch (error) {
       console.error(error);
       alert("Error summarizing text.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -121,6 +133,8 @@ const Note = ({ text }: any) => {
       return;
     }
     try {
+      setLoadingMessage("Organizing notes...");
+      setIsLoading(true);
       const response = await api.post("extract/organize-text", {
         mode: mode,
         text: text,
@@ -137,6 +151,9 @@ const Note = ({ text }: any) => {
     } catch (error) {
       console.error(error);
       alert("Error summarizing text.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -147,6 +164,8 @@ const Note = ({ text }: any) => {
       return;
     }
     try {
+      setLoadingMessage("Answering your query...");
+      setIsLoading(true);
       const response = await api.post("extract/query-text", {
         selected_text: selectedText,
         note_content: noteText,
@@ -161,6 +180,9 @@ const Note = ({ text }: any) => {
     } catch (error) {
       console.error(error);
       alert("Error processing query.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -171,6 +193,8 @@ const Note = ({ text }: any) => {
       return;
     }
     try {
+      setLoadingMessage("Completing text...");
+      setIsLoading(true);
       const response = await api.post("extract/complete-text", {
         selected_text: selectedText,
         note_content: noteText,
@@ -184,6 +208,9 @@ const Note = ({ text }: any) => {
     } catch (error) {
       console.error(error);
       alert("Error processing text.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -204,6 +231,8 @@ const Note = ({ text }: any) => {
     const sanitizedTitle = title.trim() || "Untitled Note";
 
     try {
+      setLoadingMessage("Saving note...");
+      setIsLoading(true);
       const response = await api.put(`/notes/${id}/`, {
         title: sanitizedTitle,
         notesContent: noteContent,
@@ -220,6 +249,9 @@ const Note = ({ text }: any) => {
         console.error("Unexpected error:", error.message);
       }
       Alert.alert("Error", "Something went wrong while saving.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -242,6 +274,7 @@ const Note = ({ text }: any) => {
     } as any);
 
     try {
+      setLoadingMessage("Extracting text...");
       setIsLoading(true);
       let uploadResponse;
 
@@ -281,17 +314,23 @@ const Note = ({ text }: any) => {
       Alert.alert("Error", "Upload failed. Check your backend and try again.");
     } finally {
       setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
   const deleteNote = async () => {
     try {
+      setLoadingMessage("Deleting note...");
+      setIsLoading(true);
       const response = await api.delete(`notes/${id}/`);
       console.log("Note deleted:", response.data);
       Alert.alert("Success", "Note deleted!");
     } catch (error) {
       console.error("Error deleting note:", error);
       Alert.alert("Error", "Something went wrong while deleting.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -312,10 +351,14 @@ const Note = ({ text }: any) => {
   useEffect(() => {
     const fetchNote = async () => {
       try {
+        setLoadingMessage("Fetching note...");
+        setIsLoading(true);
         const response = await api.get(`/notes/${id}/`);
         const note = response.data;
         setTitle(note.title || "Untitled Note");
         setNoteContent(note.notesContent || "");
+        setIsLoading(false);
+        setLoadingMessage("");
       } catch (error) {
         console.error("Error fetching note:", error);
       }
@@ -375,7 +418,7 @@ const Note = ({ text }: any) => {
 
   return (
     <SafeAreaView className="flex w-screen h-full bg-primary-white">
-      <LoadingModal visible={isLoading} />
+      <LoadingModal visible={isLoading} message={loadingMessage} />
 
       {!isEditing && (
         <CircleButton
@@ -479,7 +522,7 @@ const Note = ({ text }: any) => {
 
       <TextInput
         ref={titleInputRef}
-        className="text-2xl mx-2 font-semibold"
+        className="text-2xl mx-2 font-semibold pb-2"
         placeholder="Title"
         onChangeText={setTitle}
         value={title}
@@ -487,23 +530,28 @@ const Note = ({ text }: any) => {
 
       {isEditing ? (
         <>
-          <RichEditor
-            ref={RichText}
-            style={{
-              flex: 1,
-              marginBottom: 2,
-            }}
-            editorStyle={{
-              contentCSSText: "font-size: 14px;",
-            }}
-            placeholder={""}
-            initialContentHTML={noteContent}
-            onChange={(descriptionText) => {
-              setNoteContent(descriptionText);
-            }}
-            onMessage={handleOnMessage}
-          />
-
+          <ScrollView
+            contentContainerStyle={{ height: 1000 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={true}
+          >
+            <RichEditor
+              ref={RichText}
+              style={{
+                flex: 1,
+                marginBottom: 2,
+              }}
+              editorStyle={{
+                contentCSSText: "font-size: 14px;",
+              }}
+              placeholder={""}
+              initialContentHTML={noteContent}
+              onChange={(descriptionText) => {
+                setNoteContent(descriptionText);
+              }}
+              onMessage={handleOnMessage}
+            />
+          </ScrollView>
           <RichToolbar
             editor={RichText}
             actions={[
@@ -527,34 +575,34 @@ const Note = ({ text }: any) => {
           />
         </>
       ) : (
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setTimeout(() => {
-              if (RichText.current) {
-                RichText.current.focusContentEditor();
-              }
-            }, 100);
-          }}
-        >
-          <View className="mx-3 mt-2 mb-6" style={{ flex: 1 }}>
-            {noteContent ? (
-              <ScrollView>
-                <RenderHTML
-                  contentWidth={width}
-                  source={{
-                    html: highlightVisibleTextOnly(noteContent, searchQuery),
-                  }}
-                  baseStyle={{
-                    fontSize: 16,
-                    color: "#000",
-                  }}
-                />
-              </ScrollView>
-            ) : (
-              <Text className="text-gray-600">Start Writing!</Text>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
+        // <TouchableWithoutFeedback
+        //   onPress={() => {
+        //     setTimeout(() => {
+        //       if (RichText.current) {
+        //         RichText.current.focusContentEditor();
+        //       }
+        //     }, 100);
+        //   }}
+        // >
+        <View className="mx-3 mt-2 mb-6" style={{ flex: 1 }}>
+          {noteContent ? (
+            <ScrollView>
+              <RenderHTML
+                contentWidth={width}
+                source={{
+                  html: highlightVisibleTextOnly(noteContent, searchQuery),
+                }}
+                baseStyle={{
+                  fontSize: 16,
+                  color: "#000",
+                }}
+              />
+            </ScrollView>
+          ) : (
+            <Text className="text-gray-600">Start Writing!</Text>
+          )}
+        </View>
+        // </TouchableWithoutFeedback>
       )}
       <PolishMenuModal
         visible={isAIPolishModalOpen}
