@@ -386,7 +386,28 @@ const Note = ({ text }: any) => {
       }, 600);
     } catch (error) {
       console.error("Error uploading file:", error);
-      Alert.alert("Error", "Upload failed. Check your backend and try again.");
+
+      let backendMessage: string | null = null;
+
+      if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "error" in error.response.data &&
+        typeof error.response.data.error === "string"
+      ) {
+        backendMessage = error.response.data.error;
+      }
+
+      Alert.alert(
+        "Error",
+        backendMessage || "Upload failed. Check your backend and try again."
+      );
     } finally {
       setIsLoading(false);
       setLoadingMessage("");

@@ -365,7 +365,7 @@ const initialState: AuthState = {
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
-  loading: true, // Start with loading true to check auth status
+  loading: false, // Start with loading true to check auth status
   error: null,
 };
 
