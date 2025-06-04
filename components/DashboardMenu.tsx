@@ -34,6 +34,12 @@ import { setSearchQuery } from "@/slices/searchSlice";
 import { RootState } from "@/lib/redux/store";
 import { api } from "@/lib/redux/slices/authSlice";
 
+import {
+  PanResponder,
+  GestureResponderEvent,
+  PanResponderGestureState,
+} from "react-native";
+
 interface Category {
   label: string;
   value: string;
@@ -60,6 +66,68 @@ const DashboardMenu = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // PanResponder for Filter Menu
+  const filterPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dy) > 10,
+      onPanResponderMove: (evt, gestureState) => {
+        // Clamp value between -200 (hidden) and 0 (resting position)
+        let newTranslateY = gestureState.dy;
+        if (newTranslateY > 0) newTranslateY = 0; // Prevent pulling down beyond resting point
+
+        filterSlideAnim.setValue(newTranslateY);
+      },
+
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy < -50) {
+          Animated.timing(filterSlideAnim, {
+            toValue: -200,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setFilterMenuVisible(false));
+        } else {
+          Animated.timing(filterSlideAnim, {
+            toValue: 120,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  // PanResponder for Sort Menu
+  const sortPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dy) > 10,
+      onPanResponderMove: (evt, gestureState) => {
+        // Clamp value between -200 (hidden) and 0 (resting position)
+        let newTranslateY = gestureState.dy;
+        if (newTranslateY > 0) newTranslateY = 0; // Prevent pulling down beyond resting point
+
+        sortSlideAnim.setValue(newTranslateY);
+      },
+
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy < -50) {
+          Animated.timing(sortSlideAnim, {
+            toValue: -200,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setSortMenuVisible(false));
+        } else {
+          Animated.timing(sortSlideAnim, {
+            toValue: 120,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   const toggleFilterMenu = () => {
     console.log("Filter Button Pressed");
@@ -277,6 +345,7 @@ const DashboardMenu = () => {
       </View>
 
       <Animated.View
+        {...filterPanResponder.panHandlers}
         style={{
           transform: [{ translateY: filterSlideAnim }],
           shadowColor: "#000",
@@ -393,6 +462,7 @@ const DashboardMenu = () => {
       </Animated.View>
 
       <Animated.View
+        {...sortPanResponder.panHandlers}
         style={{
           transform: [{ translateY: sortSlideAnim }],
           shadowColor: "#000",
