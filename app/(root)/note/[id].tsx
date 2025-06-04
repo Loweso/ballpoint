@@ -41,7 +41,8 @@ import QueryMenuModal from "@/components/QueryMenuModal";
 import TextReplacementModal from "@/components/TextReplacementModal";
 import { LoadingModal } from "@/components/LoadingModal";
 import SearchNavigation from "@/components/FindWordOverlay";
-
+import PermissionsModal from "@/components/PermissionsModal";
+import MediaChoiceModal from "@/components/MediaChoiceModal";
 import { LinearGradient } from "expo-linear-gradient";
 
 const Note = ({ text }: any) => {
@@ -86,6 +87,9 @@ const Note = ({ text }: any) => {
     useState(false);
   const [processedText, setProcessedText] = useState("");
   const [isFromQuery, setIsFromQuery] = useState(false);
+
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showMediaModal, setShowMediaModal] = useState(false);
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -274,80 +278,56 @@ const Note = ({ text }: any) => {
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (cameraStatus !== "granted" || mediaLibraryStatus !== "granted") {
-      Alert.alert(
-        "Permission Denied",
-        "Sorry, we need camera and media library permissions to make this work."
-      );
+      setShowPermissionModal(true);
       return;
     }
 
-    Alert.alert(
-      "Choose Media to Extract Text From",
-      "Would you like to take a photo or select an image/audio file from the library?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Take Photo",
-          onPress: async () => {
-            const result = await ImagePicker.launchCameraAsync({
-              allowsEditing: true,
-              quality: 1,
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            });
+    setShowMediaModal(true);
+  };
 
-            if (!result.canceled && result.assets?.length > 0) {
-              const photo = result.assets[0];
+  const handleTakePhoto = async () => {
+    setShowMediaModal(false);
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    });
 
-              const formData = new FormData();
-              formData.append("image", {
-                uri: photo.uri,
-                name: photo.fileName || "photo.jpg",
-                type: photo.mimeType || "image/jpeg",
-              } as any);
+    if (!result.canceled && result.assets?.length > 0) {
+      const photo = result.assets[0];
+      const formData = new FormData();
+      formData.append("image", {
+        uri: photo.uri,
+        name: photo.fileName || "photo.jpg",
+        type: photo.mimeType || "image/jpeg",
+      } as any);
 
-              try {
-                setLoadingMessage("Extracting text...");
-                setIsLoading(true);
-                console.log("Uploading photo to server:", photo.uri);
+      try {
+        setLoadingMessage("Extracting text...");
+        setIsLoading(true);
+        const uploadResponse = await api.post(
+          "extract/extract-text",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
 
-                const uploadResponse = await api.post(
-                  "extract/extract-text",
-                  formData,
-                  {
-                    headers: {
-                      "Content-Type": "multipart/form-data",
-                    },
-                  }
-                );
-
-                if (uploadResponse.data?.text) {
-                  setAiText(uploadResponse.data.text);
-                  setTimeout(() => setIsExtractionWindowVisible(true), 600);
-                }
-              } catch (error) {
-                console.error("Error uploading photo:", error);
-                Alert.alert(
-                  "Error",
-                  "Upload failed. Please check your backend and try again."
-                );
-              } finally {
-                setIsLoading(false);
-                setLoadingMessage("");
-              }
-            }
-          },
-        },
-        {
-          text: "Choose from Library",
-          onPress: async () => {
-            handlePickDocument();
-          },
-        },
-      ]
-    );
+        if (uploadResponse.data?.text) {
+          setAiText(uploadResponse.data.text);
+          setTimeout(() => setIsExtractionWindowVisible(true), 600);
+        }
+      } catch (err) {
+        console.error("Error uploading photo:", err);
+        Alert.alert(
+          "Error",
+          "Upload failed. Please check your backend and try again."
+        );
+      } finally {
+        setIsLoading(false);
+        setLoadingMessage("");
+      }
+    }
   };
 
   const handlePickDocument = async () => {
@@ -802,6 +782,20 @@ const Note = ({ text }: any) => {
         onClose={() => setIsReplacementModalVisible(false)}
         onReplace={handleReplace}
         processedText={processedText}
+      />
+      <PermissionsModal
+        visible={showPermissionModal}
+        onClose={() => setShowPermissionModal(false)}
+      />
+
+      <MediaChoiceModal
+        visible={showMediaModal}
+        onCancel={() => setShowMediaModal(false)}
+        onTakePhoto={handleTakePhoto}
+        onPickFile={() => {
+          setShowMediaModal(false);
+          handlePickDocument();
+        }}
       />
     </SafeAreaView>
   );
