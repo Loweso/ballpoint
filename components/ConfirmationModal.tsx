@@ -29,7 +29,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const closeModal = () => setIsVisible(false);
 
   return (
-    <View className="absolute inset-0 h-[100%] justify-center items-center bg-black/40">
+    <View className="absolute inset-0 h-[100%] justify-center items-center bg-black/40 rounded-xl">
       <View
         className={`w-[80%] bg-white px-4 py-6 rounded-xl ${classnameModal}`}
       >

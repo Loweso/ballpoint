@@ -58,7 +58,10 @@ const Note = ({ text }: any) => {
 
   const [aiText, setAiText] = useState(text);
   const [editorHeight, setEditorHeight] = useState(200);
-  const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
+  const [insertMode, setInsertMode] = useState<
+    "append" | "replace" | "selected-replace"
+  >("append");
+
   const [loadingMessage, setLoadingMessage] = useState("");
   const [noteContent, setNoteContent] = useState(text);
   const [searchQuery, setSearchQuery] = useState("");
@@ -181,12 +184,15 @@ const Note = ({ text }: any) => {
         note_content: noteText,
         query: queryText,
       });
-      setProcessedText(response.data.answer);
-      setIsFromQuery(true);
-      setIsQueryMenuModalOpen(false);
-      setIsReplacementModalVisible(true);
-      setSelectedText("");
-      setQueryText("");
+
+      setInsertMode("selected-replace");
+      setAiText(response.data.answer);
+      setExtractionTitle("Query Response");
+
+      setTimeout(() => {
+        setIsQueryMenuModalOpen(false);
+        setIsExtractionWindowVisible(true);
+      }, 600);
     } catch (error) {
       console.error(error);
       alert("Error processing query.");
@@ -209,12 +215,15 @@ const Note = ({ text }: any) => {
         selected_text: selectedText,
         note_content: noteText,
       });
-      setProcessedText(response.data.completedText);
-      setIsFromQuery(false);
-      setIsQueryMenuModalOpen(false);
-      setIsReplacementModalVisible(true);
-      setSelectedText("");
-      setQueryText("");
+
+      setInsertMode("selected-replace");
+      setAiText(response.data.completedText);
+      setExtractionTitle("Completed Selection");
+
+      setTimeout(() => {
+        setIsQueryMenuModalOpen(false);
+        setIsExtractionWindowVisible(true);
+      }, 600);
     } catch (error) {
       console.error(error);
       alert("Error processing text.");
@@ -507,7 +516,7 @@ const Note = ({ text }: any) => {
 
           {isEditing && (
             <TouchableOpacity
-              className="flex flex-row items-center px-3 py-2 bg-tertiary-buttonGreen rounded-2xl"
+              className="flex flex-row items-center px-3 py-2 bg-tertiary-buttonGreen gap-1 rounded-2xl"
               onPress={handlePickDocument}
             >
               <Text className="text-white font-medium pl-1">Extract</Text>
@@ -522,7 +531,7 @@ const Note = ({ text }: any) => {
                 setIsEditing(false);
                 titleInputRef.current?.blur();
               }}
-              className="flex flex-row items-center px-3 py-2 bg-secondary-yellow rounded-2xl"
+              className="flex flex-row items-center px-3 py-2 bg-secondary-yellow gap-1 rounded-2xl"
             >
               <Text className="pl-1 font-medium">Done</Text>
               <Ionicons
@@ -566,6 +575,27 @@ const Note = ({ text }: any) => {
                   onPress: () => {
                     RichText.current?.setContentHTML(html);
                     setNoteContent(html);
+                    setInsertMode("append");
+                  },
+                },
+              ]
+            );
+          } else if (insertMode === "selected-replace") {
+            Alert.alert(
+              "Replace Highlighted Text?",
+              "This will replace only the highlighted portion of the note. Are you sure?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+                {
+                  text: "Replace",
+                  style: "default",
+                  onPress: () => {
+                    RichText.current?.commandDOM(
+                      `document.execCommand("insertHTML", false, \`${html}\`)`
+                    );
                     setInsertMode("append");
                   },
                 },

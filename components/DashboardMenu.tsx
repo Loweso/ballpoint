@@ -294,7 +294,7 @@ const DashboardMenu = () => {
         <View className="flex flex-row items-center justify-between px-4 py-3 w-full h-16 bg-primary-white z-50">
           <View className="flex w-1/3">
             <TouchableOpacity
-              className="items-start justify-center bg-transparent w-8"
+              className="items-start justify-center bg-transparent w-10 h-10"
               onPress={() => {
                 setIsDashBoardSettingsVisible(true); // this is for testing, change to DashBoardSettingsVisible
                 console.log("Menu Button Pressed");
@@ -313,6 +313,7 @@ const DashboardMenu = () => {
             onPress={() => {
               router.push("/user");
             }}
+            className="w-12 h-12 items-end justify-center"
           >
             <Ionicons name="person-circle-outline" size={35} />
           </TouchableOpacity>

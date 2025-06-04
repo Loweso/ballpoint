@@ -72,11 +72,13 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
             </View>
 
             {/* Filename */}
-            {title || selectedFile?.name ? (
-              <Text className="text-tertiary-buttonGreen text-lg font-semibold">
-                {title || selectedFile?.name}
-              </Text>
-            ) : null}
+            <View className="w-4/5">
+              {title || selectedFile?.name ? (
+                <Text className="text-tertiary-buttonGreen text-xl font-semibold">
+                  {title || selectedFile?.name}
+                </Text>
+              ) : null}
+            </View>
 
             {/* Scrollable Markdown Content */}
             <ScrollView

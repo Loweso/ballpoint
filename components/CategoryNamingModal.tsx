@@ -64,7 +64,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
         <TextInput
           placeholder={placeholder}
           className="text-lg text-gray-800"
-          style={{ width: 200, fontSize: 13 }}
+          style={{ width: 200, fontSize: 14 }}
           placeholderTextColor="#6B7280"
           value={name}
           onChangeText={setName}
@@ -95,13 +95,13 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
               setShowColorPicker(false);
             }}
           >
-            <Ionicons name="close-circle-outline" size={26} color="#EF4444" />
+            <Ionicons name="close-circle-outline" size={30} color="#EF4444" />
           </TouchableOpacity>
 
           <TouchableOpacity className="rounded-full" onPress={handleProceed}>
             <Ionicons
               name="arrow-forward-circle-outline"
-              size={26}
+              size={30}
               color="#EAB308"
             />
           </TouchableOpacity>
