@@ -542,7 +542,15 @@ const Note = ({ text }: any) => {
                 marginBottom: 2,
               }}
               editorStyle={{
-                contentCSSText: "font-size: 14px;",
+                contentCSSText: `
+  font-size: 14px;
+  
+  p, h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+  }
+`,
               }}
               placeholder={""}
               initialContentHTML={noteContent}
@@ -584,7 +592,7 @@ const Note = ({ text }: any) => {
         //     }, 100);
         //   }}
         // >
-        <View className="mx-3 mt-2 mb-6" style={{ flex: 1 }}>
+        <View className="mx-3 mb-6" style={{ flex: 1 }}>
           {noteContent ? (
             <ScrollView>
               <RenderHTML
@@ -593,8 +601,17 @@ const Note = ({ text }: any) => {
                   html: highlightVisibleTextOnly(noteContent, searchQuery),
                 }}
                 baseStyle={{
-                  fontSize: 16,
+                  fontSize: 14,
                   color: "#000",
+                }}
+                tagsStyles={{
+                  p: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  h1: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  h2: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  h3: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  h4: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  h5: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  h6: { marginTop: 0, marginBottom: 0, padding: 0 },
                 }}
               />
             </ScrollView>
