@@ -5,7 +5,7 @@
     "owner": "huwaw2",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/ballpointLogo.png",
+    "icon": "./assets/images/ballpointIcon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

@@ -115,10 +115,6 @@ const OnboardingScreen = () => {
 
     return (
       <SafeAreaView className="flex-1 bg-white">
-        <Text className="text-black text-2xl font-semibold m-8">
-          What You Can Do
-        </Text>
-
         <View className="flex-1 items-center">
           <View className="items-center justify-center">
             <Image source={image} style={imageStyle} resizeMode="cover" />
@@ -168,6 +164,10 @@ const OnboardingScreen = () => {
   const renderFeaturesSwiper = () => {
     return (
       <SafeAreaView className="flex-1 bg-white">
+        <Text className="text-black text-2xl font-semibold m-8">
+          What You Can Do
+        </Text>
+
         <Swiper
           ref={swiperRef}
           showsButtons={false}

@@ -12,6 +12,7 @@ import CategoryNamingModal from "./CategoryNamingModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { api } from "@/lib/redux/slices/authSlice";
 import { ScrollView } from "react-native";
+import { LoadingModal } from "@/components/LoadingModal";
 
 interface ManageCategoriesProps {
   isVisible: boolean;
@@ -53,15 +54,25 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     setSelected(newSelected);
   };
 
-  const handleRenameCategory = (index: number) => {
+  const handleRenameCategory = (index: number, label: string) => {
     setCurrentCategoryIndex(index);
     setCategoryColor(categories[index].color);
+    setCategoryToRename(categories[index].label);
     setRenameModalVisible(true);
   };
+
+  const [categoryToRename, setCategoryToRename] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const handleRenameSubmit = async (newName: string, color: string) => {
     if (currentCategoryIndex !== null) {
       const categoryToUpdate = categories[currentCategoryIndex];
+
+      setLoadingMessage("Renaming category...");
+      setIsLoading(true);
+
       try {
         await api.put(`/notes/categories/update/${categoryToUpdate.id}/`, {
           label: newName,
@@ -78,6 +89,8 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         setRenameModalVisible(false);
       } catch (error) {
         console.error("Error updating category:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -100,14 +113,14 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       return;
     }
 
+    setLoadingMessage("Adding category...");
+    setIsLoading(true);
+
     try {
-      console.log("Sending request to create a new category...");
       const response = await api.post("/notes/categories/create/", {
         label: sanitizedName,
         color: categoryColor,
       });
-
-      console.log("Category created successfully:", response.data);
 
       setCategories((prev) => [
         ...prev,
@@ -120,6 +133,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     } catch (error: any) {
       console.error("Error during category creation:", error.message || error);
     } finally {
+      setIsLoading(false);
       closeCategoryNamingModal();
     }
   };
@@ -127,6 +141,9 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
   const handleDeletePress = () => {
     if (selected.some((value) => value)) {
       setConfirmModalVisible(true);
+    } else {
+      // No items selected, exit delete mode
+      setIsSelectingForDelete(false);
     }
   };
 
@@ -137,22 +154,21 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
 
     if (indicesToDelete.length === 0) return;
 
+    setLoadingMessage("Deleting selected categories...");
+    setIsLoading(true);
+
     try {
       await Promise.all(
         indicesToDelete.map(async (index) => {
           const category = categories[index];
           try {
-            const response = await api.delete(
-              `/notes/categories/delete/${category.id}/`
-            );
-            console.log("Category deleted:", response.data);
+            await api.delete(`/notes/categories/delete/${category.id}/`);
           } catch (error) {
             console.error("Error deleting category:", error);
           }
-
-          console.log(`Successfully deleted category: ${category.label}`);
         })
       );
+
       const updatedCategories = categories.filter(
         (_, index) => !selected[index]
       );
@@ -162,6 +178,8 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       setConfirmModalVisible(false);
     } catch (error) {
       console.error("Error deleting categories:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -175,13 +193,17 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
       }).start();
 
       const fetchCategories = async () => {
+        setLoadingMessage("Fetching categories...");
+        setIsLoading(true);
+
         try {
           const response = await api.get("/notes/categories/");
-          const categories = response.data;
-          setCategories(categories);
-          setSelected(Array(categories.length).fill(false));
+          setCategories(response.data);
+          setSelected(Array(response.data.length).fill(false));
         } catch (error) {
           console.error("Failed to fetch categories:", error);
+        } finally {
+          setIsLoading(false);
         }
       };
 
@@ -217,30 +239,66 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
         style={{ width: "100%" }}
       >
         {/* Category List */}
-        <View className="w-full h-full pl-[10px] pr-[10px] pt-[15px] pb-[30px] rounded-xl justify-center items-center">
-          <View className="flex flex-row w-full justify-end pb-2">
+        <View className="w-full h-full pl-[10px] pr-[10px] pt-[15px] pb-[15px] rounded-xl justify-center items-center">
+          <View className="flex flex-row w-full items-center justify-end gap-2 pb-2">
             <TouchableOpacity
-              className="pr-2"
+              className="flex flex-row items-center px-3 py-2 gap-1 border border-[#cc930c] rounded-2xl"
               onPress={openCategoryNamingModal}
             >
-              <Ionicons name="add-circle-outline" color="#a09d45" size={28} />
+              <Ionicons name="add-circle-outline" color="#cc930c" size={14} />
+              <Text className="text-[#cc930c]">Add Category</Text>
             </TouchableOpacity>
 
-            {!isSelectingForDelete ? (
-              <TouchableOpacity
-                className="pr-2"
-                onPress={() => {
+            <TouchableOpacity
+              className="pr-2"
+              onPress={() => {
+                if (isSelectingForDelete) {
+                  const anySelected = selected.some((val) => val);
+                  if (anySelected) {
+                    setConfirmModalVisible(true);
+                  } else {
+                    setIsSelectingForDelete(false);
+                    setSelected(Array(categories.length).fill(false));
+                  }
+                } else {
                   setIsSelectingForDelete(true);
-                  setSelected(Array(categories.length).fill(false)); // Reset selection
+                  setSelected(Array(categories.length).fill(false));
+                }
+              }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: isSelectingForDelete
+                  ? "#E31E1E"
+                  : "transparent",
+                borderRadius: 28,
+                paddingVertical: 6,
+                paddingHorizontal: 10,
+                borderWidth: isSelectingForDelete ? 1 : 1,
+                borderColor: "#E31E1E",
+              }}
+            >
+              <Ionicons
+                name={isSelectingForDelete ? "trash" : "trash-outline"}
+                color={isSelectingForDelete ? "#FFFFFF" : "#E31E1E"}
+                size={16}
+              />
+              <Text
+                style={{
+                  marginLeft: 6,
+                  fontSize: 14,
+                  fontWeight: "500",
+                  color: isSelectingForDelete ? "#FFFFFF" : "#E31E1E",
+                  paddingRight: 4,
                 }}
               >
-                <Ionicons name="trash-outline" color="#E31E1E" size={28} />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity className="pr-4" onPress={handleDeletePress}>
-                <Ionicons name="trash" color="#E31E1E" size={28} />
-              </TouchableOpacity>
-            )}
+                {isSelectingForDelete
+                  ? selected.some((val) => val)
+                    ? `Delete (${selected.filter(Boolean).length})`
+                    : "Cancel"
+                  : "Delete Categories"}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <ScrollView
@@ -248,49 +306,60 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={true}
           >
-            {categories.map((category, index) => (
-              <View
-                key={index}
-                className="flex-row justify-right items-center p-2"
-              >
-                {isSelectingForDelete && (
-                  <TouchableOpacity onPress={() => toggleSelection(index)}>
-                    <Ionicons
-                      name={selected[index] ? "ellipse" : "ellipse-outline"}
-                      color={selected[index] ? "#6a994e" : "#a09d45"}
-                      size={20}
-                    />
-                  </TouchableOpacity>
-                )}
-
-                <View
-                  className="pl-[10px]"
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    flex: 1,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 20,
-                      height: 20,
-                      backgroundColor: category.color,
-                      marginRight: 10,
-                      borderRadius: 5,
-                    }}
-                  />
-                  <Text className="text-xl">{category.label}</Text>
-                </View>
-
-                <TouchableOpacity
-                  className="absolute right-[10px]"
-                  onPress={() => handleRenameCategory(index)}
-                >
-                  <Text className="text-lg text-tertiary-textGray">Rename</Text>
-                </TouchableOpacity>
+            {categories.length === 0 ? (
+              <View className="w-full items-center mt-4">
+                <Text className="text-gray-500 text-lg text-center">
+                  No existing categories. Press (+) to add.
+                </Text>
               </View>
-            ))}
+            ) : (
+              categories.map((category, index) => (
+                <View
+                  key={index}
+                  className="flex-row justify-right items-center"
+                >
+                  {isSelectingForDelete && (
+                    <TouchableOpacity onPress={() => toggleSelection(index)}>
+                      <Ionicons
+                        name={
+                          selected[index]
+                            ? "checkmark-circle"
+                            : "ellipse-outline"
+                        }
+                        color={selected[index] ? "#E31E1E" : "#a09d45"}
+                        size={26}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  <View
+                    className="pl-[10px]"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: 1,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: category.color,
+                        marginRight: 10,
+                        borderRadius: 5,
+                      }}
+                    />
+                    <Text className="text-xl p-3">{category.label}</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    className="absolute right-[10px] pl-4 py-2"
+                    onPress={() => handleRenameCategory(index, category.label)}
+                  >
+                    <Text className="text-lg text-tertiary-textGray">Edit</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
 
@@ -300,7 +369,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           onClose={() => setRenameModalVisible(false)}
           onCancel={() => setRenameModalVisible(false)}
           onProceed={handleRenameSubmit}
-          placeholder="Rename category"
+          placeholder={categoryToRename || "Rename category"}
           categoryColor={categoryColor}
           setCategoryColor={setCategoryColor}
         />
@@ -328,6 +397,7 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
           onConfirm={handleConfirmDelete}
         />
       </View>
+      <LoadingModal visible={isLoading} message={loadingMessage} />
     </Animated.View>
   );
 };
