@@ -80,7 +80,7 @@ export const ExtractionWindow: React.FC<ExtractionWindowProps> = ({
 
             {/* Scrollable Markdown Content */}
             <ScrollView
-              className="mt-4 border"
+              className="mt-4"
               contentContainerStyle={{ paddingBottom: 20 }}
               showsVerticalScrollIndicator={true}
             >

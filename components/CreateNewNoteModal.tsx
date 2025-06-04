@@ -66,7 +66,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
       onRequestClose={closeModal}
     >
       <View className="bg-black/30 h-full flex justify-center items-center">
-        <View className="h-[200px] w-[80%] bg-white px-6 py-8 rounded-xl shadow-md">
+        <View className="h-[165px] w-[80%] bg-white px-6 py-8 rounded-xl shadow-md">
           <View className="relative">
             <Text className="text-3xl">Title</Text>
             <TouchableOpacity

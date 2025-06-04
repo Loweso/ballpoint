@@ -15,7 +15,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument, File } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
 import CircleButton from "@/components/CircleButton";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import {
+  Ionicons,
+  AntDesign,
+  MaterialCommunityIcons,
+  FontAwesome6,
+} from "@expo/vector-icons";
 import RenderHTML from "react-native-render-html";
 import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
@@ -36,6 +41,8 @@ import QueryMenuModal from "@/components/QueryMenuModal";
 import TextReplacementModal from "@/components/TextReplacementModal";
 import { LoadingModal } from "@/components/LoadingModal";
 import SearchNavigation from "@/components/FindWordOverlay";
+
+import { LinearGradient } from "expo-linear-gradient";
 
 const Note = ({ text }: any) => {
   const [extractionTitle, setExtractionTitle] = useState("");
@@ -429,10 +436,26 @@ const Note = ({ text }: any) => {
   );
 
   const ReplaceIcon = () => (
-    <Ionicons name="swap-horizontal" size={20} color="black" />
+    <View
+      style={{ width: 30, height: 30, borderRadius: 20, position: "relative" }}
+      className="items-center justify-center"
+    >
+      <LinearGradient
+        colors={["#146fe1", "#37b16e"]}
+        style={{ width: 24, height: 24, borderRadius: 20 }}
+      />
+      <Ionicons
+        name="sparkles-outline"
+        size={16}
+        color="white"
+        style={{ position: "absolute", left: 8, top: 7 }}
+      />
+    </View>
   );
 
+  const [initialNoteContent, setInitialNoteContent] = useState(noteContent);
   const enableEditing = () => {
+    setInitialNoteContent(noteContent); // store the content before editing
     setIsEditing(true);
   };
 
@@ -471,23 +494,24 @@ const Note = ({ text }: any) => {
 
   const onInjectJavascript = () => {
     const script = `(function() {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const value = selection.toString() || '';
-        window.ReactNativeWebView.postMessage(JSON.stringify({ 
-          data: {
-            type: 'SELECTION_CHANGE', 
-            value,
-            range: {
-              start: range.startOffset,
-              end: range.endOffset
-            }
-          } 
-        }));
-      }
-      void(0);
-    })();`;
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const value = selection.toString() || '';
+      window.ReactNativeWebView.postMessage(JSON.stringify({ 
+        data: {
+          type: 'SELECTION_CHANGE', 
+          value,
+          range: {
+            start: range.startOffset,
+            end: range.endOffset
+          }
+        } 
+      }));
+    }
+    void(0);
+  })();`;
+
     RichText.current?.injectJavascript(script);
   };
 
@@ -500,6 +524,12 @@ const Note = ({ text }: any) => {
       console.log("Selected text", selected, "Range:", range);
       if (selected) {
         setIsQueryMenuModalOpen(true);
+      } else {
+        Alert.alert(
+          "No text selected",
+          "Please highlight some text to use this feature."
+        );
+        return;
       }
     }
   };
@@ -518,25 +548,37 @@ const Note = ({ text }: any) => {
         />
       )}
       <View className="justify-between flex-row gap-4 p-4">
-        <TouchableOpacity onPress={() => router.push("/")}>
+        <TouchableOpacity
+          onPress={() => {
+            if (isEditing && noteContent !== initialNoteContent) {
+              Alert.alert(
+                "Unsaved Changes",
+                "You have unsaved changes. Are you sure you want to go back?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Discard Changes",
+                    style: "destructive",
+                    onPress: () => {
+                      setIsEditing(false);
+                      router.push("/"); // continue navigating
+                    },
+                  },
+                ]
+              );
+            } else {
+              router.push("/");
+            }
+          }}
+          className="pr-4"
+        >
           <View className="flex flex-row items-center gap-1">
-            <AntDesign name="leftcircleo" size={20} color="black" />
-            <Text className="text-lg">Notes</Text>
+            <Ionicons name="arrow-back" size={28} color="black" />
           </View>
         </TouchableOpacity>
 
-        <View className="flex-row flex gap-x-3 justify-between items-center">
-          {isEditing && (
-            <TouchableOpacity
-              className="flex flex-row items-center px-3 py-1 bg-tertiary-buttonGreen rounded-2xl"
-              onPress={openCamera}
-            >
-              <Text className="text-white">Extract</Text>
-              <Ionicons name="document-outline" size={20} color="white" />
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity>
+        <View className="flex-row flex gap-x-1 justify-between items-center">
+          <TouchableOpacity className="pl-4 pr-2 py-1 items-center">
             <Ionicons
               name="ellipsis-horizontal"
               size={20}
@@ -550,13 +592,29 @@ const Note = ({ text }: any) => {
 
           {isEditing && (
             <TouchableOpacity
+              className="flex flex-row items-center px-3 py-2 bg-tertiary-buttonGreen rounded-2xl"
+              onPress={openCamera}
+            >
+              <Text className="text-white font-medium pl-1">Extract</Text>
+              <Ionicons name="document-outline" size={13} color="white" />
+            </TouchableOpacity>
+          )}
+
+          {isEditing && (
+            <TouchableOpacity
               onPress={async () => {
                 await saveNote();
                 setIsEditing(false);
                 titleInputRef.current?.blur();
               }}
+              className="flex flex-row items-center px-3 py-2 bg-secondary-yellow rounded-2xl"
             >
-              <Text>Done</Text>
+              <Text className="pl-1 font-medium">Done</Text>
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={15}
+                color="black"
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -610,7 +668,7 @@ const Note = ({ text }: any) => {
 
       <TextInput
         ref={titleInputRef}
-        className="text-2xl mx-2 font-semibold pb-2"
+        className="text-2xl mx-4 mb-3 font-semibold"
         placeholder="Title"
         onChangeText={setTitle}
         value={title}
@@ -621,6 +679,7 @@ const Note = ({ text }: any) => {
           <ScrollView
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={true}
+            className="mx-1"
           >
             <RichEditor
               ref={RichText}
@@ -636,7 +695,7 @@ const Note = ({ text }: any) => {
                 contentCSSText: `
                 font-size: 14px;
                 p, h1, h2, h3, h4, h5, h6 {
-                  margin: 0;
+                  margin: 2;
                   padding: 0;
                 }
               `,
@@ -676,7 +735,7 @@ const Note = ({ text }: any) => {
         //     }, 100);
         //   }}
         // >
-        <View className="mx-3 mb-6" style={{ flex: 1 }}>
+        <View className="mx-4 mb-6" style={{ flex: 1 }}>
           {noteContent ? (
             <ScrollView>
               <RenderHTML
@@ -689,13 +748,13 @@ const Note = ({ text }: any) => {
                   color: "#000",
                 }}
                 tagsStyles={{
-                  p: { marginTop: 0, marginBottom: 0, padding: 0 },
-                  h1: { marginTop: 0, marginBottom: 0, padding: 0 },
-                  h2: { marginTop: 0, marginBottom: 0, padding: 0 },
-                  h3: { marginTop: 0, marginBottom: 0, padding: 0 },
-                  h4: { marginTop: 0, marginBottom: 0, padding: 0 },
-                  h5: { marginTop: 0, marginBottom: 0, padding: 0 },
-                  h6: { marginTop: 0, marginBottom: 0, padding: 0 },
+                  p: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  h1: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  h2: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  h3: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  h4: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  h5: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  h6: { marginTop: 2, marginBottom: 2, padding: 0 },
                 }}
               />
             </ScrollView>
