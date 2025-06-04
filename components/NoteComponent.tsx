@@ -14,7 +14,7 @@ import OutsidePressHandler from "react-native-outside-press";
 import { useFonts } from "expo-font";
 import NoteSettingsConfirmationModal from "./NoteSettingsConfirmationModal";
 import { api } from "@/lib/redux/slices/authSlice";
-import RenderHTML from "react-native-render-html";
+// Removed RenderHTML import since no longer used in preview
 
 type NoteComponentProps = {
   title: string;
@@ -26,19 +26,27 @@ type NoteComponentProps = {
 };
 
 function getReadableTextColor(hex: string): string {
-  // Remove '#' if present
   const cleanedHex = hex.replace("#", "");
-
-  // Parse r, g, b
   const r = parseInt(cleanedHex.substring(0, 2), 16);
   const g = parseInt(cleanedHex.substring(2, 4), 16);
   const b = parseInt(cleanedHex.substring(4, 6), 16);
-
-  // Calculate luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black for bright backgrounds, white for dark ones
   return luminance > 0.6 ? "#000000" : "#ffffff";
+}
+
+function sanitizeHTML(html: string): string {
+  const noInlineStyles = html.replace(/style="[^"]*"/gi, "");
+  const noStyleTags = noInlineStyles.replace(
+    /<style[^>]*>[\s\S]*?<\/style>/gi,
+    ""
+  );
+  return noStyleTags;
+}
+
+// Simple function to strip HTML tags for plain text extraction
+function stripHtmlTags(html: string): string {
+  if (!html) return "";
+  return html.replace(/<\/?[^>]+(>|$)/g, "").trim();
 }
 
 const NoteComponent: React.FC<NoteComponentProps> = ({
@@ -78,7 +86,6 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
   };
   const handleRename = async () => {
     const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
-
     try {
       await api.put(`/notes/${noteID}/`, {
         title: newTitle,
@@ -105,6 +112,9 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
       Alert.alert("Error", "Something went wrong while deleting.");
     }
   };
+
+  // Extract plain text preview for exactly 4 lines display
+  const plainTextPreview = stripHtmlTags(sanitizeHTML(notesContent));
 
   return (
     <Pressable
@@ -173,17 +183,16 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
       </View>
 
       <View className="flex flex-row flex-wrap my-2 gap-2">
-        {[...categories] // create a shallow copy to avoid mutating the original
-          .sort((a, b) => b.label.length - a.label.length) // sort by label length (descending)
+        {[...categories]
+          .sort((a, b) => b.label.length - a.label.length)
           .map((category, index) => {
             const backgroundColor = category.color || "#fffee1";
             const textColor = getReadableTextColor(backgroundColor);
-
             return (
               <View
                 key={index}
                 style={{ backgroundColor }}
-                className="h-8 py-1 px-4"
+                className="h-8 p-2 rounded-lg"
               >
                 <Text style={{ color: textColor }} className="font-bold">
                   {String(category.label)}
@@ -193,22 +202,21 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
           })}
       </View>
 
-      <View
-        style={{
-          maxHeight: 66, // ~4 lines based on font size/line height
-          overflow: "hidden",
-        }}
-      >
-        <RenderHTML
-          contentWidth={200}
-          source={{ html: notesContent }}
-          baseStyle={{
+      {/* Plain text preview with strict 4 lines limit */}
+      <View>
+        <Text
+          style={{
             fontSize: 12,
-            color: "#1a1a1a",
             lineHeight: 16,
-            textAlign: "justify",
+            color: "#1a1a1a",
+            fontFamily: "System",
+            fontWeight: "normal",
+            textAlign: "left",
           }}
-        />
+          numberOfLines={4}
+        >
+          {plainTextPreview}
+        </Text>
       </View>
 
       <Modal visible={isRenameModalVisible} transparent animationType="fade">
