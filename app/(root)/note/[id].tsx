@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { pickDocument, File } from "@/hooks/DocumentPicker";
 import { ExtractionWindow } from "@/components/extraction/ExtractionWindow";
@@ -50,6 +50,7 @@ const Note = ({ text }: any) => {
   const [isSearchNavOpen, setIsSearchNavOpen] = useState(false);
 
   const [aiText, setAiText] = useState(text);
+  const [editorHeight, setEditorHeight] = useState(200);
   const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
   const [loadingMessage, setLoadingMessage] = useState("");
   const [noteContent, setNoteContent] = useState(text);
@@ -65,6 +66,7 @@ const Note = ({ text }: any) => {
   } | null>(null);
   const [isQueryMenuModalOpen, setIsQueryMenuModalOpen] = useState(false);
 
+  const router = useRouter();
   const md = new MarkdownIt();
   const RichText = useRef<RichEditor | null>(null);
   const titleInputRef = useRef<TextInput | null>(null);
@@ -94,7 +96,8 @@ const Note = ({ text }: any) => {
     if (isEditing && RichText.current) {
       RichText.current.setContentHTML(noteContent);
     }
-  }, [isEditing, noteContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing]);
 
   const summarizeNotes = async () => {
     const text = striptags(noteContent);
@@ -430,12 +433,12 @@ const Note = ({ text }: any) => {
         />
       )}
       <View className="justify-between flex-row gap-4 p-4">
-        <Link href="/">
+        <TouchableOpacity onPress={() => router.push("/")}>
           <View className="flex flex-row items-center gap-1">
             <AntDesign name="leftcircleo" size={20} color="black" />
-            <Text className="text-lg"> Notes </Text>
+            <Text className="text-lg">Notes</Text>
           </View>
-        </Link>
+        </TouchableOpacity>
 
         <View className="flex-row flex gap-x-3 justify-between items-center">
           {isEditing && (
@@ -531,33 +534,31 @@ const Note = ({ text }: any) => {
       {isEditing ? (
         <>
           <ScrollView
-            contentContainerStyle={{ height: 1000 }}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={true}
           >
             <RichEditor
               ref={RichText}
+              initialContentHTML={noteContent}
+              placeholder=""
+              onChange={setNoteContent}
+              onMessage={handleOnMessage}
               style={{
-                flex: 1,
-                marginBottom: 2,
+                minHeight: 200,
+                height: editorHeight,
               }}
               editorStyle={{
                 contentCSSText: `
-  font-size: 14px;
-  
-  p, h1, h2, h3, h4, h5, h6 {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding: 0;
-  }
-`,
+                font-size: 14px;
+                p, h1, h2, h3, h4, h5, h6 {
+                  margin: 0;
+                  padding: 0;
+                }
+              `,
               }}
-              placeholder={""}
-              initialContentHTML={noteContent}
-              onChange={(descriptionText) => {
-                setNoteContent(descriptionText);
+              onHeightChange={(height) => {
+                setEditorHeight(height);
               }}
-              onMessage={handleOnMessage}
             />
           </ScrollView>
           <RichToolbar
@@ -577,9 +578,7 @@ const Note = ({ text }: any) => {
               replaceText: ReplaceIcon,
             }}
             openAIPolishModal={toggleAIPolishModal}
-            replaceText={() => {
-              onInjectJavascript();
-            }}
+            replaceText={onInjectJavascript}
           />
         </>
       ) : (

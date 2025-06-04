@@ -46,7 +46,23 @@ function sanitizeHTML(html: string): string {
 // Simple function to strip HTML tags for plain text extraction
 function stripHtmlTags(html: string): string {
   if (!html) return "";
-  return html.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+  // Replace block-level tags with newlines
+  const withLineBreaks = html
+    .replace(
+      /<\s*(div|p|br|li|section|article|header|footer|h[1-6])[^>]*>/gi,
+      "\n"
+    )
+    .replace(
+      /<\s*\/\s*(div|p|li|section|article|header|footer|h[1-6])\s*>/gi,
+      "\n"
+    );
+
+  // Strip remaining tags
+  const textOnly = withLineBreaks.replace(/<\/?[^>]+(>|$)/g, "");
+
+  // Normalize multiple newlines and trim
+  return textOnly.replace(/\n{2,}/g, "\n").trim();
 }
 
 const NoteComponent: React.FC<NoteComponentProps> = ({
@@ -192,7 +208,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
               <View
                 key={index}
                 style={{ backgroundColor }}
-                className="h-8 p-2 rounded-lg"
+                className="p-2 rounded"
               >
                 <Text style={{ color: textColor }} className="font-bold">
                   {String(category.label)}
