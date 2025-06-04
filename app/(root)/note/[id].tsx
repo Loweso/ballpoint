@@ -26,6 +26,7 @@ import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
 import MarkdownIt from "markdown-it";
 import { highlightVisibleTextOnly } from "@/utils/highlightTextinHTML";
+import * as ImagePicker from "expo-image-picker";
 
 import {
   actions,
@@ -40,7 +41,8 @@ import QueryMenuModal from "@/components/QueryMenuModal";
 import TextReplacementModal from "@/components/TextReplacementModal";
 import { LoadingModal } from "@/components/LoadingModal";
 import SearchNavigation from "@/components/FindWordOverlay";
-
+import PermissionsModal from "@/components/PermissionsModal";
+import MediaChoiceModal from "@/components/MediaChoiceModal";
 import { LinearGradient } from "expo-linear-gradient";
 
 const Note = ({ text }: any) => {
@@ -64,6 +66,7 @@ const Note = ({ text }: any) => {
 
   const [loadingMessage, setLoadingMessage] = useState("");
   const [noteContent, setNoteContent] = useState(text);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -87,6 +90,9 @@ const Note = ({ text }: any) => {
     useState(false);
   const [processedText, setProcessedText] = useState("");
   const [isFromQuery, setIsFromQuery] = useState(false);
+
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showMediaModal, setShowMediaModal] = useState(false);
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -271,6 +277,65 @@ const Note = ({ text }: any) => {
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
+    }
+  };
+
+  const openCamera = async () => {
+    const { status: cameraStatus } =
+      await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaLibraryStatus } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (cameraStatus !== "granted" || mediaLibraryStatus !== "granted") {
+      setShowPermissionModal(true);
+      return;
+    }
+
+    setShowMediaModal(true);
+  };
+
+  const handleTakePhoto = async () => {
+    setShowMediaModal(false);
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      const photo = result.assets[0];
+      const formData = new FormData();
+      formData.append("image", {
+        uri: photo.uri,
+        name: photo.fileName || "photo.jpg",
+        type: photo.mimeType || "image/jpeg",
+      } as any);
+
+      try {
+        setLoadingMessage("Extracting text...");
+        setIsLoading(true);
+        const uploadResponse = await api.post(
+          "extract/extract-text",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        if (uploadResponse.data?.text) {
+          setAiText(uploadResponse.data.text);
+          setTimeout(() => setIsExtractionWindowVisible(true), 600);
+        }
+      } catch (err) {
+        console.error("Error uploading photo:", err);
+        Alert.alert(
+          "Error",
+          "Upload failed. Please check your backend and try again."
+        );
+      } finally {
+        setIsLoading(false);
+        setLoadingMessage("");
+      }
     }
   };
 
@@ -516,8 +581,8 @@ const Note = ({ text }: any) => {
 
           {isEditing && (
             <TouchableOpacity
-              className="flex flex-row items-center px-3 py-2 bg-tertiary-buttonGreen gap-1 rounded-2xl"
-              onPress={handlePickDocument}
+              className="flex flex-row items-center px-3 py-2 bg-tertiary-buttonGreen rounded-2xl"
+              onPress={openCamera}
             >
               <Text className="text-white font-medium pl-1">Extract</Text>
               <Ionicons name="document-outline" size={13} color="white" />
@@ -747,6 +812,20 @@ const Note = ({ text }: any) => {
         onClose={() => setIsReplacementModalVisible(false)}
         onReplace={handleReplace}
         processedText={processedText}
+      />
+      <PermissionsModal
+        visible={showPermissionModal}
+        onClose={() => setShowPermissionModal(false)}
+      />
+
+      <MediaChoiceModal
+        visible={showMediaModal}
+        onCancel={() => setShowMediaModal(false)}
+        onTakePhoto={handleTakePhoto}
+        onPickFile={() => {
+          setShowMediaModal(false);
+          handlePickDocument();
+        }}
       />
     </SafeAreaView>
   );
