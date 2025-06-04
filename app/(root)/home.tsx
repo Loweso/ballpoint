@@ -111,10 +111,8 @@ export default function Home() {
         const response = await api.get(`/notes`, {
           params: { search: searchQuery }, // Pass the search query as a parameter
         });
-        console.log(response.data); // Log the response data for debugging
+
         setNotes(response.data); // Update notes with search results
-      } catch (err) {
-        console.error("Error fetching search results:", err);
       } finally {
         setLoading(false);
       }
@@ -131,8 +129,6 @@ export default function Home() {
     try {
       const response = await api.get(`/notes`);
       setNotes(response.data); // Store data in state
-    } catch (error) {
-      console.error("Error fetching notes:", error);
     } finally {
       setLoading(false);
     }

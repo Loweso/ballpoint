@@ -92,7 +92,7 @@ const SignupPage = () => {
       await SecureStore.setItemAsync("authState", "login");
       router.push("/(auth)/login");
     } catch (err: any) {
-      console.error("Signup failed:", err);
+    
 
       // Handle backend validation errors
       if (

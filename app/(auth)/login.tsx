@@ -30,10 +30,7 @@ const LoginPage = () => {
   });
   const [generalError, setGeneralError] = useState("");
 
-  useEffect(() => {
-    console.log("sdsd");
-  }, []);
-
+ 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Validate form fields
@@ -70,7 +67,7 @@ const LoginPage = () => {
       await dispatch(loginUser({ email, password })).unwrap();
       router.replace("/(root)/home");
     } catch (err: any) {
-      console.error("Login failed:", err);
+  
 
       // Handle backend validation errors
       if (err.email || err.password || err.non_field_errors) {

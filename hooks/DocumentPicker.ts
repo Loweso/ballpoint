@@ -14,7 +14,7 @@ export const pickDocument = async (): Promise<File | null> => {
     });
 
     if (result.canceled) {
-      console.log("User canceled the document picker");
+  
       alert("No file was selected.");
       return null;
     } else if (result.assets && result.assets.length > 0) {
@@ -37,7 +37,7 @@ export const pickDocument = async (): Promise<File | null> => {
         return null;
       }
 
-      console.log("Selected file:", file);
+
       return file;
     } else {
       return null;

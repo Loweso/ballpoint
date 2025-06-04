@@ -8,16 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { api } from "../../lib/redux/slices/authSlice";
 
 enum ScreenState {
   FIND_ACCOUNT,
-  USE_GOOGLE,
-  CONFIRM_ACCOUNT,
+  VERIFY_EMAIL,
   NEW_PASSWORD,
 }
 
@@ -31,16 +32,15 @@ export default function ForgotPasswordFlow({ navigation }: any) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const renderScreen = () => {
     switch (screenState) {
       case ScreenState.FIND_ACCOUNT:
         return renderFindAccountScreen();
-      case ScreenState.USE_GOOGLE:
-        return renderUseGoogleScreen();
-      case ScreenState.CONFIRM_ACCOUNT:
-        return renderConfirmAccountScreen();
+      case ScreenState.VERIFY_EMAIL:
+        return renderVerifyEmailScreen();
       case ScreenState.NEW_PASSWORD:
         return renderNewPasswordScreen();
       default:
@@ -50,9 +50,80 @@ export default function ForgotPasswordFlow({ navigation }: any) {
 
   const handleBackPress = () => {
     if (screenState > 0) {
-      setScreenState(screenState - 1); // Go to the previous state in the flow
+      setScreenState(screenState - 1);
     } else {
-      router.push("/login"); // ✅ Use router to navigate to the login screen
+      router.push("/login");
+    }
+  };
+
+  const handleSendVerificationCode = async () => {
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await api.post("/api/forgot-password", { email });
+      setScreenState(ScreenState.VERIFY_EMAIL);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to send verification code"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!code) {
+      Alert.alert("Error", "Please enter the verification code");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await api.post("/api/verify-code", { email, code });
+      setScreenState(ScreenState.NEW_PASSWORD);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Invalid verification code"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (newPassword.length < 8) {
+      Alert.alert("Error", "Password must be at least 8 characters long");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await api.post("/api/reset-password", {
+        email,
+        code,
+        new_password: newPassword,
+      });
+      Alert.alert("Success", "Password has been reset successfully", [
+        { text: "OK", onPress: () => router.push("/login") },
+      ]);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to reset password"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,120 +133,74 @@ export default function ForgotPasswordFlow({ navigation }: any) {
       <View className="flex-1 justify-start">
         <Text className="text-2xl font-bold mb-2">Find your account</Text>
         <Text className="text-base text-gray-600 mb-5">
-          Enter your email address
+          Enter your email address to reset your password
         </Text>
 
         <TextInput
           className="h-12 border border-gray-300 rounded px-4 text-base mb-5"
           placeholder="Email"
           value={email}
-          onChangeText={(text) => {
-            console.log("Email entered:", text);
-            setEmail(text);
-          }}
+          onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!isLoading}
         />
 
         <TouchableOpacity
           className="h-12 bg-tertiary-buttonGreen rounded justify-center items-center mb-4"
-          onPress={() => {
-            if (email && email.includes("@") && email.includes(".")) {
-              setScreenState(ScreenState.USE_GOOGLE);
-            } else {
-              alert("Please enter a valid email address");
-            }
-          }}
+          onPress={handleSendVerificationCode}
+          disabled={isLoading}
         >
-          <Text className="text-white font-medium text-base">Continue</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  // Screen 2: Use your Google account
-  const renderUseGoogleScreen = () => {
-    return (
-      <View className="flex-1 justify-start items-center">
-        <Text className="text-2xl font-bold mb-2">Use your Google account</Text>
-        <Text className="text-base text-gray-600 mb-5">
-          Log into Google to quickly reset your password
-        </Text>
-
-        <View className="items-center my-8">
-          <FontAwesome
-            name="user-circle-o"
-            size={72}
-            color="black"
-            style={{ paddingBottom: 15 }}
-          />
-          <Text className="text-xl font-medium">
-            {email || "No email provided"}
+          <Text className="text-white font-medium text-base">
+            {isLoading ? "Sending..." : "Send Verification Code"}
           </Text>
-        </View>
-
-        <TouchableOpacity
-          className="w-full h-12 bg-tertiary-buttonGreen rounded justify-center items-center mb-4"
-          onPress={() => setScreenState(ScreenState.CONFIRM_ACCOUNT)}
-        >
-          <Text className="text-white font-medium text-base">Continue</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="w-full h-12 border border-gray-300 rounded justify-center items-center">
-          <Text className="text-gray-600 text-sm">Try another way</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
-  // Screen 3: Confirm your account
-  const renderConfirmAccountScreen = () => {
+  // Screen 2: Verify Email
+  const renderVerifyEmailScreen = () => {
     return (
       <View className="flex-1 justify-start">
-        <Text className="text-xl font-bold mb-2">Confirm your account</Text>
+        <Text className="text-xl font-bold mb-2">Verify your email</Text>
         <Text className="text-sm text-gray-600 mb-5">
-          We've sent a code to your email that needs to confirm your account.
-          Enter that code.
+          We've sent a verification code to {email}. Please enter the code
+          below.
         </Text>
 
         <TextInput
           className="h-12 border border-gray-300 rounded px-4 text-base mb-5"
-          placeholder="Code"
+          placeholder="Enter verification code"
           value={code}
           onChangeText={setCode}
           keyboardType="number-pad"
+          editable={!isLoading}
         />
 
         <TouchableOpacity
           className="h-12 bg-tertiary-buttonGreen rounded justify-center items-center mb-4"
-          onPress={() => setScreenState(ScreenState.NEW_PASSWORD)}
+          onPress={handleVerifyCode}
+          disabled={isLoading}
         >
-          <Text className="text-white font-medium text-base">Continue</Text>
+          <Text className="text-white font-medium text-base">
+            {isLoading ? "Verifying..." : "Verify Code"}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="h-12 border border-gray-300 rounded justify-center items-center">
-          <Text className="text-gray-600 text-sm">Send code again</Text>
+        <TouchableOpacity
+          className="h-12 border border-gray-300 rounded justify-center items-center"
+          onPress={handleSendVerificationCode}
+          disabled={isLoading}
+        >
+          <Text className="text-gray-600 text-sm">Resend code</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
-  // Screen 4: Enter new password
+  // Screen 3: Enter new password
   const renderNewPasswordScreen = () => {
-    const handleSavePassword = () => {
-      if (newPassword.length < 8) {
-        alert("Password must be at least 8 characters long.");
-        return;
-      }
-
-      if (newPassword !== confirmPassword) {
-        alert("Passwords do not match.");
-        return;
-      }
-
-      router.push("/login");
-    };
-
     return (
       <View className="flex-1 justify-start">
         <Text className="text-xl font-bold mb-5">Enter new password</Text>
@@ -187,6 +212,7 @@ export default function ForgotPasswordFlow({ navigation }: any) {
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry={!showNewPassword}
+            editable={!isLoading}
           />
           <TouchableOpacity
             className="absolute right-4 top-3"
@@ -207,6 +233,7 @@ export default function ForgotPasswordFlow({ navigation }: any) {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
+            editable={!isLoading}
           />
           <TouchableOpacity
             className="absolute right-4 top-3"
@@ -222,10 +249,11 @@ export default function ForgotPasswordFlow({ navigation }: any) {
 
         <TouchableOpacity
           className="h-12 bg-tertiary-buttonGreen rounded justify-center items-center"
-          onPress={handleSavePassword}
+          onPress={handleResetPassword}
+          disabled={isLoading}
         >
           <Text className="text-white font-medium text-base">
-            Save and continue to log in
+            {isLoading ? "Resetting..." : "Reset Password"}
           </Text>
         </TouchableOpacity>
       </View>

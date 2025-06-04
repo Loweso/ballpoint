@@ -3,7 +3,6 @@ import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
 import {
   refreshToken,
   checkAuthStatus,
-  clearAuthTokens,
   logoutUser,
 } from "@/lib/redux/slices/authSlice";
 import { router, useSegments, useRootNavigationState } from "expo-router";
@@ -28,10 +27,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
     if (!isAuthenticated && !inAuthGroup) {
       // Redirect to login if not authenticated and trying to access protected route
-      console.log("asdsadasdasreal");
+
       router.replace("/(auth)/login");
     } else if (isAuthenticated && inAuthGroup) {
-      console.log(isAuthenticated, inAuthGroup, accessToken);
       // Redirect to home if authenticated and trying to access auth routes
       router.replace("/(root)/home");
     }
@@ -53,7 +51,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         // Navigate to login
         router.replace("/(auth)/login");
       }
-    }, 30 * 1000); // Set to 30 seconds for testing
+    }, 60 * 1000); // Set to 30 seconds for testing
 
     return () => clearInterval(refreshInterval);
   }, [isAuthenticated, dispatch, segments]);

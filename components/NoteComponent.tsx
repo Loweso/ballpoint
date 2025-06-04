@@ -86,7 +86,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
         categories: [],
         date: today,
       });
-      console.log("Renamed to:", newTitle);
+    
       setIsRenameModalVisible(false);
     } catch (error) {
       console.error("Error renaming note:", error);
@@ -97,7 +97,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
   const deleteNote = async () => {
     try {
       const response = await api.delete(`/notes/${noteID}/`);
-      console.log("Note deleted:", response.data);
+   
       Alert.alert("Success", "Note deleted!");
       onDelete(noteID);
     } catch (error) {
@@ -110,7 +110,7 @@ const NoteComponent: React.FC<NoteComponentProps> = ({
     <Pressable
       className="w-full bg-primary-white rounded-2xl border-2 border-slate-400 p-4"
       onPress={() => {
-        console.log("Redirect to?:", noteID);
+       
         router.push(`/note/${noteID}` as any);
       }}
     >

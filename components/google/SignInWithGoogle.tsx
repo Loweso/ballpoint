@@ -24,14 +24,11 @@ export default function GoogleSignInButton() {
 
       router.replace("/(root)/home");
     } catch (err: any) {
-      console.log(err, "ashgdsahda");
       console.error(err.response?.data || err.message);
     }
   };
 
   useEffect(() => {
-    console.log("Client ID:", process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID);
-
     // If Google login is successful
     if (response?.type === "success" && response.params?.id_token) {
       authenticateWithBackend(response.params.id_token);

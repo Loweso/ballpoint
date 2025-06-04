@@ -88,7 +88,7 @@ const QueryMenuModal: React.FC<QueryMenuModalProps> = ({
               <TouchableOpacity
                 className="flex-row m-1 gap-2 items-center rounded-lg"
                 onPress={() => {
-                  console.log("Cancel button pressed");
+                 
                   onClose();
                   setQueryText(""); // Clear the query text
                   setSelectedText("");

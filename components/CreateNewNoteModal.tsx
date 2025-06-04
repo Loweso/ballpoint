@@ -38,7 +38,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
         categories: [],
         date: today,
       });
-      console.log("Create Note Response:", response.data);
+
 
       const newNoteID = response.data.noteID;
 

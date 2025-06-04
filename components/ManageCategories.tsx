@@ -83,12 +83,10 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
   };
 
   const openCategoryNamingModal = () => {
-    console.log("Opening naming modal...");
     setIsCategoryNamingModalVisible(true);
   };
 
   const closeCategoryNamingModal = () => {
-    console.log("Closing naming modal...");
     setIsCategoryNamingModalVisible(false);
   };
 
@@ -96,18 +94,14 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
     const sanitizedName = newName.trim();
 
     if (!sanitizedName) {
-      console.log("Category name cannot be empty or just spaces.");
       return;
     }
 
     try {
-      console.log("Sending request to create a new category...");
       const response = await api.post("/notes/categories/create/", {
         label: sanitizedName,
         color: categoryColor,
       });
-
-      console.log("Category created successfully:", response.data);
 
       setCategories((prev) => [
         ...prev,
@@ -145,12 +139,9 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
             const response = await api.delete(
               `/notes/categories/delete/${category.id}/`
             );
-            console.log("Category deleted:", response.data);
           } catch (error) {
             console.error("Error deleting category:", error);
           }
-
-          console.log(`Successfully deleted category: ${category.label}`);
         })
       );
       const updatedCategories = categories.filter(

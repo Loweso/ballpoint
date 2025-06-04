@@ -28,12 +28,6 @@ export default function User() {
   const { user } = useAppSelector((state) => state.auth);
   const [editedUsername, setEditedUsername] = useState(user?.username ?? "");
 
-  useEffect(() => {
-    if (user) {
-      console.log(user);
-    }
-  }, [user]);
-
   const dispatch = useAppDispatch();
 
   const handleUsernameChange = (text: string) => {
@@ -61,8 +55,6 @@ export default function User() {
   };
 
   const pickImage = async () => {
-    console.log("Picking image through document picker...");
-
     const file = await pickDocument();
     if (!file) return;
 
@@ -87,15 +79,10 @@ export default function User() {
 
       if (response?.profile_picture) {
         dispatch(updateProfilePicture(response.profile_picture));
-        console.log(
-          "Profile picture updated successfully:",
-          response.profile_picture
-        );
       } else {
         console.error("Error: No photo in response", response);
       }
     } catch (err) {
-      console.error("Failed to upload profile picture:", err);
       Alert.alert("Error", "Upload failed. Please try again.");
     }
   };
@@ -129,7 +116,6 @@ export default function User() {
               className="absolute left-28 bottom-4 bg-transparent w-16"
               onPress={() => {
                 pickImage();
-                console.log("User Profile Picture Change");
               }}
             >
               <Ionicons

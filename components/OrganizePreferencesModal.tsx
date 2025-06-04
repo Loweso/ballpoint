@@ -16,7 +16,7 @@ export const OrganizePreferencesModal: React.FC<
 
   const closeModal = () => {
     setIsVisible(false);
-    console.log(isVisible);
+ 
   };
 
   const data = [

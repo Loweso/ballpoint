@@ -50,7 +50,7 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
       setLoading(true);
       const response = await api.get("/notes/categories/");
       setCategories(response.data);
-      console.log("Fetched categories:", response.data);
+    
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     } finally {
@@ -65,7 +65,7 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
       const note = response.data;
       const categoryIds = note.categories.map((cat: Category) => cat.id); // Extract category IDs
       setNoteCategories(categoryIds);
-      console.log("Fetched note categories:", categoryIds);
+ 
     } catch (error) {
       console.error("Failed to fetch note categories:", error);
     } finally {
@@ -75,11 +75,11 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
 
   const updateNoteCategories = async () => {
     try {
-      console.log("damn note categories:", noteCategories);
+  
       const response = await api.put(`/notes/${id}/update-categories/`, {
         categories: noteCategories,
       });
-      console.log("Updated note categories:", response.data);
+    
     } catch (error) {
       console.error("Failed to update note categories:", error);
     }

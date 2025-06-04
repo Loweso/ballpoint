@@ -1,5 +1,4 @@
-// app/index.tsx
-import { Redirect, router } from "expo-router";
+import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
@@ -9,49 +8,31 @@ export default function Index() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [authState, setAuthState] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(checkAuthStatus());
-  }, [dispatch]);
-
-  useEffect(() => {
-    const checkOnboarding = async () => {
+    const init = async () => {
+      await dispatch(checkAuthStatus());
       const value = await SecureStore.getItemAsync("authState");
-      console.log("Auth status:", value);
-
-      if (!isAuthenticated) {
-        setAuthState(value);
-        switch (value) {
-          case "onboarding":
-            router.replace("/(auth)/onboardingscreen");
-            break;
-          case "login":
-            router.replace("/(auth)/login");
-            break;
-          case "signup":
-            router.replace("/(auth)/signup");
-            break;
-        }
-      }
+      setAuthState(value);
+      setLoading(false);
     };
-    checkOnboarding();
+    init();
   }, []);
 
-  // If user is authenticated, go to home
+  if (loading) return null; // or a splash/loading component
+
   if (isAuthenticated) {
     return <Redirect href="/(root)/home" />;
   }
 
-  // If not onboarded, go to onboarding
-  if (authState === "onboarding" || authState === null) {
-    return <Redirect href="/(auth)/onboardingscreen" />;
-  }
-
-  if (authState === "login") {
-    return <Redirect href="/(auth)/login" />;
-  }
-
-  if (authState === "signup") {
-    return <Redirect href="/(auth)/signup" />;
+  switch (authState) {
+    case "login":
+      return <Redirect href="/(auth)/login" />;
+    case "signup":
+      return <Redirect href="/(auth)/signup" />;
+    case "onboarding":
+    default:
+      return <Redirect href="/(auth)/onboardingscreen" />;
   }
 }

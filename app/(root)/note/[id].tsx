@@ -79,16 +79,6 @@ const Note = ({ text }: any) => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
   };
 
-  useEffect(() => {
-    console.log(isOrganizePreferencesModalOpen, "organize");
-  }, [isOrganizePreferencesModalOpen]);
-
-  useEffect(() => {
-    if (selectedText) {
-      console.log("Selected text updated:", selectedText);
-    }
-  }, [selectedText]);
-
   const summarizeNotes = async () => {
     const text = striptags(noteContent);
     if (!striptags(text).trim()) {
@@ -99,7 +89,7 @@ const Note = ({ text }: any) => {
       const response = await api.post("extract/summarize-text", {
         text: text,
       });
-      console.log(response.data.summary);
+
       setInsertMode("append");
       setAiText(response.data.summary);
       setExtractionTitle("Summary of Notes");
@@ -125,7 +115,7 @@ const Note = ({ text }: any) => {
         mode: mode,
         text: text,
       });
-      console.log(response.data.organized);
+
       setInsertMode("replace");
       setAiText(response.data.organized);
       setExtractionTitle(`Organized Notes: ${mode}`);
@@ -211,7 +201,6 @@ const Note = ({ text }: any) => {
         date: today,
       });
 
-      console.log("Sending data:", response);
       Alert.alert("Success", "Note updated!");
     } catch (error: any) {
       if (error.response) {
@@ -224,7 +213,7 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
-    console.log(extractionTitle, "extraction title");
+ 
     const file = await pickDocument();
     setSelectedFile(file);
     setInsertMode("append");
@@ -287,7 +276,7 @@ const Note = ({ text }: any) => {
   const deleteNote = async () => {
     try {
       const response = await api.delete(`notes/${id}/`);
-      console.log("Note deleted:", response.data);
+
       Alert.alert("Success", "Note deleted!");
     } catch (error) {
       console.error("Error deleting note:", error);
@@ -366,7 +355,7 @@ const Note = ({ text }: any) => {
       const range = event?.data?.range;
       setSelectedText(selected);
       setSelectionRange(range);
-      console.log("Selected text", selected, "Range:", range);
+
       if (selected) {
         setIsQueryMenuModalOpen(true);
       }
@@ -412,7 +401,7 @@ const Note = ({ text }: any) => {
               color="black"
               onPress={() => {
                 setIsNoteSettingsVisible(true);
-                console.log("Note Settings Pressed");
+       
               }}
             />
           </TouchableOpacity>

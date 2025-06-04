@@ -62,7 +62,7 @@ const DashboardMenu = () => {
   }, []);
 
   const toggleFilterMenu = () => {
-    console.log("Filter Button Pressed");
+
     setFilterMenuVisible(!isFilterMenuVisible);
     if (isSortMenuVisible) {
       toggleSortMenu();
@@ -75,7 +75,7 @@ const DashboardMenu = () => {
   };
 
   const toggleSortMenu = () => {
-    console.log("Sort Button Pressed");
+ 
     setSortMenuVisible(!isSortMenuVisible);
     if (isFilterMenuVisible) {
       toggleFilterMenu();
@@ -172,7 +172,7 @@ const DashboardMenu = () => {
         endDate: range.endDate ? range.endDate.toISOString() : null,
       })
     );
-    console.log("Filters applied:", selectedCategories, dateRange);
+
   };
 
   const handleApplySorts = () => {
@@ -182,13 +182,13 @@ const DashboardMenu = () => {
     dispatch(
       setSortOrder(sortOrder === pressedSortOrder ? null : pressedSortOrder)
     );
-    console.log("Sort settings applied:", pressedSortType, pressedSortOrder);
+
   };
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
     clearCategories();
-    console.log("Filters cleared");
+
   };
 
   const handleClearSort = () => {
@@ -208,7 +208,7 @@ const DashboardMenu = () => {
               className="items-start justify-center bg-transparent w-8"
               onPress={() => {
                 setIsDashBoardSettingsVisible(true); // this is for testing, change to DashBoardSettingsVisible
-                console.log("Menu Button Pressed");
+            
               }}
             >
               <Entypo name="dots-three-vertical" size={20} color="black" />

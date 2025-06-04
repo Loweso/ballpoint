@@ -36,7 +36,7 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
   };
 
   const handleRenameSubmit = (newName: string) => {
-    console.log("New Category Name:", newName);
+
     setRenameModalVisible(false);
   };
 
