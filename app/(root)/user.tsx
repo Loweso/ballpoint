@@ -19,6 +19,7 @@ import {
 } from "@/lib/redux/slices/authSlice";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { LoadingModal } from "@/components/LoadingModal";
 
 export default function User() {
   const [isEditing, setIsEditing] = useState(false);
@@ -27,6 +28,9 @@ export default function User() {
 
   const { user } = useAppSelector((state) => state.auth);
   const [editedUsername, setEditedUsername] = useState(user?.username ?? "");
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -41,6 +45,8 @@ export default function User() {
   };
 
   const handleSaveUsername = async () => {
+    setIsLoading(true);
+    setLoadingMessage("Updating username...");
     try {
       const updatedUser = await dispatch(
         updateUsername({ username: editedUsername })
@@ -49,25 +55,32 @@ export default function User() {
       setEditedUsername(updatedUser.username);
     } catch (err) {
       console.error("Error updating username:", err);
+      Alert.alert("Update Failed", "Could not update your username.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
   const handleLogout = async () => {
+    setIsLoading(true);
+    setLoadingMessage("Logging out...");
     try {
       await dispatch(logoutUser()).unwrap();
     } catch (err) {
       console.error("Logout failed:", err);
+      Alert.alert("Error", "Logout failed. Try again.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
   const pickImage = async () => {
-    console.log("Picking image through document picker...");
-
     const file = await pickDocument();
     if (!file) return;
 
     const isImage = file.mimeType?.startsWith("image");
-
     if (!isImage) {
       Alert.alert("Unsupported File", "Please select a valid image file.");
       return;
@@ -80,23 +93,23 @@ export default function User() {
       type: file.mimeType || "image/jpeg",
     });
 
+    setIsLoading(true);
+    setLoadingMessage("Uploading image...");
     try {
       const response = await dispatch(
         updateProfilePicture({ photo: file })
       ).unwrap();
-
       if (response?.profile_picture) {
         dispatch(updateProfilePicture(response.profile_picture));
-        console.log(
-          "Profile picture updated successfully:",
-          response.profile_picture
-        );
       } else {
-        console.error("Error: No photo in response", response);
+        console.error("No photo returned");
       }
     } catch (err) {
-      console.error("Failed to upload profile picture:", err);
+      console.error("Upload failed:", err);
       Alert.alert("Error", "Upload failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -237,6 +250,7 @@ export default function User() {
           }}
         />
       </View>
+      <LoadingModal visible={isLoading} message={loadingMessage} />
     </SafeAreaView>
   );
 }
