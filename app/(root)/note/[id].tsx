@@ -27,6 +27,7 @@ import { api } from "@/lib/redux/slices/authSlice";
 import MarkdownIt from "markdown-it";
 import { highlightVisibleTextOnly } from "@/utils/highlightTextinHTML";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 
 import {
   actions,
@@ -43,6 +44,7 @@ import { LoadingModal } from "@/components/LoadingModal";
 import SearchNavigation from "@/components/FindWordOverlay";
 import PermissionsModal from "@/components/PermissionsModal";
 import MediaChoiceModal from "@/components/MediaChoiceModal";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { LinearGradient } from "expo-linear-gradient";
 
 const Note = ({ text }: any) => {
@@ -93,6 +95,18 @@ const Note = ({ text }: any) => {
 
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
+
+  const [noteUpdated, setNoteUpdated] = useState(false);
+  const [noteSavingError, setNoteSavingError] = useState(false);
+  const [uploadFailed, setUploadFailed] = useState(false);
+  const [unsupportedFile, setUnsupportedFile] = useState(false);
+  const [noteDeleted, setNoteDeleted] = useState(false);
+  const [noteDeletedError, setNoteDeletedError] = useState(false);
+  const [noTextHighlighted, setNoTextHighlighted] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [editModeRequired, setEditModeRequired] = useState(false);
+  const [replaceNote, setReplaceNote] = useState(false);
+  const [replaceHighlightedText, setReplaceHighlightedText] = useState(false);
 
   const toggleAIPolishModal = () => {
     setIsAIPolishModalOpen(!isAIPolishModalOpen);
@@ -169,7 +183,7 @@ const Note = ({ text }: any) => {
       }, 600);
     } catch (error) {
       console.error(error);
-      alert("Error summarizing text.");
+      alert("Error organizing text.");
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
@@ -265,15 +279,14 @@ const Note = ({ text }: any) => {
         date: today,
       });
 
-      console.log("Sending data:", response);
-      Alert.alert("Success", "Note updated!");
+      setNoteUpdated(true);
     } catch (error: any) {
       if (error.response) {
         console.error("Backend error response:", error.response.data);
       } else {
         console.error("Unexpected error:", error.message);
       }
-      Alert.alert("Error", "Something went wrong while saving.");
+      setNoteSavingError(true);
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
@@ -328,10 +341,7 @@ const Note = ({ text }: any) => {
         }
       } catch (err) {
         console.error("Error uploading photo:", err);
-        Alert.alert(
-          "Error",
-          "Upload failed. Please check your backend and try again."
-        );
+        setUploadFailed(true);
       } finally {
         setIsLoading(false);
         setLoadingMessage("");
@@ -383,10 +393,7 @@ const Note = ({ text }: any) => {
           setAiText(uploadResponse.data.transcript);
         }
       } else {
-        Alert.alert(
-          "Unsupported File",
-          "Please select an image or audio file."
-        );
+        setUnsupportedFile(true);
         return;
       }
 
@@ -417,6 +424,7 @@ const Note = ({ text }: any) => {
         "Error",
         backendMessage || "Upload failed. Check your backend and try again."
       );
+      setUploadFailed(true);
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
@@ -429,10 +437,10 @@ const Note = ({ text }: any) => {
       setIsLoading(true);
       const response = await api.delete(`notes/${id}/`);
       console.log("Note deleted:", response.data);
-      Alert.alert("Success", "Note deleted!");
+      setNoteDeleted(true);
     } catch (error) {
       console.error("Error deleting note:", error);
-      Alert.alert("Error", "Something went wrong while deleting.");
+      setNoteDeletedError(true);
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
@@ -535,11 +543,43 @@ const Note = ({ text }: any) => {
       if (selected) {
         setIsQueryMenuModalOpen(true);
       } else {
-        Alert.alert(
-          "No text selected",
-          "Please highlight some text to use this feature."
-        );
+        setNoTextHighlighted(true);
         return;
+      }
+    }
+  };
+
+  const insertImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "Permission to access media library is required."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+      base64: false, // we’ll convert it ourselves
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+
+      try {
+        const base64 = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const mimeType = result.assets[0].type || "image/jpeg";
+        const dataUrl = `data:${mimeType};base64,${base64}`;
+
+        RichText.current?.insertImage(dataUrl);
+      } catch (error) {
+        console.error("Failed to convert image to base64:", error);
       }
     }
   };
@@ -561,21 +601,7 @@ const Note = ({ text }: any) => {
         <TouchableOpacity
           onPress={() => {
             if (isEditing && noteContent !== initialNoteContent) {
-              Alert.alert(
-                "Unsaved Changes",
-                "You have unsaved changes. Are you sure you want to go back?",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Discard Changes",
-                    style: "destructive",
-                    onPress: () => {
-                      setIsEditing(false);
-                      router.push("/"); // continue navigating
-                    },
-                  },
-                ]
-              );
+              setUnsavedChanges(true);
             } else {
               router.push("/");
             }
@@ -726,13 +752,10 @@ const Note = ({ text }: any) => {
                 contentCSSText: `
                 font-size: 14px;
                 p, h1, h2, h3, h4, h5, h6 {
-                  margin: 2;
+                  marginBottom: 2px;
                   padding: 0;
                 }
               `,
-              }}
-              onHeightChange={(height) => {
-                setEditorHeight(height);
               }}
             />
           </ScrollView>
@@ -745,8 +768,12 @@ const Note = ({ text }: any) => {
               actions.redo,
               actions.setBold,
               actions.setItalic,
+              actions.setUnderline,
+              actions.setStrikethrough,
               actions.insertBulletsList,
               actions.insertOrderedList,
+              actions.checkboxList,
+              actions.insertImage,
             ]}
             iconMap={{
               openAIPolishModal: AiModalOpenIcon,
@@ -754,6 +781,7 @@ const Note = ({ text }: any) => {
             }}
             openAIPolishModal={toggleAIPolishModal}
             replaceText={onInjectJavascript}
+            onPressAddImage={insertImage}
           />
         </>
       ) : (
@@ -779,13 +807,13 @@ const Note = ({ text }: any) => {
                   color: "#000",
                 }}
                 tagsStyles={{
-                  p: { marginTop: 2, marginBottom: 2, padding: 0 },
-                  h1: { marginTop: 2, marginBottom: 2, padding: 0 },
-                  h2: { marginTop: 2, marginBottom: 2, padding: 0 },
-                  h3: { marginTop: 2, marginBottom: 2, padding: 0 },
-                  h4: { marginTop: 2, marginBottom: 2, padding: 0 },
-                  h5: { marginTop: 2, marginBottom: 2, padding: 0 },
-                  h6: { marginTop: 2, marginBottom: 2, padding: 0 },
+                  p: { marginTop: 0, marginBottom: 2, padding: 0 },
+                  h1: { marginTop: 0, marginBottom: 2, padding: 0 },
+                  h2: { marginTop: 0, marginBottom: 2, padding: 0 },
+                  h3: { marginTop: 0, marginBottom: 2, padding: 0 },
+                  h4: { marginTop: 0, marginBottom: 2, padding: 0 },
+                  h5: { marginTop: 0, marginBottom: 2, padding: 0 },
+                  h6: { marginTop: 0, marginBottom: 2, padding: 0 },
                 }}
               />
             </ScrollView>
@@ -837,6 +865,69 @@ const Note = ({ text }: any) => {
       <PermissionsModal
         visible={showPermissionModal}
         onClose={() => setShowPermissionModal(false)}
+      />
+
+      <PermissionsModal
+        visible={noteUpdated}
+        onClose={() => setNoteUpdated(false)}
+        title="You're on Point!"
+        message="Your note has been successfully updated."
+      />
+      <PermissionsModal
+        visible={noteSavingError}
+        onClose={() => setNoteSavingError(false)}
+        title="Error"
+        message="Something went wrong while saving your note. Please try again."
+      />
+      <PermissionsModal
+        visible={uploadFailed}
+        onClose={() => setUploadFailed(false)}
+        title="Upload Failed"
+        message="There was an error uploading your file. Please check your backend and try again."
+      />
+      <PermissionsModal
+        visible={unsupportedFile}
+        onClose={() => setUnsupportedFile(false)}
+        title="Unsupported File"
+        message="Please select a valid image or audio file."
+      />
+      <PermissionsModal
+        visible={noteDeleted}
+        onClose={() => setNoteDeleted(false)}
+        title="Note Deleted"
+        message="Your note has been successfully deleted."
+      />
+      <PermissionsModal
+        visible={noteDeletedError}
+        onClose={() => setNoteDeletedError(false)}
+        title="Error"
+        message="Something went wrong while deleting your note. Please try again."
+      />
+      <PermissionsModal
+        visible={noTextHighlighted}
+        onClose={() => setNoTextHighlighted(false)}
+        title="No Text Highlighted"
+        message="Please highlight some text to use this feature."
+      />
+      <PermissionsModal
+        visible={editModeRequired}
+        onClose={() => setEditModeRequired(false)}
+        title="Edit Mode Required"
+        message="Please enable edit mode to use this feature."
+      />
+
+      <ConfirmationModal
+        isVisible={unsavedChanges}
+        setIsVisible={setUnsavedChanges}
+        label="You have unsaved changes. Are you sure you want to go back?"
+        confirmText="Discard Changes"
+        cancelText="Cancel"
+        classnameConfirm="bg-tertiary-buttonRed"
+        classnameCancel="bg-gray-200"
+        onConfirm={() => {
+          setIsEditing(false);
+          router.push("/");
+        }}
       />
 
       <MediaChoiceModal

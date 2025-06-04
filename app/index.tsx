@@ -26,10 +26,10 @@ export default function Index() {
             router.replace("/(auth)/onboardingscreen");
             break;
           case "login":
-            router.replace("/(auth)/onboardingscreen");
+            router.replace("/(auth)/login");
             break;
           case "signup":
-            router.replace("/(auth)/onboardingscreen");
+            router.replace("/(auth)/signup");
             break;
         }
       }
