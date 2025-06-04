@@ -32,9 +32,9 @@ const PolishModal: React.FC<PolishModalProps> = ({
       <TouchableWithoutFeedback onPress={onClose}>
         <SafeAreaView className="bg-black/30 flex-1 justify-center items-center">
           <TouchableWithoutFeedback>
-            <View className="bg-white rounded-lg flex-column shadow-md">
+            <View className="bg-white w-4/5 rounded-lg flex-column shadow-md">
               <TouchableOpacity
-                className="flex-row m-1 gap-2 items-center rounded-lg"
+                className="flex-row m-1 p-2 gap-2 items-center rounded-lg"
                 onPress={summarizeNotes}
               >
                 <View className="flex-none p-1 rounded-md">
@@ -44,13 +44,18 @@ const PolishModal: React.FC<PolishModalProps> = ({
                     color="black"
                   />
                 </View>
-                <Text className="flex-none text-black font-medium pr-2">
-                  Summarize notes
-                </Text>
+                <View className="flex-column">
+                  <Text className="flex-none text-black font-medium pr-2">
+                    Summarize notes
+                  </Text>
+                  <Text className="text-gray-500 text-xs">
+                    Generate a brief synthesis of your notes.
+                  </Text>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-row m-1 gap-2 items-center rounded-lg"
+                className="flex-row m-1 p-2 gap-2 items-center rounded-lg"
                 onPress={() => {
                   setIsOrganizePreferencesModalOpen(true);
                   setTimeout(() => {
@@ -65,9 +70,14 @@ const PolishModal: React.FC<PolishModalProps> = ({
                     color="black"
                   />
                 </View>
-                <Text className="flex-none text-black font-medium">
-                  Organize notes
-                </Text>
+                <View className="flex-column">
+                  <Text className="flex-none text-black font-medium pr-2">
+                    Organize notes
+                  </Text>
+                  <Text className="text-gray-500 text-xs">
+                    Structure out the main points of your notes.
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
