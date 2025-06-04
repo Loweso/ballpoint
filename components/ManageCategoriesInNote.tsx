@@ -166,8 +166,8 @@ const ManageCategoriesInNote: React.FC<ManageCategoriesProps> = ({
                         height: 20,
                         borderRadius: 10,
                         backgroundColor: isSelected ? "black" : "white",
-                        borderWidth: 2,
-                        borderColor: "black",
+                        borderWidth: 1,
+                        borderColor: useDarkText ? "black" : "white",
                         marginRight: 10,
                       }}
                     />

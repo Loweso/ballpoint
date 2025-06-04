@@ -86,14 +86,21 @@ export const NoteSettings: React.FC<NoteSettingsModalProps> = ({
                   <View
                     className="h-[110px] w-[90px] justify-center items-center rounded-xl p-3"
                     style={{
-                      backgroundColor: "#d3d3d3", // faded grey when disabled
+                      backgroundColor: isEditing ? "#d3d3d3" : "#C6DFFF", // faded grey when disabled
                       opacity: isEditing ? 0.5 : 1,
                     }}
                   >
-                    <Ionicons name="search-outline" color="#080808" size={48} />
+                    <Ionicons
+                      name="search-outline"
+                      style={{ color: isEditing ? "#080808" : "#146FE1" }}
+                      size={48}
+                    />
                     <Text
                       className="min-h-[35px] w-full text-center text-sm"
-                      style={{ textAlignVertical: "center" }}
+                      style={{
+                        textAlignVertical: "center",
+                        color: isEditing ? "#080808" : "#146FE1",
+                      }}
                     >
                       Search in Note
                     </Text>

@@ -53,18 +53,18 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
   if (!visible) return null;
 
   return (
-    <View className="absolute inset-0 h-full justify-center items-center bg-black/30">
+    <View className="absolute inset-0 h-full justify-center items-center bg-black/30 rounded-xl">
       {/* BACKDROP PRESS TO CLOSE */}
       <TouchableWithoutFeedback onPress={onClose}>
         <View className="absolute inset-0" />
       </TouchableWithoutFeedback>
 
       {/* MODAL CONTENT */}
-      <View className="bg-white flex-row rounded-xl items-center shadow-md p-1 gap-2 z-10">
+      <View className="bg-white flex-row rounded-xl items-center shadow-md p-2 px-3 gap-1 z-10">
         <TextInput
           placeholder={placeholder}
           className="text-lg text-gray-800"
-          style={{ width: 200, fontSize: 13 }}
+          style={{ width: 200, fontSize: 14 }}
           placeholderTextColor="#6B7280"
           value={name}
           onChangeText={setName}
@@ -87,7 +87,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
         {/* Action Buttons */}
         <View className="flex-row items-center gap-1">
           <TouchableOpacity
-            className="p-1 rounded-full"
+            className="pl-1 rounded-full"
             onPress={() => {
               onCancel();
               setName("");
@@ -95,16 +95,13 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
               setShowColorPicker(false);
             }}
           >
-            <Ionicons name="close-circle-outline" size={26} color="#EF4444" />
+            <Ionicons name="close-circle-outline" size={30} color="#EF4444" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            className="p-1 rounded-full"
-            onPress={handleProceed}
-          >
+          <TouchableOpacity className="rounded-full" onPress={handleProceed}>
             <Ionicons
               name="arrow-forward-circle-outline"
-              size={26}
+              size={30}
               color="#EAB308"
             />
           </TouchableOpacity>
@@ -122,7 +119,7 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
           <View
             style={{
               width: 300,
-              height: 360,
+              height: 420,
               backgroundColor: "#fff",
               borderRadius: 16,
               padding: 16,
@@ -148,7 +145,11 @@ const CategoryNamingModal: React.FC<CategoryNamingModalProps> = ({
               onPress={() => setShowColorPicker(false)}
               style={{ marginTop: 12, alignItems: "center" }}
             >
-              <Text className="text-black font-semibold">Choose</Text>
+              <View className="mt-2 px-3 py-1 rounded-xl bg-tertiary-buttonGreen/80">
+                <Text className="text-white text-2xl font-semibold">
+                  Choose
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>

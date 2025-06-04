@@ -147,7 +147,7 @@ const SignupPage = () => {
   }, [dispatch]);
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-white border border-black">
+    <SafeAreaView className="flex-1 justify-center items-center bg-white">
       <View className="p-3 bg-white rounded-lg shadow-md border border-black w-[75%]">
         <View className="items-center">
           <Image
@@ -240,7 +240,7 @@ const SignupPage = () => {
         ) : null}
 
         <TouchableOpacity
-          className="bg-tertiary-buttonGreen p-2 rounded-md m-2"
+          className="bg-tertiary-buttonGreen p-3 rounded-md m-2"
           onPress={handleSignup}
           disabled={loading}
         >

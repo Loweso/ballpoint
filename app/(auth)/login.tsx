@@ -153,7 +153,7 @@ const LoginPage = () => {
         ) : null}
 
         <TouchableOpacity
-          className="bg-tertiary-buttonGreen p-2 rounded-md m-2"
+          className="bg-tertiary-buttonGreen p-3 rounded-md m-2"
           onPress={handleSignin}
           disabled={loading}
         >
@@ -164,7 +164,7 @@ const LoginPage = () => {
 
         <View className="items-center m-1">
           <Link href="/forgot-password" asChild>
-            <Text className="text-sm text-black">Forgot Password?</Text>
+            <Text className="text-md text-black">Forgot Password?</Text>
           </Link>
         </View>
 
