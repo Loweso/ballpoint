@@ -11,6 +11,7 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.ballpoint.myapp",
+      "buildNumber": "1",
       "supportsTablet": true,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload images.",
@@ -20,6 +21,7 @@
     },
     "android": {
       "package": "com.ballpoint.myapp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/ballpointLogo.png",
         "backgroundColor": "#ffffff"
@@ -58,6 +60,12 @@
       "eas": {
         "projectId": "0f406678-b0e7-4ffc-a820-59dad71a83b4"
       }
+    },
+    "updates": {
+      "enabled": false
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

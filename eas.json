@@ -23,7 +23,14 @@
     },
     "production": {
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "enterpriseProvisioning": "universal"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://ballpoint-backend-c8uwr.ondigitalocean.app",
+        "EXPO_PUBLIC_APP_ENV": "production"
       }
     }
   }

@@ -330,6 +330,13 @@ const isPublicEndpoint = (url?: string): boolean => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (!error.response) {
+      // Network error
+      return Promise.reject({
+        message: "Network error. Please check your connection.",
+      });
+    }
+
     const originalRequest = error.config;
 
     // Skip if not 401 or already retried or public endpoint
