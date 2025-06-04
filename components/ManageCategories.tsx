@@ -248,49 +248,58 @@ export const ManageCategories: React.FC<ManageCategoriesProps> = ({
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={true}
           >
-            {categories.map((category, index) => (
-              <View
-                key={index}
-                className="flex-row justify-right items-center p-2"
-              >
-                {isSelectingForDelete && (
-                  <TouchableOpacity onPress={() => toggleSelection(index)}>
-                    <Ionicons
-                      name={selected[index] ? "ellipse" : "ellipse-outline"}
-                      color={selected[index] ? "#6a994e" : "#a09d45"}
-                      size={20}
-                    />
-                  </TouchableOpacity>
-                )}
-
-                <View
-                  className="pl-[10px]"
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    flex: 1,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 20,
-                      height: 20,
-                      backgroundColor: category.color,
-                      marginRight: 10,
-                      borderRadius: 5,
-                    }}
-                  />
-                  <Text className="text-xl">{category.label}</Text>
-                </View>
-
-                <TouchableOpacity
-                  className="absolute right-[10px]"
-                  onPress={() => handleRenameCategory(index)}
-                >
-                  <Text className="text-lg text-tertiary-textGray">Rename</Text>
-                </TouchableOpacity>
+            {categories.length === 0 ? (
+              <View className="w-full items-center mt-4">
+                <Text className="text-gray-500 text-lg text-center">
+                  No existing categories. Press (+) to add.
+                </Text>
               </View>
-            ))}
+            ) : (
+              categories.map((category, index) => (
+                <View
+                  key={index}
+                  className="flex-row justify-right items-center p-2"
+                >
+                  {isSelectingForDelete && (
+                    <TouchableOpacity onPress={() => toggleSelection(index)}>
+                      <Ionicons
+                        name={selected[index] ? "ellipse" : "ellipse-outline"}
+                        color={selected[index] ? "#6a994e" : "#a09d45"}
+                        size={20}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  <View
+                    className="pl-[10px]"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: 1,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: category.color,
+                        marginRight: 10,
+                        borderRadius: 5,
+                      }}
+                    />
+                    <Text className="text-xl">{category.label}</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    className="absolute right-[10px]"
+                    onPress={() => handleRenameCategory(index)}
+                  >
+                    <Text className="text-lg text-tertiary-textGray">
+                      Rename
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
 

@@ -436,7 +436,7 @@ const Note = ({ text }: any) => {
         <TouchableOpacity onPress={() => router.push("/")}>
           <View className="flex flex-row items-center gap-1">
             <AntDesign name="leftcircleo" size={20} color="black" />
-            <Text className="text-lg">Notes</Text>
+            <Text className="text-lg pl-2">Notes</Text>
           </View>
         </TouchableOpacity>
 
