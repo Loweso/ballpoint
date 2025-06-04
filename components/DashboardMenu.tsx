@@ -130,7 +130,6 @@ const DashboardMenu = () => {
   ).current;
 
   const toggleFilterMenu = () => {
-
     setFilterMenuVisible(!isFilterMenuVisible);
     if (isSortMenuVisible) {
       toggleSortMenu();
@@ -143,7 +142,6 @@ const DashboardMenu = () => {
   };
 
   const toggleSortMenu = () => {
- 
     setSortMenuVisible(!isSortMenuVisible);
     if (isFilterMenuVisible) {
       toggleFilterMenu();
@@ -297,7 +295,6 @@ const DashboardMenu = () => {
               className="items-start justify-center bg-transparent w-10 h-10"
               onPress={() => {
                 setIsDashBoardSettingsVisible(true); // this is for testing, change to DashBoardSettingsVisible
-            
               }}
             >
               <Entypo name="dots-three-vertical" size={20} color="black" />
@@ -426,29 +423,27 @@ const DashboardMenu = () => {
         <View className="flex flex-col items-center w-full mt-4 gap-3">
           <View className="flex flex-row items-center justify-between w-full gap-3">
             <Pressable
-              className={`flex flex-col items-center justify-center w-[47.5%] h-16 rounded-full ${
-                value != null ||
-                (range.startDate !== undefined && range.endDate !== undefined)
-                  ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
-                  : "bg-gray-400"
-              }`}
-              onPress={handleApplyFilters}
-              disabled={
-                value == null &&
-                range.startDate === undefined &&
-                range.endDate === undefined
-              }
-            >
-              <Text className="text-primary-white font-bold">
-                APPLY FILTERS
-              </Text>
-            </Pressable>
-            <Pressable
               className="flex flex-col items-center justify-center w-[47.5%] h-16 rounded-full bg-tertiary-buttonRed"
               onPress={handleClearFilters}
             >
               <Text className="text-primary-white font-bold">
                 CLEAR FILTERS
+              </Text>
+            </Pressable>
+
+            <Pressable
+              className={`flex flex-col items-center justify-center w-[47.5%] h-16 rounded-full ${
+                value.length > 0 || (range.startDate && range.endDate)
+                  ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
+                  : "bg-gray-400"
+              }`}
+              onPress={handleApplyFilters}
+              disabled={
+                value.length === 0 && (!range.startDate || !range.endDate)
+              }
+            >
+              <Text className="text-primary-white font-bold">
+                APPLY FILTERS
               </Text>
             </Pressable>
           </View>
@@ -547,6 +542,15 @@ const DashboardMenu = () => {
         <View className="flex flex-col items-center w-full gap-3">
           <View className="flex flex-row items-center justify-between w-full gap-3">
             <Pressable
+              className="flex flex-col items-center justify-center w-[52.5%] h-16 rounded-full bg-tertiary-buttonRed"
+              onPress={handleClearSort}
+            >
+              <Text className="text-primary-white font-bold">
+                CLEAR SORT SETTINGS
+              </Text>
+            </Pressable>
+
+            <Pressable
               className={`flex flex-col items-center justify-center w-[42.5%] h-16 rounded-full ${
                 pressedSortType && pressedSortOrder
                   ? "bg-tertiary-buttonGreen hover:bg-[#37b16f]"
@@ -556,15 +560,6 @@ const DashboardMenu = () => {
               disabled={!pressedSortType || !pressedSortOrder}
             >
               <Text className="text-primary-white font-bold">APPLY SORT</Text>
-            </Pressable>
-
-            <Pressable
-              className="flex flex-col items-center justify-center w-[52.5%] h-16 rounded-full bg-tertiary-buttonRed"
-              onPress={handleClearSort}
-            >
-              <Text className="text-primary-white font-bold">
-                CLEAR SORT SETTINGS
-              </Text>
             </Pressable>
           </View>
 

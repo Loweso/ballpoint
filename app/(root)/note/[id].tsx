@@ -340,7 +340,6 @@ const Note = ({ text }: any) => {
   };
 
   const handlePickDocument = async () => {
- 
     const file = await pickDocument();
     setSelectedFile(file);
     setInsertMode("append");
@@ -592,7 +591,11 @@ const Note = ({ text }: any) => {
             if (isEditing && noteContent !== initialNoteContent) {
               setUnsavedChanges(true);
             } else {
-              router.push("/");
+              setLoadingMessage("Returning to dashboard...");
+              setIsLoading(true);
+              setTimeout(() => {
+                router.push("/");
+              }, 500);
             }
           }}
           className="pr-4"
@@ -610,7 +613,6 @@ const Note = ({ text }: any) => {
               color="black"
               onPress={() => {
                 setIsNoteSettingsVisible(true);
-       
               }}
             />
           </TouchableOpacity>
@@ -761,7 +763,6 @@ const Note = ({ text }: any) => {
               actions.setStrikethrough,
               actions.insertBulletsList,
               actions.insertOrderedList,
-              actions.checkboxList,
               actions.insertImage,
             ]}
             iconMap={{
