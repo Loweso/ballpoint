@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { api } from "@/lib/redux/slices/authSlice";
+import { useFonts } from "expo-font";
 
 interface CreateNewNoteModalProps {
   isVisible: boolean;
@@ -22,6 +23,9 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
 }) => {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [fontsLoaded] = useFonts({
+    "Comfortaa-Medium": require("../assets/fonts/Comfortaa-Medium.ttf"),
+  });
 
   const closeModal = () => {
     setIsVisible(false);
@@ -66,19 +70,21 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
       onRequestClose={closeModal}
     >
       <View className="bg-black/30 h-full flex justify-center items-center">
-        <View className="h-[20vh] w-[80%] bg-white px-6 py-8 rounded-xl shadow-md">
-          <View className="relative">
-            <Text className="text-3xl">Title</Text>
-            <TouchableOpacity
-              className="absolute top-[-10px] right-0"
-              onPress={closeModal}
+        <View className="flex flex-col w-[80%] bg-white px-6 py-8 rounded-xl shadow-md">
+          <View className="flex flex-row items-center justify-between relative">
+            <Text
+              className="text-2xl"
+              style={{ fontFamily: "Comfortaa-Medium" }}
             >
+              Title
+            </Text>
+            <TouchableOpacity onPress={closeModal}>
               <Ionicons name="close-outline" color="#5A5353" size={32} />
             </TouchableOpacity>
           </View>
-          <View className="flex flex-row w-full mt-4 text-lg bg-white rounded-xl">
+          <View className="flex flex-row w-full mt-3 text-lg bg-white rounded-xl">
             <TextInput
-              className="h-full w-full text-lg bg-transparent border-b overflow-hidden"
+              className="h-full w-full text-md bg-transparent border-b overflow-hidden"
               placeholder="Enter note title..."
               placeholderTextColor="gray"
               value={title}
@@ -87,7 +93,7 @@ export const CreateNewNoteModal: React.FC<CreateNewNoteModalProps> = ({
           </View>
           <TouchableOpacity
             onPress={createNote}
-            className="bg-tertiary-buttonGreen/70 rounded-full p-4 w-full flex justify-center items-center mt-3"
+            className="bg-tertiary-buttonGreen/70 rounded-full p-3 w-full flex justify-center items-center mt-5"
           >
             <Text className="text-white">Create New Note</Text>
           </TouchableOpacity>
