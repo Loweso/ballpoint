@@ -21,6 +21,7 @@ import striptags from "striptags";
 import { api } from "@/lib/redux/slices/authSlice";
 import MarkdownIt from "markdown-it";
 import { highlightVisibleTextOnly } from "@/utils/highlightTextinHTML";
+import * as ImagePicker from "expo-image-picker";
 
 import {
   actions,
@@ -54,6 +55,7 @@ const Note = ({ text }: any) => {
   const [insertMode, setInsertMode] = useState<"append" | "replace">("append");
   const [loadingMessage, setLoadingMessage] = useState("");
   const [noteContent, setNoteContent] = useState(text);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -258,6 +260,89 @@ const Note = ({ text }: any) => {
     }
   };
 
+  const openCamera = async () => {
+    const { status: cameraStatus } =
+      await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaLibraryStatus } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (cameraStatus !== "granted" || mediaLibraryStatus !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "Sorry, we need camera and media library permissions to make this work."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Choose Media to Extract Text From",
+      "Would you like to take a photo or select an image/audio file from the library?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Take Photo",
+          onPress: async () => {
+            const result = await ImagePicker.launchCameraAsync({
+              allowsEditing: true,
+              quality: 1,
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            });
+
+            if (!result.canceled && result.assets?.length > 0) {
+              const photo = result.assets[0];
+
+              const formData = new FormData();
+              formData.append("image", {
+                uri: photo.uri,
+                name: photo.fileName || "photo.jpg",
+                type: photo.mimeType || "image/jpeg",
+              } as any);
+
+              try {
+                setLoadingMessage("Extracting text...");
+                setIsLoading(true);
+                console.log("Uploading photo to server:", photo.uri);
+
+                const uploadResponse = await api.post(
+                  "extract/extract-text",
+                  formData,
+                  {
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                    },
+                  }
+                );
+
+                if (uploadResponse.data?.text) {
+                  setAiText(uploadResponse.data.text);
+                  setTimeout(() => setIsExtractionWindowVisible(true), 600);
+                }
+              } catch (error) {
+                console.error("Error uploading photo:", error);
+                Alert.alert(
+                  "Error",
+                  "Upload failed. Please check your backend and try again."
+                );
+              } finally {
+                setIsLoading(false);
+                setLoadingMessage("");
+              }
+            }
+          },
+        },
+        {
+          text: "Choose from Library",
+          onPress: async () => {
+            handlePickDocument();
+          },
+        },
+      ]
+    );
+  };
+
   const handlePickDocument = async () => {
     console.log(extractionTitle, "extraction title");
     const file = await pickDocument();
@@ -444,7 +529,7 @@ const Note = ({ text }: any) => {
           {isEditing && (
             <TouchableOpacity
               className="flex flex-row items-center px-3 py-1 bg-tertiary-buttonGreen rounded-2xl"
-              onPress={handlePickDocument}
+              onPress={openCamera}
             >
               <Text className="text-white">Extract</Text>
               <Ionicons name="document-outline" size={20} color="white" />
