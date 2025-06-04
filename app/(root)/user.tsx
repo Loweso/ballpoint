@@ -229,8 +229,11 @@ export default function User() {
             onPress={() => {
               setIsConfirmationVisible(true);
             }}
+            className="py-4 w-full"
           >
-            <Text className="text-xl text-tertiary-textRed">Log out</Text>
+            <Text className="text-center text-xl text-tertiary-textRed">
+              Log out
+            </Text>
           </TouchableOpacity>
         </View>
 
